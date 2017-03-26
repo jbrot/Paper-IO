@@ -18,7 +18,8 @@ typedef uint16_t pos_t;
 /*
  * The possible directions the player can take on.
  */
-enum Direction {
+enum Direction 
+{
 	NONE	 = 0,
 	UP  	 = 1,
 	DOWN	 = 2,

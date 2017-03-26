@@ -26,7 +26,8 @@ const id_t OUT_OF_BOUNDS = 255;
 
 class GameState;
 
-enum TrailType {
+enum TrailType 
+{
 	NONE = 0,
 	EASTWEST = 1,
 	NORTHSOUTH = 2,
@@ -36,7 +37,8 @@ enum TrailType {
 	SOUTHWEST = 6,
 };
 
-class SquareState {
+class SquareState 
+{
 friend class GameState;
 public:
 	pos_t getX();
@@ -65,7 +67,8 @@ private:
 	SquareState(state_t *state, bool *changed);
 };
 
-class GameState {
+class GameState 
+{
 public:
 	pos_t getWidth();
 	pos_t getHeight();
