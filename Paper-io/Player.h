@@ -10,90 +10,46 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <iostream>
-using namespace std;
+#include <string>
 
-#include "Color.h"
-#include "Point.h"
+typedef uint16_t id_t;
+typedef uint16_t pos_t;
+
+/*
+ * The possible directions the player can take on.
+ */
+enum Direction {
+	NONE	 = 0,
+	UP  	 = 1,
+	DOWN	 = 2,
+	LEFT	 = 3,
+	RIGHT	 = 4,
+};
 
 class Player
 {
 public:
+	Player();
 
-    /**
-     * Requires: Nothing.
-     * Modifies: ID, color, position, name
-     * Effects: Spawns a new player. Should be able to choose an ID,
-     *          a unique color, and a valid spawn position.
-     */
-    Player(string name, Point Spawn, int number, Color shade);
+	Player(id_t id, std::string name, pos_t x, pos_t y);
 
-    /**
-     * Requires: Nothing.
-     * Modifies: position.
-     * Effects: Moves player to new position.
-     */
-    void setPosition(Point pt);
+	id_t getId();
 
-    /**
-     * Requires: Nothing.
-     * Modifies: Nothing.
-     * Effects: Returns the player's position
-     */
-    Point getPosition();
+	std::string getName();
 
-    /**
-     * Requires: Nothing.
-     * Modifies: ID.
-     * Effects: Sets player ID
-     */
-    void setID(int identity);
+	void setX(pos_t x);
+	pos_t getX();
 
-    /**
-     * Requires: Nothing.
-     * Modifies: Nothing.
-     * Effects: Returns player ID
-     */
-    int getID();
+	void setY(pos_t y);
+	pos_t getY();
 
-    /**
-     * Requires: Nothing.
-     * Modifies: color.
-     * Effects: Sets player color
-     */
-    void setColor(Color newColor);
-
-    /**
-     * Requires: Nothing.
-     * Modifies: Nothing.
-     * Effects: Returns player color.
-     */
-    Color getColor();
-
-    /**
-     * Requires: Nothing.
-     * Modifies: name.
-     * Effects: Sets name of player
-     */
-    void setName(string name);
-
-    /**
-     * Requires: Nothing.
-     * Modifies: Nothing.
-     * Effects: Returns player name.
-     */
-    string getName();
-
-    void setDirection(int input);
-
-    int getDirection();
+	void setLocation(pos_t x, pos_t y);
 
 private:
-    string name;
-    int ID;
-    Color color;
-    Point position;
-    int direction;
-
+	std::string name;
+	id_t id;
+	pos_t x;
+	pos_t y;
+	Direction dir;
 };
 #endif // !PLAYER_H
