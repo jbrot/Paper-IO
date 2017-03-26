@@ -61,7 +61,8 @@ private:
 	state_t *state;
 	bool *changed;
 
-	GameState(state_t *state, bool *changed);
+	SquareState();
+	SquareState(state_t *state, bool *changed);
 };
 
 class GameState {
@@ -79,6 +80,7 @@ private:
 
 	state_t **board;
 
+	GameState();
 	GameState(pos_t width, pos_t height);
 };
 

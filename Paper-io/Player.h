@@ -29,12 +29,7 @@ enum Direction {
 class Player
 {
 public:
-	Player();
-
-	Player(id_t id, std::string name, pos_t x, pos_t y);
-
 	id_t getId();
-
 	std::string getName();
 
 	void setX(pos_t x);
@@ -45,11 +40,17 @@ public:
 
 	void setLocation(pos_t x, pos_t y);
 
+	bool isDead();
+	void setDead(bool dead);
+
 private:
 	std::string name;
 	id_t id;
 	pos_t x;
 	pos_t y;
 	Direction dir;
+	bool alive;
+
+	Player();
 };
 #endif // !PLAYER_H
