@@ -8,5 +8,8 @@ INCLUDEPATH += .
 
 QT += widgets
 
+RESOURCES = client.qrc
+
 # Input
-SOURCES += main.cpp
+HEADERS += window.h
+SOURCES += main.cpp window.cpp
