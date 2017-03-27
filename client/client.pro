@@ -6,10 +6,10 @@ TEMPLATE = app
 TARGET = client
 INCLUDEPATH += .
 
-QT += widgets
+QT += widgets network
 
 RESOURCES = client.qrc
 
 # Input
-HEADERS += window.h
-SOURCES += main.cpp window.cpp
+HEADERS += client.h
+SOURCES += main.cpp client.cpp

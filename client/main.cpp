@@ -4,14 +4,18 @@
 
 #include <QApplication>
 
-#include "window.h"
+#include "client.h"
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
+	QGuiApplication::setApplicationDisplayName(Client::tr("Arduino-IO"));
+	QCoreApplication::setOrganizationName("Delta Epsilon");
+	QCoreApplication::setOrganizationDomain("dank.meeeeee.me");
+	QCoreApplication::setApplicationName("Arduin-IO");
 
-	Window window;
-	window.show();
+	Client client;
+	client.show();
 
 	return app.exec();
 }
