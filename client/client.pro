@@ -11,5 +11,6 @@ QT += widgets network
 RESOURCES = client.qrc
 
 # Input
-HEADERS += client.h
-SOURCES += main.cpp client.cpp
+HEADERS += client.h \
+	iohandler.h
+SOURCES += main.cpp client.cpp iohandler.cpp

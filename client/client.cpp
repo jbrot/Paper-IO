@@ -43,7 +43,8 @@ Client::Client(QWidget *parent)
 	, portEdit(new QLineEdit())
 	, ctc(new QPushButton(tr("Connect")))
 	, timeout(new QTimer(this))
-	, socket(new QTcpSocket(this))
+	, ioh(new IOHandler(Q_NULLPTR))
+	, iothread(new QThread(this))
 	, session(Q_NULLPTR)
 {
 	setWindowTitle(tr("Arduino-IO"));
@@ -97,24 +98,26 @@ Client::Client(QWidget *parent)
 
 	// Network set up
 	// This code is adapted from the FortuneClient example
-	str.setDevice(socket);
-	str.setVersion(QDataStream::Qt_5_0);
+	ioh->moveToThread(iothread);
+	connect(iothread, &QThread::finished, ioh, &QObject::deleteLater);
 
 	connect(nameEdit, &QLineEdit::textChanged, this, &Client::enableConnect);
 	connect(ipEdit, &QLineEdit::textChanged, this, &Client::enableConnect);
 	connect(portEdit, &QLineEdit::textChanged, this, &Client::enableConnect);
-	connect(ctc, &QAbstractButton::clicked, this, &Client::connectToServer);
+	connect(ctc, &QAbstractButton::clicked, this, &Client::openConnection);
+	connect(this, &Client::connectToServer, ioh, &IOHandler::connectToServer);
 
 	// Timeout setup
 	timeout->setInterval(5000);
 	timeout->setSingleShot(true);
 	connect(timeout, &QTimer::timeout, this, &Client::connectTimeout);
+	connect(timeout, &QTimer::timeout, ioh, &IOHandler::disconnect);
 
-	typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-	connect(socket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
-	        this, &Client::displayError);
-	connect(socket, &QAbstractSocket::connected, this, &Client::connected);
-	connect(socket, &QAbstractSocket::disconnected, this, &Client::disconnected);
+	connect(ioh, &IOHandler::error, this, &Client::displayError);
+	connect(ioh, &IOHandler::connected, this, &Client::connected);
+	connect(ioh, &IOHandler::disconnected, this, &Client::disconnected);
+
+	iothread->start();
 
 	QNetworkConfigurationManager manager;
 	if (manager.capabilities() & QNetworkConfigurationManager::NetworkSessionRequired)
@@ -138,6 +141,18 @@ Client::Client(QWidget *parent)
 		ctc->setEnabled(false);
 		status->setText(tr("Opening network session..."));
 		session->open();
+	}
+}
+
+Client::~Client()
+{
+	// Kill the IO thread
+	// Adapted from http://stackoverflow.com/questions/28660852/qt-qthread-destroyed-while-thread-is-still-running-during-closing
+	iothread->quit();
+	if (!iothread->wait(1000)) // Wait for termination (1 sec max)
+	{
+		iothread->terminate();
+		iothread->wait();
 	}
 }
 
@@ -174,7 +189,7 @@ void Client::enableConnect()
 	                                                && !portEdit->text().isEmpty());
 }
 
-void Client::displayError(QAbstractSocket::SocketError socketError)
+void Client::displayError(QAbstractSocket::SocketError socketError, QString msg)
 {
 	timeout->stop();
 	switch (socketError) {
@@ -196,7 +211,7 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 	default:
 		QMessageBox::information(this, tr("Arduino-IO"),
 		                         tr("The following error occurred: %1.")
-		                         .arg(socket->errorString()));
+		                         .arg(msg));
 	}
 	
 	enableConnect();
@@ -208,14 +223,13 @@ void Client::displayError2(QNetworkSession::SessionError sessionError)
 	                         tr("The following error occurred: %1.").arg(session->errorString()));
 }
 
-void Client::connectToServer()
+void Client::openConnection()
 {
 	ctc->setEnabled(false);
 	nameEdit->setEnabled(false);
 	ipEdit->setEnabled(false);
 	portEdit->setEnabled(false);
-	socket->abort();
-	socket->connectToHost(ipEdit->text(), portEdit->text().toInt());
+	emit connectToServer(ipEdit->text(), portEdit->text().toInt());
 	timeout->start();
 }
 
@@ -238,6 +252,5 @@ void Client::connectTimeout()
 {
 	QMessageBox::information(this, tr("Arduino-IO"),
 	                         tr("Connection timed out!"));
-	socket->abort();
 	enableConnect();
 }

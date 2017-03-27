@@ -11,9 +11,11 @@
 #include <QLineEdit>
 #include <QNetworkSession>
 #include <QPushButton>
-#include <QTcpSocket>
 #include <QTimer>
+#include <QThread>
 #include <QWidget>
+
+#include "iohandler.h"
 
 class Client : public QWidget
 {
@@ -21,18 +23,22 @@ class Client : public QWidget
 
 public:
 	Client(QWidget *parent = 0);
+	~Client();
 
 	QSize sizeHint() const override;
 
 private slots:
-	void displayError(QAbstractSocket::SocketError socketError);
+	void openConnection();
+	void displayError(QAbstractSocket::SocketError socketError, QString msg);
 	void displayError2(QNetworkSession::SessionError sessionError);
 	void sessionOpened();
 	void enableConnect();
-	void connectToServer();
 	void connected();
 	void disconnected();
 	void connectTimeout();
+
+signals:
+	void connectToServer(const QString &host, quint16 port);
 
 private:
 	QLabel *status;
@@ -42,8 +48,8 @@ private:
 	QPushButton *ctc;
 
 	QTimer *timeout;
-	QTcpSocket *socket;
-	QDataStream str;
+	IOHandler *ioh;
+	QThread *iothread;
 
 	QNetworkSession *session;
 };
