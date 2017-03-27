@@ -18,6 +18,8 @@ void killPlayers(GameState &state);
 void checkForTrail(Player player, GameState &state);
 void checkForBoundary(Player player, GameState &state);
 void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos);
+void fillInBody(Player player, GameState &state);
+void checkForCompletedLoop(Player player, GameState &state);
 
 void updateGame(GameState &state)
 {
@@ -46,6 +48,10 @@ void updateGame(GameState &state)
 
 		// Check if player hit a boundary
 		checkForBoundary(allPlayers[i], state);
+
+		// Check if player completed a loop
+		checkForCompletedLoop(allPlayers[i], state);
+
 
 	}
 	
@@ -155,7 +161,8 @@ void checkForTrail(Player player, GameState &state)
 	}
 }
 
-void checkForBoundary(Player player, GameState &state){
+void checkForBoundary(Player player, GameState &state)
+{
 
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
@@ -167,7 +174,8 @@ void checkForBoundary(Player player, GameState &state){
 		player.setDead(dead);
 }
 
-void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos){
+void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos)
+{
 
 	// Note: I have NO IDEA what I'm doing in this function
 	// God have mercy upon this code
@@ -195,4 +203,39 @@ void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos){
 	floodMarkSquares(player, state, xpos, ypos - 1);
 
 	// Pray to heavenly Jesus that this works
+}
+
+void fillInBody(Player player, GameState &state)
+{
+
+	SquareState square = state.getState(0, 0);
+
+	for (int i = 0; i <= state.getWidth(); ++i)
+	{
+		for (int j = 0; j <= state.getHeight(); ++i)
+		{
+
+			square = state.getState(i, j);
+			if (!square.isFlooded())
+				square.setOwningPlayerId(player.getId());
+
+			square.markAsUnflooded();
+
+		}
+	}
+}
+
+void checkForCompletedLoop(Player player, GameState &state)
+{
+	plid_t xpos = player.getX();
+	plid_t ypos = player.getY();
+
+	SquareState square = state.getState(xpos, ypos);
+
+	if (square.getOwningPlayerId() == player.getId())
+	{
+		floodMarkSquares(player, state, 0, 0);
+		fillInBody(player, state);
+	}
+
 }

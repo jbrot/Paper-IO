@@ -68,6 +68,7 @@ public:
 
 	// "flooded" flag is for the filling algorithms
 	void markAsFlooded();
+	void markAsUnflooded();
 	bool isFlooded();
 
 private:
