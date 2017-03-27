@@ -12,5 +12,6 @@ RESOURCES = client.qrc
 
 # Input
 HEADERS += client.h \
-	iohandler.h
-SOURCES += main.cpp client.cpp iohandler.cpp
+	iohandler.h \
+	launcher.h
+SOURCES += main.cpp client.cpp iohandler.cpp launcher.cpp

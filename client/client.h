@@ -6,16 +6,13 @@
 #ifndef Client_H
 #define Client_H
 
-#include <QDataStream>
-#include <QLabel>
-#include <QLineEdit>
 #include <QNetworkSession>
-#include <QPushButton>
 #include <QTimer>
 #include <QThread>
 #include <QWidget>
 
 #include "iohandler.h"
+#include "launcher.h"
 
 class Client : public QWidget
 {
@@ -28,24 +25,15 @@ public:
 	QSize sizeHint() const override;
 
 private slots:
-	void openConnection();
 	void displayError(QAbstractSocket::SocketError socketError, QString msg);
 	void displayError2(QNetworkSession::SessionError sessionError);
 	void sessionOpened();
-	void enableConnect();
 	void connected();
 	void disconnected();
 	void connectTimeout();
 
-signals:
-	void connectToServer(const QString &host, quint16 port);
-
 private:
-	QLabel *status;
-	QLineEdit *nameEdit;
-	QLineEdit *ipEdit;
-	QLineEdit *portEdit;
-	QPushButton *ctc;
+	Launcher *launcher;
 
 	QTimer *timeout;
 	IOHandler *ioh;
