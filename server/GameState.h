@@ -17,26 +17,23 @@
 #include <vector>
 
 #include "Player.h"
+#include "types.h"
 
-typedef uint8_t pid_t;
-typedef uint16_t pos_t;
-typedef uint32_t state_t;
-
-const pid_t NULL_ID = 0;
-const pid_t UNOCCUPIED = 0;
-const pid_t OUT_OF_BOUNDS = 255;
+const plid_t NULL_ID = 0;
+const plid_t UNOCCUPIED = 0;
+const plid_t OUT_OF_BOUNDS = 255;
 
 class GameState;
 
 enum TrailType 
 {
-    NOTRAIL = 0,
-    EASTTOWEST = 1,
-    NORTHTOSOUTH = 2,
-    NORTHTOEAST = 3,
-    NORTHTOWEST = 4,
-    SOUTHTOEAST = 5,
-    SOUTHTOWEST = 6,
+	NOTRAIL = 0,
+	EASTTOWEST = 1,
+	NORTHTOSOUTH = 2,
+	NORTHTOEAST = 3,
+	NORTHTOWEST = 4,
+	SOUTHTOEAST = 5,
+	SOUTHTOWEST = 6,
 };
 
 class SquareState 
@@ -47,27 +44,27 @@ public:
 	pos_t getY();
 
 	TrailType getTrailType();
-    void setTrailType(TrailType trail);
+	void setTrailType(TrailType trail);
 
 	bool hasTrail();
-    Player *getTrailPlayer();
-    void setTrailPlayer(Player *player);
-    void setTrailPlayerId(id_t id);
-    id_t getTrailPlayerId();
+	Player *getTrailPlayer();
+	void setTrailPlayer(Player *player);
+	void setTrailPlayerId(id_t id);
+	plid_t getTrailPlayerId();
 
     // We define "occupying" to mean having a trail
 	bool isOccupied();
-    Player *getOccupyingPlayer();
-    void setOccupyingPlayer(Player *player);
-    id_t getOccupyingPlayerId();
-    void setOccupyingPlayerId(id_t player);
+	Player *getOccupyingPlayer();
+	void setOccupyingPlayer(Player *player);
+	plid_t getOccupyingPlayerId();
+	void setOccupyingPlayerId(id_t player);
 
     // We define "owning" to mean being in your body
 	bool isOwned();
-    Player *getOwningPlayer();
-    void setOwningPlayer(Player *player);
-    id_t getOwningPlayerId();
-    void setOwningPlayerId(id_t player);
+	Player *getOwningPlayer();
+	void setOwningPlayer(Player *player);
+	plid_t getOwningPlayerId();
+	void setOwningPlayerId(id_t player);
 
 private:
 	state_t *state;
@@ -85,9 +82,9 @@ public:
 
 	SquareState getState(pos_t x, pos_t y);
 
-	Player *lookupPlayer(id_t id);
+	Player *lookupPlayer(plid_t id);
 
-    const std::vector<Player> *getPlayers();
+	const std::vector<Player> *getPlayers();
 
 private:
 	pos_t width;

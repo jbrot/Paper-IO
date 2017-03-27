@@ -9,7 +9,7 @@
 
 #include "Player.h"
 
-id_t Player::getId() {
+plid_t Player::getId() {
 	return id;
 }
 
@@ -55,9 +55,9 @@ void Player::setOldDirection(Direction old){
 }
 
 bool Player::isDead() {
-	return !alive;
+	return dead;
 }
 
-void Player::setDead(bool dead) {
-	alive = dead;
+void Player::setDead(bool state) {
+	dead = state;
 }

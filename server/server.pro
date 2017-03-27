@@ -9,6 +9,10 @@ INCLUDEPATH += .
 QT += widgets network
 
 # Input
-HEADERS += gamelogic.h GameState.h PaperServer.h Player.h
+HEADERS += gamelogic.h \
+	GameState.h \
+	PaperServer.h \
+	Player.h \
+	types.h
 SOURCES += main.cpp PaperServer.cpp Player.cpp \
-    gamelogic.cpp
+	gamelogic.cpp

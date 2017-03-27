@@ -12,27 +12,12 @@
 
 #include <string>
 
-typedef uint16_t id_t;
-typedef uint16_t pos_t;
-
-/*
- * The possible directions the player can take on.
- * Origin is defined to be the top left of the screen
- * ie, positive x is right, positive y is down.
- */
-enum Direction 
-{
-	NONE	 = 0,
-	UP  	 = 1,
-	DOWN	 = 2,
-	LEFT	 = 3,
-	RIGHT	 = 4,
-};
+#include "types.h"
 
 class Player
 {
 public:
-	id_t getId();
+	plid_t getId();
 	std::string getName();
 
 	void setX(pos_t x);
@@ -54,12 +39,12 @@ public:
 
 private:
 	std::string name;
-	id_t id;
+	plid_t id;
 	pos_t x;
 	pos_t y;
     Direction oldDir;
     Direction newDir;
-	bool alive;
+	bool dead;
 
 	Player();
 };
