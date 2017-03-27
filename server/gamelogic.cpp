@@ -1,28 +1,37 @@
-/**
-* gamelogic.cpp
-*
-* EECS 183, Winter 2017
-* Final Project: Paper-io
-*
-* Holds the game logic which occurs on each tick
-*/
+/*
+ * gamelogic.cpp
+ *
+ * EECS 183, Winter 2017
+ * Final Project: Paper-io
+ *
+ * Holds the game logic which occurs on each tick
+ */
 
+#include <QtCore>
 
 #include "gamelogic.h"
 #include "Player.h"
 
 void updatePosition(Player& player);
-void leaveTrail(Player player, GameState &state);
-void killPlayer(Player player, GameState &state);
+void leaveTrail(Player &player, GameState &state);
+void killPlayers(GameState &state);
 void checkForTrail(Player player, GameState &state);
 
-void updateGame(GameState &state){
+void updateGame(GameState &state)
+{
+
+    if (!state.getPlayers())
+    {
+        qCritical() << "ERROR: Players vector is NULL";
+        return;
+    }
 
     // Create vector of all Players
-    std::vector<Player> allPlayers = getPlayers();
+    std::vector<Player> allPlayers = *state.getPlayers();
 
     // Loop over all Players
-    for (int i =0; i < allPlayers.size(); ++1){
+    for (int i =0; i < allPlayers.size(); ++i)
+    {
 
         // Leave trail under player
         leaveTrail(allPlayers[i], state);
@@ -46,16 +55,16 @@ void updatePosition(Player& player){
 
     switch (newD){
     case UP:
-        player.setY(player.getY - 1);
+        player.setY(player.getY() - 1);
         break;
     case RIGHT:
-        player.setX(player.getX + 1);
+        player.setX(player.getX() + 1);
         break;
     case DOWN:
-        player.setY(player.getY + 1);
+        player.setY(player.getY() + 1);
         break;
     case LEFT:
-        player.setX(player.getX - 1);
+        player.setX(player.getX() - 1);
         break;
     }
 
@@ -64,7 +73,7 @@ void updatePosition(Player& player){
 
 }
 
-void leaveTrail(Player player, GameState &state){
+void leaveTrail(Player &player, GameState &state){
 
     pos_t xpos = player.getX();
     pos_t ypos = player.getY();
@@ -74,7 +83,7 @@ void leaveTrail(Player player, GameState &state){
 
     SquareState square = state.getState(xpos, ypos);
 
-    square.setOccupyingPlayer(player);
+    square.setOccupyingPlayer(&player);
 
     if (old == newD)
     {
@@ -115,7 +124,7 @@ void killPlayers(GameState &state){
 
             // Check if square is occupied and kill accordingly
             if (square.getOccupyingPlayer() && square.getOccupyingPlayer()->isDead()){
-                square.setTrailType(NONE);
+                square.setTrailType(NOTRAIL);
                 square.setOccupyingPlayerId(NULL_ID);
             }
 

@@ -18,19 +18,19 @@
 
 #include "Player.h"
 
-typedef uint8_t id_t;
+typedef uint8_t pid_t;
 typedef uint16_t pos_t;
 typedef uint32_t state_t;
 
-const id_t NULL_ID = 0;
-const id_t UNOCCUPIED = 0;
-const id_t OUT_OF_BOUNDS = 255;
+const pid_t NULL_ID = 0;
+const pid_t UNOCCUPIED = 0;
+const pid_t OUT_OF_BOUNDS = 255;
 
 class GameState;
 
 enum TrailType 
 {
-    NONE = 0,
+    NOTRAIL = 0,
     EASTTOWEST = 1,
     NORTHTOSOUTH = 2,
     NORTHTOEAST = 3,
@@ -47,7 +47,7 @@ public:
 	pos_t getY();
 
 	TrailType getTrailType();
-	setTrailType(TrailType trail);
+    void setTrailType(TrailType trail);
 
 	bool hasTrail();
     Player *getTrailPlayer();
@@ -87,7 +87,7 @@ public:
 
 	Player *lookupPlayer(id_t id);
 
-    std::vector<Player> getPlayers();
+    const std::vector<Player> *getPlayers();
 
 private:
 	pos_t width;
