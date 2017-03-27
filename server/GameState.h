@@ -30,7 +30,7 @@ class GameState;
 
 enum TrailType 
 {
-	NONE = 0,
+    NONE = 0,
     EASTTOWEST = 1,
     NORTHTOSOUTH = 2,
     NORTHTOEAST = 3,
@@ -50,18 +50,24 @@ public:
 	setTrailType(TrailType trail);
 
 	bool hasTrail();
-	id_t getTrailPlayer();
-	setTrailPlayer(id_t id);
+    Player *getTrailPlayer();
+    void setTrailPlayer(Player *player);
+    void setTrailPlayerId(id_t id);
+    id_t getTrailPlayerId();
 
     // We define "occupying" to mean having a trail
 	bool isOccupied();
-	id_t getOccupyingPlayer();
-	void setOccupyingPlayer(id_t player);
+    Player *getOccupyingPlayer();
+    void setOccupyingPlayer(Player *player);
+    id_t getOccupyingPlayerId();
+    void setOccupyingPlayerId(id_t player);
 
     // We define "owning" to mean being in your body
 	bool isOwned();
-	id_t getOwningPlayer();
-	void setOwningPlayer(id_t player);
+    Player *getOwningPlayer();
+    void setOwningPlayer(Player *player);
+    id_t getOwningPlayerId();
+    void setOwningPlayerId(id_t player);
 
 private:
 	state_t *state;

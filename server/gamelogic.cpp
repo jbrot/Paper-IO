@@ -13,6 +13,8 @@
 
 void updatePosition(Player& player);
 void leaveTrail(Player player, GameState &state);
+void killPlayer(Player player, GameState &state);
+void checkForTrail(Player player, GameState &state);
 
 void updateGame(GameState &state){
 
@@ -28,9 +30,14 @@ void updateGame(GameState &state){
         // Update position of player
         updatePosition(allPlayers[i]);
 
-
+        // Check if player hit a trail
+        checkForTrail(allPlayers[i], state);
 
     }
+
+    // Kill dead players
+    killPlayers(state);
+
 }
 
 void updatePosition(Player& player){
@@ -54,6 +61,7 @@ void updatePosition(Player& player){
 
     player.setOldDirection(newD);
 
+
 }
 
 void leaveTrail(Player player, GameState &state){
@@ -66,7 +74,7 @@ void leaveTrail(Player player, GameState &state){
 
     SquareState square = state.getState(xpos, ypos);
 
-    square.setOccupyingPlayer(player.getId());
+    square.setOccupyingPlayer(player);
 
     if (old == newD)
     {
@@ -93,6 +101,42 @@ void leaveTrail(Player player, GameState &state){
             square.setTrailType(SOUTHTOEAST);
         if (old == LEFT && newD == DOWN)
             square.setTrailType(NORTHTOEAST);
+    }
+
+}
+
+void killPlayers(GameState &state){
+
+    // Loop over all squares
+    for (int j = 0; j < state.getWidth(); ++j){
+        for (int k = 0; k < state.getHeight(); ++k){
+
+            SquareState square = state.getState(j, k);
+
+            // Check if square is occupied and kill accordingly
+            if (square.getOccupyingPlayer() && square.getOccupyingPlayer()->isDead()){
+                square.setTrailType(NONE);
+                square.setOccupyingPlayerId(NULL_ID);
+            }
+
+            // Check if square is owned and kill accordingly
+            if (square.getOwningPlayer() && square.getOwningPlayer()->isDead()){
+                square.setOwningPlayer(NULL_ID);
+            }
+        }
+
+    }
+}
+
+void checkForTrail(Player player, GameState &state){
+
+    pos_t xpos = player.getX();
+    pos_t ypos = player.getY();
+
+    SquareState square = state.getState(xpos, ypos);
+
+    if (square.getTrailType() != 0){
+        square.getOccupyingPlayer()->isDead();
     }
 
 }
