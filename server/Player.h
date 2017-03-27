@@ -44,7 +44,10 @@ public:
 	void setLocation(pos_t x, pos_t y);
 
     Direction getNewDirection();
+    void setNewDirection(Direction newD);
+
     Direction getOldDirection();
+    void setOldDirection(Direction old);
 
 	bool isDead();
 	void setDead(bool dead);

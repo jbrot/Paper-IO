@@ -12,7 +12,7 @@
 #include "Player.h"
 
 void updatePosition(Player& player);
-void leaveTrail(Player player, Direction old, Direction newD);
+void leaveTrail(Player player, GameState &state);
 
 void updateGame(GameState &state){
 
@@ -21,6 +21,9 @@ void updateGame(GameState &state){
 
     // Loop over all Players
     for (int i =0; i < allPlayers.size(); ++1){
+
+        // Leave trail under player
+        leaveTrail(allPlayers[i], state);
 
         // Update position of player
         updatePosition(allPlayers[i]);
@@ -33,10 +36,6 @@ void updateGame(GameState &state){
 void updatePosition(Player& player){
 
     Direction newD = player.getNewDirection();
-    Direction old = player.getOldDirection();
-
-    leaveTrail(player, old, newD);
-
 
     switch (newD){
     case UP:
@@ -53,14 +52,19 @@ void updatePosition(Player& player){
         break;
     }
 
+    player.setOldDirection(newD);
+
 }
 
-void leaveTrail(Player player, Direction old, Direction newD){
+void leaveTrail(Player player, GameState &state){
 
-    pos_t Xpos = player.getX();
-    pos_t Ypos = player.getY();
+    pos_t xpos = player.getX();
+    pos_t ypos = player.getY();
 
-    SquareState square = getState(Xpos, Ypos);
+    Direction old = player.getOldDirection();
+    Direction newD = player.getNewDirection();
+
+    SquareState square = state.getState(xpos, ypos);
 
     square.setOccupyingPlayer(player.getId());
 

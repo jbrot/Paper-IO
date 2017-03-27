@@ -42,8 +42,16 @@ Direction Player::getNewDirection(){
     return newDir;
 }
 
+void Player::setNewDirection(Direction newD){
+    newDir = newD;
+}
+
 Direction Player::getOldDirection(){
     return oldDir;
+}
+
+void Player::setOldDirection(Direction old){
+    oldDir = old;
 }
 
 bool Player::isDead() {
