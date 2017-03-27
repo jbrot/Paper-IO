@@ -17,6 +17,8 @@ typedef uint16_t pos_t;
 
 /*
  * The possible directions the player can take on.
+ * Origin is defined to be the top left of the screen
+ * ie, positive x is right, positive y is down.
  */
 enum Direction 
 {
@@ -41,6 +43,9 @@ public:
 
 	void setLocation(pos_t x, pos_t y);
 
+    Direction getNewDirection();
+    Direction getOldDirection();
+
 	bool isDead();
 	void setDead(bool dead);
 
@@ -49,7 +54,8 @@ private:
 	id_t id;
 	pos_t x;
 	pos_t y;
-	Direction dir;
+    Direction oldDir;
+    Direction newDir;
 	bool alive;
 
 	Player();

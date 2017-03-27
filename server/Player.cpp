@@ -38,6 +38,14 @@ void Player::setLocation(pos_t newX, pos_t newY) {
 	y = newY;
 }
 
+Direction Player::getNewDirection(){
+    return newDir;
+}
+
+Direction Player::getOldDirection(){
+    return oldDir;
+}
+
 bool Player::isDead() {
 	return !alive;
 }

@@ -14,6 +14,8 @@
 #ifndef GAMESTATE_H 
 #define GAMESTATE_H
 
+#include <vector>
+
 #include "Player.h"
 
 typedef uint8_t id_t;
@@ -29,12 +31,12 @@ class GameState;
 enum TrailType 
 {
 	NONE = 0,
-	EASTWEST = 1,
-	NORTHSOUTH = 2,
-	NORTHEAST = 3,
-	NORTHWEST = 4,
-	SOUTHEAST = 5,
-	SOUTHWEST = 6,
+    EASTTOWEST = 1,
+    NORTHTOSOUTH = 2,
+    NORTHTOEAST = 3,
+    NORTHTOWEST = 4,
+    SOUTHTOEAST = 5,
+    SOUTHTOWEST = 6,
 };
 
 class SquareState 
@@ -51,10 +53,12 @@ public:
 	id_t getTrailPlayer();
 	setTrailPlayer(id_t id);
 
+    // We define "occupying" to mean having a trail
 	bool isOccupied();
 	id_t getOccupyingPlayer();
 	void setOccupyingPlayer(id_t player);
 
+    // We define "owning" to mean being in your body
 	bool isOwned();
 	id_t getOwningPlayer();
 	void setOwningPlayer(id_t player);
@@ -76,6 +80,8 @@ public:
 	SquareState getState(pos_t x, pos_t y);
 
 	Player *lookupPlayer(id_t id);
+
+    std::vector<Player> getPlayers();
 
 private:
 	pos_t width;

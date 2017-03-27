@@ -10,4 +10,5 @@ QT += widgets network
 
 # Input
 HEADERS += gamelogic.h GameState.h PaperServer.h Player.h
-SOURCES += main.cpp PaperServer.cpp Player.cpp
+SOURCES += main.cpp PaperServer.cpp Player.cpp \
+    gamelogic.cpp
