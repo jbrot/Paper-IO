@@ -66,9 +66,14 @@ public:
 	plid_t getOwningPlayerId();
 	void setOwningPlayerId(plid_t player);
 
+	// "flooded" flag is for the filling algorithms
+	void markAsFlooded();
+	bool isFlooded();
+
 private:
 	state_t *state;
 	bool *changed;
+	bool flooded;
 
 	SquareState();
 	SquareState(state_t *state, bool *changed);

@@ -17,6 +17,7 @@ void leaveTrail(Player &player, GameState &state);
 void killPlayers(GameState &state);
 void checkForTrail(Player player, GameState &state);
 void checkForBoundary(Player player, GameState &state);
+void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos);
 
 void updateGame(GameState &state)
 {
@@ -164,4 +165,34 @@ void checkForBoundary(Player player, GameState &state){
 		player.setDead(dead);
 	if (ypos < 1 || ypos > state.getHeight())
 		player.setDead(dead);
+}
+
+void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos){
+
+	// Note: I have NO IDEA what I'm doing in this function
+	// God have mercy upon this code
+	// This is meant to recursively check adjacent squares
+	// A square which is reachable is marked as "flooded"
+
+	// Check if out of bounds
+	if (xpos < 0 || xpos > (state.getWidth() + 1) || ypos < 0 || ypos > (state.getWidth() + 1))
+			return;
+
+	// Fix square
+	SquareState square = state.getState(xpos, ypos);
+
+	// Detect if square is occupied or owned by player
+	if (square.getOccupyingPlayerId() == player.getId() || square.getOwningPlayerId() == player.getId())
+		return;
+
+	// If not, mark it as flooded
+	square.markAsFlooded();
+
+	// Move on to adjacent squares
+	floodMarkSquares(player, state, xpos + 1, ypos);
+	floodMarkSquares(player, state, xpos - 1, ypos);
+	floodMarkSquares(player, state, xpos, ypos + 1);
+	floodMarkSquares(player, state, xpos, ypos - 1);
+
+	// Pray to heavenly Jesus that this works
 }
