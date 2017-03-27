@@ -42,6 +42,7 @@ Client::Client(QWidget *parent)
 	, ipEdit(new QLineEdit())
 	, portEdit(new QLineEdit())
 	, ctc(new QPushButton(tr("Connect")))
+	, timeout(new QTimer(this))
 	, socket(new QTcpSocket(this))
 	, session(Q_NULLPTR)
 {
@@ -104,9 +105,16 @@ Client::Client(QWidget *parent)
 	connect(portEdit, &QLineEdit::textChanged, this, &Client::enableConnect);
 	connect(ctc, &QAbstractButton::clicked, this, &Client::connectToServer);
 
+	// Timeout setup
+	timeout->setInterval(5000);
+	timeout->setSingleShot(true);
+	connect(timeout, &QTimer::timeout, this, &Client::connectTimeout);
+
 	typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
 	connect(socket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
 	        this, &Client::displayError);
+	connect(socket, &QAbstractSocket::connected, this, &Client::connected);
+	connect(socket, &QAbstractSocket::disconnected, this, &Client::disconnected);
 
 	QNetworkConfigurationManager manager;
 	if (manager.capabilities() & QNetworkConfigurationManager::NetworkSessionRequired)
@@ -158,6 +166,9 @@ void Client::sessionOpened()
 
 void Client::enableConnect()
 {
+	nameEdit->setEnabled(true);
+	ipEdit->setEnabled(true);
+	portEdit->setEnabled(true);
 	ctc->setEnabled((!session || session->isOpen()) && !nameEdit->text().isEmpty()
 	                                                && !ipEdit->text().isEmpty()
 	                                                && !portEdit->text().isEmpty());
@@ -165,6 +176,7 @@ void Client::enableConnect()
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
 {
+	timeout->stop();
 	switch (socketError) {
 	case QAbstractSocket::RemoteHostClosedError:
 		// TODO handle remote disconnect
@@ -177,7 +189,7 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 	case QAbstractSocket::ConnectionRefusedError:
 		QMessageBox::information(this, tr("Arduino-IO"),
 		                         tr("The connection was refused by the peer. "
-		                            "Make sure the fortune server is running, "
+		                            "Make sure the remote server is running, "
 		                            "and check that the host name and port "
 		                            "settings are correct."));
 		break;
@@ -187,7 +199,7 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 		                         .arg(socket->errorString()));
 	}
 	
-	ctc->setEnabled(true);
+	enableConnect();
 }
 
 void Client::displayError2(QNetworkSession::SessionError sessionError)
@@ -199,6 +211,33 @@ void Client::displayError2(QNetworkSession::SessionError sessionError)
 void Client::connectToServer()
 {
 	ctc->setEnabled(false);
+	nameEdit->setEnabled(false);
+	ipEdit->setEnabled(false);
+	portEdit->setEnabled(false);
 	socket->abort();
 	socket->connectToHost(ipEdit->text(), portEdit->text().toInt());
+	timeout->start();
+}
+
+void Client::connected()
+{
+	timeout->stop();
+	QMessageBox::information(this, tr("Arduino-IO"),
+	                         tr("Connected!"));
+}
+
+void Client::disconnected()
+{
+	QMessageBox::information(this, tr("Arduino-IO"),
+	                         tr("Disconnected!"));
+	enableConnect();
+}
+
+
+void Client::connectTimeout()
+{
+	QMessageBox::information(this, tr("Arduino-IO"),
+	                         tr("Connection timed out!"));
+	socket->abort();
+	enableConnect();
 }

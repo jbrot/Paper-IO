@@ -12,6 +12,7 @@
 #include <QNetworkSession>
 #include <QPushButton>
 #include <QTcpSocket>
+#include <QTimer>
 #include <QWidget>
 
 class Client : public QWidget
@@ -27,8 +28,11 @@ private slots:
 	void displayError(QAbstractSocket::SocketError socketError);
 	void displayError2(QNetworkSession::SessionError sessionError);
 	void sessionOpened();
-	void connectToServer();
 	void enableConnect();
+	void connectToServer();
+	void connected();
+	void disconnected();
+	void connectTimeout();
 
 private:
 	QLabel *status;
@@ -37,6 +41,7 @@ private:
 	QLineEdit *portEdit;
 	QPushButton *ctc;
 
+	QTimer *timeout;
 	QTcpSocket *socket;
 	QDataStream str;
 
