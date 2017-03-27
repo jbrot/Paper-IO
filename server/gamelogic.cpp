@@ -16,6 +16,7 @@ void updatePosition(Player& player);
 void leaveTrail(Player &player, GameState &state);
 void killPlayers(GameState &state);
 void checkForTrail(Player player, GameState &state);
+void checkForBoundary(Player player, GameState &state);
 
 void updateGame(GameState &state)
 {
@@ -41,6 +42,9 @@ void updateGame(GameState &state)
 
 		// Check if player hit a trail
 		checkForTrail(allPlayers[i], state);
+
+		// Check if player hit a boundary
+		checkForBoundary(allPlayers[i], state);
 
 	}
 	
@@ -141,10 +145,23 @@ void checkForTrail(Player player, GameState &state)
 {
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
+	bool dead = true;
 	
 	SquareState square = state.getState(xpos, ypos);
 	
 	if (square.getTrailType() != 0){
-		square.getOccupyingPlayer()->isDead();
+		square.getOccupyingPlayer()->setDead(dead);
 	}
+}
+
+void checkForBoundary(Player player, GameState &state){
+
+	pos_t xpos = player.getX();
+	pos_t ypos = player.getY();
+	bool dead = true;
+
+	if (xpos < 1 || xpos > state.getWidth())
+		player.setDead(dead);
+	if (ypos < 1 || ypos > state.getHeight())
+		player.setDead(dead);
 }

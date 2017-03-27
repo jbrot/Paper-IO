@@ -49,7 +49,7 @@ public:
 	bool hasTrail();
 	Player *getTrailPlayer();
 	void setTrailPlayer(Player *player);
-	void setTrailPlayerId(id_t id);
+	void setTrailPlayerId(plid_t id);
 	plid_t getTrailPlayerId();
 
     // We define "occupying" to mean having a trail
@@ -57,14 +57,14 @@ public:
 	Player *getOccupyingPlayer();
 	void setOccupyingPlayer(Player *player);
 	plid_t getOccupyingPlayerId();
-	void setOccupyingPlayerId(id_t player);
+	void setOccupyingPlayerId(plid_t player);
 
     // We define "owning" to mean being in your body
 	bool isOwned();
 	Player *getOwningPlayer();
 	void setOwningPlayer(Player *player);
 	plid_t getOwningPlayerId();
-	void setOwningPlayerId(id_t player);
+	void setOwningPlayerId(plid_t player);
 
 private:
 	state_t *state;
