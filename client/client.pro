@@ -17,7 +17,7 @@ INCLUDEPATH += . $$PWD/../common
 HEADERS += client.h \
 	iohandler.h \
 	launcher.h \
-	protocol.h \
-	types.h
+	../common/protocol.h \
+	../common/types.h
 SOURCES += main.cpp client.cpp iohandler.cpp launcher.cpp
 

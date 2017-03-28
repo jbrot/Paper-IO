@@ -1,0 +1,10 @@
+# Don't track the binaries or build directories
+bin/
+build/
+
+# Don't track Makefiles, they should be generated locally via qmake
+Makefile
+
+# Misc ignores so my git status is pretty :P
+.qmake.stash
+.vimrc

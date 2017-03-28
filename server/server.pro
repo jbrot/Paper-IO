@@ -17,7 +17,7 @@ HEADERS += clienthandler.h \
 	GameState.h \
 	paperserver.h \
 	Player.h \
-	protocol.h \
-	types.h
+	../common/protocol.h \
+	../common/types.h
 SOURCES += main.cpp clienthandler.cpp paperserver.cpp \
 	Player.cpp gamelogic.cpp
