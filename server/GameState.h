@@ -67,10 +67,16 @@ public:
 	void markAsUnflooded();
 	bool isFlooded();
 
+	// Marking squares as checked for flood algorithm
+	bool hasBeenChecked();
+	void markAsChecked();
+	void markAsUnchecked();
+
 private:
 	state_t *state;
 	bool *changed;
 	bool flooded;
+	bool checked;
 
 	SquareState();
 	SquareState(state_t *state, bool *changed);

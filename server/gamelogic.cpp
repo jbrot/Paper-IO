@@ -133,8 +133,8 @@ void leaveTrail(Player &player, GameState &state)
 void killPlayers(GameState &state)
 {
 	// Loop over all squares
-	for (int j = 0; j < state.getWidth(); ++j){
-		for (int k = 0; k < state.getHeight(); ++k){
+	for (int j = 0; j <= (state.getWidth() + 1); ++j){
+		for (int k = 0; k <= (state.getHeight() + 1); ++k){
 
 			SquareState square = state.getState(j, k);
 
@@ -189,9 +189,12 @@ void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos)
 	// Fix square
 	SquareState square = state.getState(xpos, ypos);
 
-	// Check if already marked
-	if (square.isFlooded())
+	// Check if already checked
+	if (square.hasBeenChecked())
 		return;
+
+	// Mark square as checked
+	square.markAsChecked();
 
 	// Check if out of bounds
 	if (xpos < 0 || xpos > (state.getWidth() + 1) || ypos < 0 || ypos > (state.getWidth() + 1))
@@ -218,9 +221,9 @@ void fillInBody(Player player, GameState &state)
 
 	SquareState square = state.getState(0, 0);
 
-	for (int i = 0; i <= state.getWidth(); ++i)
+	for (int i = 0; i <= (state.getWidth() + 1); ++i)
 	{
-		for (int j = 0; j <= state.getHeight(); ++i)
+		for (int j = 0; j <= (state.getHeight() + 1); ++i)
 		{
 
 			square = state.getState(i, j);
@@ -228,6 +231,7 @@ void fillInBody(Player player, GameState &state)
 				square.setOwningPlayerId(player.getId());
 
 			square.markAsUnflooded();
+			square.markAsUnchecked();
 
 		}
 	}
