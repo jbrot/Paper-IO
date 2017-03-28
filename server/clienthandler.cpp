@@ -86,7 +86,7 @@ void ClientHandler::kaTimeout()
 
 void ClientHandler::newData()
 {
-	qint8 packet = 0;
+	packet_t packet = 0;
 
 	str.startTransaction();
 	str >> packet;
