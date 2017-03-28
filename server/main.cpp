@@ -6,7 +6,7 @@
 #include <QApplication>
 #include <QtNetwork>
 
-#include "PaperServer.h"
+#include "paperserver.h"
 
 int main(int argc, char *argv[])
 {

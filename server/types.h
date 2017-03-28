@@ -8,6 +8,14 @@
 typedef uint8_t plid_t;
 typedef uint16_t pos_t;
 typedef uint32_t state_t;
+typedef uint32_t tick_t;
+
+/* This object has no associated player */
+const plid_t NULL_ID = 0;
+/* This square is not occupied (in some sense) by any player */
+const plid_t UNOCCUPIED = 0;
+/* This square is not within the bounds of the game */
+const plid_t OUT_OF_BOUNDS = 255;
 
 /*
  * The possible directions the player can take on.

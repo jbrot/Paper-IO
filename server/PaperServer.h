@@ -7,6 +7,16 @@
 #define PAPERSERVER_H
 
 #include <QTcpServer>
+#include <QThread>
+#include <QVector>
+
+#include "clienthandler.h"
+
+struct ThreadClient
+{
+	QThread *thread;
+	ClientHandler *client;
+};
 
 class PaperServer : public QTcpServer
 {
@@ -14,9 +24,13 @@ class PaperServer : public QTcpServer
 
 public:
 	PaperServer(QObject *parent = 0);
+	~PaperServer();
 
 protected:
 	void incomingConnection(qintptr socketDescriptor) override;
+
+private:
+	QVector<ThreadClient> connections;
 };
 
 #endif // !PAPERSERVER_H

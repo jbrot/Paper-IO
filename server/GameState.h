@@ -19,10 +19,6 @@
 #include "Player.h"
 #include "types.h"
 
-const plid_t NULL_ID = 0;
-const plid_t UNOCCUPIED = 0;
-const plid_t OUT_OF_BOUNDS = 255;
-
 class GameState;
 
 enum TrailType 
