@@ -37,6 +37,8 @@ public:
 	bool isDead();
 	void setDead(bool dead);
 
+	bool setWinner();
+
 private:
 	std::string name;
 	plid_t id;
@@ -45,6 +47,7 @@ private:
     Direction oldDir;
     Direction newDir;
 	bool dead;
+	bool winner;
 
 	Player();
 };

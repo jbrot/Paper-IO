@@ -20,6 +20,7 @@ void checkForBoundary(Player player, GameState &state);
 void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos);
 void fillInBody(Player player, GameState &state);
 void checkForCompletedLoop(Player player, GameState &state);
+bool detectWin(Player player, GameState &state);
 
 void updateGame(GameState &state)
 {
@@ -52,6 +53,9 @@ void updateGame(GameState &state)
 		// Check if player completed a loop
 		checkForCompletedLoop(allPlayers[i], state);
 
+		// Check if player wins
+		if (detectWin(allPlayers[i], state))
+			allPlayers[i].setWinner();
 
 	}
 	
@@ -182,12 +186,16 @@ void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos)
 	// This is meant to recursively check adjacent squares
 	// A square which is reachable is marked as "flooded"
 
+	// Fix square
+	SquareState square = state.getState(xpos, ypos);
+
+	// Check if already marked
+	if (square.isFlooded())
+		return;
+
 	// Check if out of bounds
 	if (xpos < 0 || xpos > (state.getWidth() + 1) || ypos < 0 || ypos > (state.getWidth() + 1))
 			return;
-
-	// Fix square
-	SquareState square = state.getState(xpos, ypos);
 
 	// Detect if square is occupied or owned by player
 	if (square.getOccupyingPlayerId() == player.getId() || square.getOwningPlayerId() == player.getId())
@@ -238,4 +246,20 @@ void checkForCompletedLoop(Player player, GameState &state)
 		fillInBody(player, state);
 	}
 
+}
+
+bool detectWin(Player player, GameState &state){
+
+	SquareState square = state.getState(1, 1);
+
+	for (int i = 1; i <= state.getWidth(); ++i)
+	{
+		for (int j = 1; j <= state.getHeight(); ++j)
+		{
+			if (state.getState(i, j).getOwningPlayerId() != player.getId())
+				return false;
+		}
+	}
+
+	return true;
 }
