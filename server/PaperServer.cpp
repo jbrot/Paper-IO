@@ -28,15 +28,15 @@ PaperServer::~PaperServer()
 
 void PaperServer::incomingConnection(qintptr socketDescriptor)
 {
-	QThread *cth = new QThread(this);
-	ClientHandler *ch = new ClientHandler;
-	cth->moveToThread(cth);
-	connect(ch, &ClientHandler::disconnect, cth, &QThread::quit);
-	connect(cth, &QThread::finished, ch, &QObject::deleteLater);
-	cth->start();
+	QThread *cthrd = new QThread(this);
+	ClientHandler *chand = new ClientHandler;
+	chand->moveToThread(cthrd);
+	connect(chand, &ClientHandler::disconnected, cthrd, &QThread::quit);
+	connect(cthrd, &QThread::finished, chand, &QObject::deleteLater);
+	cthrd->start();
 
-	QMetaObject::invokeMethod( ch, "establishConnection", Q_ARG(qintptr, socketDescriptor));
+	QMetaObject::invokeMethod( chand, "establishConnection", Q_ARG(int, socketDescriptor));
 
-	ThreadClient tc{cth, ch};
+	ThreadClient tc{cthrd, chand};
 	connections.append(tc);
 }

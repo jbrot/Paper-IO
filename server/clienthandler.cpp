@@ -2,12 +2,15 @@
  * Implements IO for a client.
  */
 
+#include <QHostAddress>
+
 #include "clienthandler.h"
+#include "protocol.h"
 
 ClientHandler::ClientHandler(QObject *parent)
 	: keepAlive(new QTimer(this))
 	, socket(new QTcpSocket(this))
-	, state(QUEUEING)
+	, state(LIMBO)
 	, player(NULL_ID)
 {
 	// We need to do this so we can communicate errors across threads.
@@ -18,6 +21,7 @@ ClientHandler::ClientHandler(QObject *parent)
 
 	keepAlive->setInterval(5000);
 	connect(keepAlive, &QTimer::timeout, this, &ClientHandler::kaTimeout);
+	lastka = QDateTime::currentDateTime();
 
 	typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
 	connect(socket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
@@ -35,7 +39,7 @@ void ClientHandler::transitionState(ClientState news, plid_t pd)
 	// TODO Inform client of transition
 }
 
-void ClientHandler::establishConnection(qintptr socketDescriptor)
+void ClientHandler::establishConnection(int socketDescriptor)
 {
 	if (!socket->setSocketDescriptor(socketDescriptor))
 	{
@@ -44,11 +48,11 @@ void ClientHandler::establishConnection(qintptr socketDescriptor)
 	}
 
 	keepAlive->start();
-	// Communicate the state to the client.
-	transitionState(state, player);
+
+	qDebug() << "New connection: " << socket->peerAddress(); 
 }
 
-void sendTick(InternalGameState *igs, tick_t tick)
+void ClientHandler::sendTick(void *igs, tick_t tick)
 {
 	// TODO Send update
 }
@@ -71,10 +75,40 @@ void ClientHandler::ierror(QAbstractSocket::SocketError err)
 
 void ClientHandler::kaTimeout()
 {
-	// TODO Send keepalive
+	if (lastka.secsTo(QDateTime::currentDateTime()) > TIMEOUT_LEN)
+	{
+		disconnect();
+		qDebug() << "Haven't received keep alive packet, timing out client.";
+	}
+	str << PACKET_KEEP_ALIVE;
+	qDebug() << "Keep alive sent!";
 }
 
 void ClientHandler::newData()
 {
-	// TODO Read packet
+	qint8 packet = 0;
+
+	str.startTransaction();
+	str >> packet;
+	// We have to do two switches---first to read in the packet and then,
+	// once reading is confirmed successful, to process.
+	switch (packet) {
+	case PACKET_KEEP_ALIVE:
+		break;
+	default:
+		break;
+	}
+	// If we didn't fully read the packet, then quit.
+	if (!str.commitTransaction())
+		return;
+
+	switch (packet) {
+	case PACKET_KEEP_ALIVE:
+		lastka = QDateTime::currentDateTime();
+		qDebug() << "Keep alive received!";
+		break;
+	default:
+		qDebug() << "Received unknown packet: " << packet;
+		break;
+	}
 }

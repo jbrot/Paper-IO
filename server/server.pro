@@ -5,6 +5,7 @@
 TEMPLATE = app
 TARGET = server
 INCLUDEPATH += .
+INCLUDEPATH += $$PWD/../common
 
 QT += widgets network
 
@@ -14,6 +15,7 @@ HEADERS += clienthandler.h \
 	GameState.h \
 	paperserver.h \
 	Player.h \
+	protocol.h \
 	types.h
-SOURCES += main.cpp clienthandler.cpp paperserver.cpp Player.cpp \
-	gamelogic.cpp
+SOURCES += main.cpp clienthandler.cpp paperserver.cpp \
+	Player.cpp gamelogic.cpp

@@ -5,6 +5,7 @@
 TEMPLATE = app
 TARGET = client
 INCLUDEPATH += .
+INCLUDEPATH += $$PWD/../common
 
 QT += widgets network
 
@@ -13,5 +14,6 @@ RESOURCES = client.qrc
 # Input
 HEADERS += client.h \
 	iohandler.h \
-	launcher.h
+	launcher.h \
+	../common/protocol.h
 SOURCES += main.cpp client.cpp iohandler.cpp launcher.cpp

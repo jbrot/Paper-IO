@@ -8,7 +8,9 @@
 #define IOHANDLER_H
 
 #include <QDataStream>
+#include <QDateTime>
 #include <QTcpSocket>
+#include <QTimer>
 
 class IOHandler : public QObject
 {
@@ -29,10 +31,15 @@ signals:
 
 private slots:
 	void ierror(QAbstractSocket::SocketError error);
+	void kaTimeout();
+	void newData();
 
 private:
 	QTcpSocket *socket;
 	QDataStream str;
+
+	QTimer *keepAlive;
+	QDateTime lastka;
 };
 
 #endif // !IOHANDLER_H

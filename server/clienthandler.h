@@ -3,12 +3,11 @@
  */
 
 #include <QDataStream>
+#include <QDateTime>
 #include <QTcpSocket>
 #include <QTimer>
 
 #include "types.h"
-
-class InternalGameState;
 
 /*
  * The current state of the client. QUEUEING means the client
@@ -32,8 +31,8 @@ public:
 
 public slots:
 	void transitionState(ClientState news, plid_t pid = NULL_ID);
-	void establishConnection(qintptr socketDescriptor);
-	void sendTick(InternalGameState *igs, tick_t tick);
+	void establishConnection(int socketDescriptor);
+	void sendTick(void *igs, tick_t tick);
 	void abort();
 	void disconnect();
 
@@ -56,4 +55,6 @@ private:
 
 	ClientState state;
 	plid_t player;
+
+	QDateTime lastka;
 };
