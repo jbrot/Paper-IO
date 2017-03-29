@@ -19,5 +19,16 @@ HEADERS += client.h \
 	launcher.h \
 	../common/protocol.h \
 	../common/types.h
-SOURCES += main.cpp client.cpp iohandler.cpp launcher.cpp
+SOURCES += main.cpp client.cpp iohandler.cpp launcher.cpp \
+# Common files
+	../common/packetgameend.cpp \
+	../common/packetgamejoin.cpp \
+	../common/packetgametick.cpp \
+	../common/packetleaderboardupdate.cpp \
+	../common/packetplayersupdate.cpp \
+	../common/packetrequestjoin.cpp \
+	../common/packetresendboard.cpp \
+	../common/packetupdatedir.cpp \
+	../common/protocol.cpp
+
 

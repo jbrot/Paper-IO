@@ -86,13 +86,13 @@ void ClientHandler::kaTimeout()
 
 void ClientHandler::newData()
 {
-	packet_t packet = 0;
+	packet_t pkth = 0;
 
 	str.startTransaction();
-	str >> packet;
+	str >> pkth;
 	// We have to do two switches---first to read in the packet and then,
 	// once reading is confirmed successful, to process.
-	switch (packet) {
+	switch (pkth) {
 	case PACKET_KEEP_ALIVE:
 		break;
 	default:
@@ -102,13 +102,13 @@ void ClientHandler::newData()
 	if (!str.commitTransaction())
 		return;
 
-	switch (packet) {
+	switch (pkth) {
 	case PACKET_KEEP_ALIVE:
 		lastka = QDateTime::currentDateTime();
 		qDebug() << "Keep alive received!";
 		break;
 	default:
-		qDebug() << "Received unknown packet: " << packet;
+		qDebug() << "Received unknown packet: " << pkth;
 		break;
 	}
 }

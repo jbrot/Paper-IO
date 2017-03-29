@@ -1,12 +1,21 @@
 /*
- * Contains common definitions for the client-server protocol.
+ * Contains the complete specification for the client-server protocol.
  */
 
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#include <QByteArray>
+#include <QDataStream>
+#include <QHash>
+
+#include "types.h"
+
 /* How long to wait for a keep alive packet before disconnecting */
 const int TIMEOUT_LEN = 10;
+
+/* How big of a view the client receives */
+const int CLIENT_FRAME = 31;
 
 typedef quint8 packet_t;
 
@@ -37,40 +46,49 @@ const packet_t PACKET_REQUEST_JOIN = 1;
  */
 const packet_t PACKET_QUEUED = 2;
 /*
- * Game Join packet. Informs the client it is now in game and provides
- * initial state information.
- *
- * Spec: <PACKET_GAME_JOIN> <quint8: id> <quint32: current_tick> <quint8: score>
- *       <quint8: player_count> {<quint8: player_id> <QString: player_name>}[player_count times: player name map]
- *       {<quint8: player_id> <quint8: score>}[5 times: leader board in descending order]
- *       {<quint32: board_state>}[31 * 31 times, populating the local board state, L to R, T to B]
- * Direction: Server to Client
- */
-const packet_t PACKET_GAME_JOIN = 3;
-/*
  * Players Update packet. Informs the client that the currently connected players have changed.
  *
- * Spec: <PACKET_PLAYERS_UPDATE> <quint8: player_count> {<quint8: player_id> <QString: player_name>}[player_count times: player name map]
+ * Spec: <PACKET_PLAYERS_UPDATE> <tick_t: current tick> <QHash<plid_t, QString>: id/player map>
  * Direction: Server to Client
  */
-const packet_t PACKET_PLAYERS_UPDATE = 4;
+const packet_t PACKET_PLAYERS_UPDATE = 3;
 /*
  * Leaderboard Update packet. Informs the client that the leaderboard has changed.
  * 
- * Spec: <PACKET_LEADERBOARD_UPDATE> {<quint8: player_id> <quint8: score>}[5 times: leader board in descending order]
+ * Spec: <PACKET_LEADERBOARD_UPDATE> <tick_t: current tick> {<quint8: player_id> <quint8: score>}[5 times: leader board in descending order]
  * Direction: Server to Client
  */
-const packet_t PACKET_LEADERBOARD_UPDATE = 5;
+const packet_t PACKET_LEADERBOARD_UPDATE = 4;
+/*
+ * Resend Board packet. Sends the entire local board state after a client request.
+ *
+ * Spec: <PACKET_RESEND_BOARD> <tick_t: current tick> {<state_t: board state>}[CLIENT_FRAME^2 times, populating the local board state, L to R, T to B] <quint64: 64 bit crc>
+ * Direction: Server to Client
+ */
+const packet_t PACKET_RESEND_BOARD = 5;
+/*
+ * Game Join packet. Informs the client it is now in game and provides
+ * initial state information. N.B., the current tick will be sent three
+ * times, but this isn't a big deal and simplifies the net code. Only
+ * the first tick value will actually be used.
+ *
+ * Spec: <PACKET_GAME_JOIN> <plid_t: id> <quint8: score>
+ *       <contents of PACKET_PLAYERS_UPDATE>
+ *       <contents of PACKET_LEADERBOARD_UPDATE>
+ *       <contents of PACKET_RESEND_BOARD>
+ * Direction: Server to Client
+ */
+const packet_t PACKET_GAME_JOIN = 6;
 /*
  * Game Tick packet. Informs the client of a server tick and change in board state.
  *
- * Spec: <PACKET_GAME_TICK> <quint32: current_tick> <quint8: direction_moved> <quint8: score>
- *       {<quint32: board_state>}[31 times, the new row visible either L to R or T to B depending on direction]
- *       <quint32: diff_len> {<quint8>}[diff_len times: RLE encoded XOR difference of existing board, L to R, T to B]
- *       <quint64: a hash of the new board state>
+ * Spec: <PACKET_GAME_TICK> <tick_t: current tick> <quint8: direction_moved> <quint8: score>
+ *       {<quint32: board_state>}[CLIENT_FRAME times, the new row visible either L to R or T to B depending on direction]
+ *       {<quint8>}[RLE encoded XOR difference of existing board, L to R, T to B]
+ *       <quint64: a 64 bit crc of the new board state>
  * Direction: Server to Client
  */
-const packet_t PACKET_GAME_TICK = 6;
+const packet_t PACKET_GAME_TICK = 7;
 /*
  * Update Direction packet. Informs the server the direction the client wants to move.
  * This may be ignored if invalid.
@@ -78,7 +96,7 @@ const packet_t PACKET_GAME_TICK = 6;
  * Spec: <PACKET_UPDATE_DIR> <quint8: direction>
  * Direction: Client to Server
  */
-const packet_t PACKET_UPDATE_DIR = 7;
+const packet_t PACKET_UPDATE_DIR = 8;
 /*
  * Resend Request packet. Requests the server resend the local board state in its entirety (probably
  * because of a hash mismatch).
@@ -86,14 +104,7 @@ const packet_t PACKET_UPDATE_DIR = 7;
  * Spec: <PACKET_REQUEST_RESEND>
  * Direction: Client to Server
  */
-const packet_t PACKET_REQUEST_RESEND = 8;
-/*
- * Resend Board packet. Sends the entire local board state after a client request.
- *
- * Spec: <PACKET_RESEND_BOARD> {<quint32: board_state>}[31 * 31 times, populating the local board state, L to R, T to B]
- * Direction: Server to Client
- */
-const packet_t PACKET_RESEND_BOARD = 9;
+const packet_t PACKET_REQUEST_RESEND = 9;
 /*
  * End Game packet. Informs the player that their game has ended and provides the final score. Note
  * this does not distinguish between death and victory. The client may either quit or issue a
@@ -103,5 +114,277 @@ const packet_t PACKET_RESEND_BOARD = 9;
  * Direction: Serber to Client
  */
 const packet_t PACKET_GAME_END = 10;
+
+QByteArray hashBoard(state_t const* const* board);
+
+class Packet
+{
+public:
+	friend QDataStream &operator>>(QDataStream &str, Packet &packet);
+	friend QDataStream &operator<<(QDataStream &str, const Packet &packet);
+
+	virtual ~Packet() = 0;
+
+protected:
+	virtual void read(QDataStream &str);
+	virtual void write(QDataStream &str) const;
+};
+
+class PacketKeepAlive : public Packet
+{
+};
+
+class PacketRequestJoin : public Packet
+{
+public:
+	PacketRequestJoin();
+	PacketRequestJoin(const QString &str);
+
+	QString getName() const;
+	void setName(const QString &name);
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	QString name;
+};
+
+class PacketQueued : public Packet
+{
+};
+
+class PacketPlayersUpdate : public Packet
+{
+public:
+	PacketPlayersUpdate();
+	PacketPlayersUpdate(tick_t tick, const QHash<plid_t, QString> &players);
+
+	tick_t getTick() const;
+	void setTick(tick_t tick);
+
+	QHash<plid_t, QString> getPlayers() const;
+	void setPlayers(const QHash<plid_t, QString> &players);
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	tick_t tick;
+	QHash<plid_t, QString> players;
+};
+
+// The following class relies on this assumption.
+static_assert(std::is_same<plid_t, quint8>::value, "plid_t != quint8");
+
+/*
+ * This class stores the leaderboard as a 1d array alternating
+ * between player id and score.
+ */
+class PacketLeaderboardUpdate : public Packet
+{
+public:
+	PacketLeaderboardUpdate();
+	PacketLeaderboardUpdate(tick_t tick, const quint8 lb[10]);
+
+	tick_t getTick() const;
+	void setTick(tick_t tick);
+
+	const quint8 *getLeaderboard() const;
+	void setLeaderboard(const quint8 lb[10]);
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	tick_t tick;
+	quint8 data[10];
+};
+
+/*
+ * This class either holds pointers to the board
+ * state or its own copy.
+ */
+class PacketResendBoard : public Packet
+{
+public:
+	/*
+	 * Initializes a new PacketResendBoard with its own copy
+	 * of the board state.
+	 */
+	PacketResendBoard();
+	/*
+	 * Initializes a new PacketResendBoard holding pointers to
+	 * the board state.
+	 */
+	PacketResendBoard(tick_t tick, state_t *board[CLIENT_FRAME]);
+	~PacketResendBoard();
+
+	tick_t getTick() const;
+	void setTick(tick_t tick);
+
+	const state_t *const *getBoard() const;
+	/*
+	 * Sets the board state to be the given pointer.
+	 */
+	void setBoardPointer(state_t *board[CLIENT_FRAME]);
+	/*
+	 * Copies the board state from the given pointer.
+	 */
+	void setBoardCopy(state_t const *board[CLIENT_FRAME]);
+
+	QByteArray getChecksum() const;
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	tick_t tick;
+
+	bool alloc;
+	state_t *board[CLIENT_FRAME];
+
+	QByteArray chksum;
+};
+
+class PacketGameJoin : public Packet
+{
+public:
+	/*
+	 * N.B. This initializes the sub-packets with defauly constructors
+	 * which means PacketResendBoard will allocate its own CLIENT_FRAME^2
+	 * array of state_t's. As a result, this constructor should only
+	 * be used if this packet is going to be read in and the other constructor
+	 * should be used for writing.
+	 */
+	PacketGameJoin();
+	PacketGameJoin(plid_t plid, quint8 score, const PacketPlayersUpdate &ppu, const PacketLeaderboardUpdate &plu, const PacketResendBoard &prb);
+
+	plid_t getId() const;
+	void setId(plid_t id);
+
+	quint8 getScore() const;
+	void setScore(quint8 score);
+
+	const PacketPlayersUpdate &getPPU() const;
+	void setPPU(const PacketPlayersUpdate &ppu);
+
+	const PacketLeaderboardUpdate &getPLU() const;
+	void setPLU(const PacketLeaderboardUpdate &plu);
+
+	const PacketResendBoard &getPRB() const;
+	void setPRB(const PacketResendBoard &prb);
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	plid_t plid;
+	quint8 score;
+
+	PacketPlayersUpdate ppu;
+	PacketLeaderboardUpdate plu;
+	PacketResendBoard prb;
+};
+
+/*
+ * This class either holds pointers to the diff or its own copy.
+ */
+class PacketGameTick : public Packet
+{
+public:
+	/*
+	 * Initializes a new PacketGameTick with its own copy of the diff.
+	 */
+	PacketGameTick();
+	/*
+	 * Initializes a new PacketGameTick holding pointers to the diff.
+	 */
+	PacketGameTick(tick_t tick, Direction dir, quint8 score, const state_t news[CLIENT_FRAME], state_t *diff[CLIENT_FRAME], const QByteArray &chksum);
+	~PacketGameTick();
+
+	tick_t getTick() const;
+	void setTick(tick_t tick);
+
+	Direction getDirection() const;
+	void setDirection(Direction dir);
+
+	quint8 getScore() const;
+	void setScore(quint8 sc);
+
+	const state_t *getNewSection() const;
+	void setNewSection(const state_t[CLIENT_FRAME]);
+
+	const state_t *const *getDiff() const;
+	/*
+	 * Sets the diff to be the given pointer.
+	 */
+	void setDiffPointer(state_t *diff[CLIENT_FRAME], const QByteArray &checksum);
+	/*
+	 * Copies the diff from the given pointer.
+	 */
+	void setDiffCopy(state_t const *diff[CLIENT_FRAME], const QByteArray &checksum);
+
+	QByteArray getChecksum() const;
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	tick_t tick;
+	quint8 dir;
+	quint8 score;
+
+	state_t news[CLIENT_FRAME];
+
+	bool alloc;
+	state_t *diff[CLIENT_FRAME];
+
+	QByteArray chksum;
+};
+
+class PacketUpdateDir : public Packet
+{
+public:
+	PacketUpdateDir();
+	PacketUpdateDir(Direction dir);
+
+	Direction getDirection() const;
+	void setDirection(Direction dir);
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	quint8 dir;
+};
+
+class PacketRequestResend : public Packet
+{
+};
+
+class PacketGameEnd : public Packet
+{
+public:
+	PacketGameEnd();
+	PacketGameEnd(quint8 score);
+
+	quint8 getScore() const;
+	void setScore(quint8 score);
+
+protected:
+	void read(QDataStream &str) override;
+	void write(QDataStream &str) const override;
+
+private:
+	quint8 score;
+};
 
 #endif // !PROTOCOL_H

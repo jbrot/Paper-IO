@@ -20,4 +20,15 @@ HEADERS += clienthandler.h \
 	../common/protocol.h \
 	../common/types.h
 SOURCES += main.cpp clienthandler.cpp paperserver.cpp \
-	Player.cpp gamelogic.cpp
+	Player.cpp gamelogic.cpp \
+# Common files
+	../common/packetgameend.cpp \
+	../common/packetgamejoin.cpp \
+	../common/packetgametick.cpp \
+	../common/packetleaderboardupdate.cpp \
+	../common/packetplayersupdate.cpp \
+	../common/packetrequestjoin.cpp \
+	../common/packetresendboard.cpp \
+	../common/packetupdatedir.cpp \
+	../common/protocol.cpp
+
