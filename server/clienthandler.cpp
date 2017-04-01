@@ -35,10 +35,26 @@ ClientHandler::ClientHandler(QObject *parent)
 	connect(socket, &QIODevice::readyRead, this, &ClientHandler::newData);
 }
 
-void ClientHandler::transitionState(ClientState news, plid_t pd)
+void ClientHandler::enqueue()
 {
-	state = news;
-	player= pd;
+	state = QUEUEING;
+	player = NULL_ID;
+
+	// TODO Inform client of transition
+}
+
+void ClientHandler::beginGame(void *igs)
+{
+	state = INGAME;
+	// TODO player = ??;
+
+	// TODO Inform client of transition
+}
+
+void ClientHandler::endGame(quint8 score)
+{
+	state = LIMBO;
+	player = NULL_ID;
 
 	// TODO Inform client of transition
 }
@@ -119,7 +135,7 @@ void ClientHandler::newData()
 	}
 }
 
-thid_t ClientHandler::getId()
+thid_t ClientHandler::getId() const
 {
 	return id;
 }

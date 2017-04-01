@@ -7,13 +7,15 @@
 
 PaperServer::PaperServer(QObject *parent) 
 	: QTcpServer(parent)
+	, games()
 	, connections()
+	, waiting()
 {
-	// Nothing to do yet
 }
 
 PaperServer::~PaperServer()
 {
+	// TODO Kill the game threads.
 	// Kill all of the IO threads.
 	for (auto iter = connections.cbegin(); iter != connections.cend(); iter++)
 	{
@@ -92,15 +94,37 @@ void PaperServer::validateConnection(thid_t id)
 
 void PaperServer::queueConnection(thid_t id)
 {
-	// TODO Queue connection to be put in a game.
+	if (!connections.contains(id))
+	{
+		qWarning() << "Warning: Connection " << id << " is not registered but requests to be queued!";
+		return;
+	}
+
+	waiting.enqueue(id);
+	ThreadClient tc = connections.value(id);
+	QMetaObject::invokeMethod( tc.client, "enqueue");
+
+	// TODO Create game if none exist. If the queue size is too large, set a timer
+	// to start a new game if the queue doesn't shrink in a little while.
 }
 
 void PaperServer::deleteConnection(thid_t id)
 {
+	waiting.removeAll(id);
 	if (connections.remove(id))
 	{
 		qDebug() << "Connection " << id << " closed.";
 	} else {
 		qWarning() << "Warning: Connection " << id << " is not registered but claims to be terminated!";
 	}
+}
+
+void PaperServer::launchGame()
+{
+	// TODO
+}
+
+void PaperServer::gameTerminated(gid_t id)
+{
+	// TODO
 }

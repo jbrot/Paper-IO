@@ -22,6 +22,9 @@ enum ClientState {
 	LIMBO,
 };
 
+/* Connection ID */
+typedef quint32 thid_t;
+
 class ClientHandler : public QObject
 {
 	Q_OBJECT
@@ -33,10 +36,12 @@ public:
 	 */
 	ClientHandler(QObject *parent = Q_NULLPTR);
 
-	thid_t getId();
+	thid_t getId() const;
 
 public slots:
-	void transitionState(ClientState news, plid_t pid = NULL_ID);
+	void enqueue();
+	void beginGame(void *igs);
+	void endGame(quint8 score);
 	void establishConnection(int socketDescriptor);
 	void sendTick(void *igs, tick_t tick);
 	void abort();

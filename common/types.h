@@ -13,8 +13,6 @@ typedef uint16_t pos_t;
 typedef uint32_t state_t;
 /* Tick ID (monotonically increasing within a GameThread) */
 typedef uint32_t tick_t;
-/* Connection ID */
-typedef uint32_t thid_t;
 
 /* This object has no associated player */
 const plid_t NULL_ID = 0;

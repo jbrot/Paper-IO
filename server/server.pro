@@ -14,6 +14,7 @@ QT += widgets network
 INCLUDEPATH += . $$PWD/../common
 HEADERS += clienthandler.h \
 	gamelogic.h \
+	gamehandler.h \
 	gamestate.h \
 	paperserver.h \
 	player.h \
