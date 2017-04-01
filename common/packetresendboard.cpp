@@ -8,7 +8,8 @@
 #include "protocol.h"
 
 PacketResendBoard::PacketResendBoard()
-	: tick(0)
+	: Packet(PACKET_RESEND_BOARD)
+	, tick(0)
 	, alloc(true)
 {
 	board[0] = new state_t[CLIENT_FRAME * CLIENT_FRAME];
@@ -19,7 +20,8 @@ PacketResendBoard::PacketResendBoard()
 }
 
 PacketResendBoard::PacketResendBoard(tick_t tck, state_t *brd[CLIENT_FRAME])
-	: tick(tck)
+	: Packet(PACKET_RESEND_BOARD)
+	, tick(tck)
 	, alloc(false)
 {
 	std::copy(brd, brd + CLIENT_FRAME, board);

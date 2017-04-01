@@ -12,12 +12,14 @@
 #include "protocol.h"
 
 PacketRequestJoin::PacketRequestJoin()
-	: name()
+	: Packet(PACKET_REQUEST_JOIN)
+	, name()
 {
 }
 
 PacketRequestJoin::PacketRequestJoin(const QString &nm)
-	: name(nm)
+	: Packet(PACKET_REQUEST_JOIN)
+	, name(nm)
 {
 }
 

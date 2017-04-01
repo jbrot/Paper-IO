@@ -8,13 +8,15 @@
 #include "protocol.h"
 
 PacketLeaderboardUpdate::PacketLeaderboardUpdate()
-	: tick(0)
+	: Packet(PACKET_LEADERBOARD_UPDATE)
+	, tick(0)
 {
 	std::fill(data, data + 10, 0);
 }
 
 PacketLeaderboardUpdate::PacketLeaderboardUpdate(tick_t tck, const quint8 lb[10])
-	: tick(tck)
+	: Packet(PACKET_LEADERBOARD_UPDATE)
+	, tick(tck)
 {
 	std::copy(lb, lb + 10, data);
 }

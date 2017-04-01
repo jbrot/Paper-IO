@@ -8,13 +8,15 @@
 #include "protocol.h"
 
 PacketPlayersUpdate::PacketPlayersUpdate()
-	: tick(0)
+	: Packet(PACKET_PLAYERS_UPDATE)
+	, tick(0)
 	, players()
 {
 }
 
 PacketPlayersUpdate::PacketPlayersUpdate(tick_t tck, const QHash<plid_t, QString> &pls)
-	: tick(tck)
+	: Packet(PACKET_PLAYERS_UPDATE)
+	, tick(tck)
 	, players(pls)
 {
 }

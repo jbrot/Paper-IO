@@ -9,12 +9,14 @@
 #include "protocol.h"
 
 PacketUpdateDir::PacketUpdateDir()
-	: dir(Direction::NONE)
+	: Packet(PACKET_UPDATE_DIR)
+	, dir(Direction::NONE)
 {
 }
 
 PacketUpdateDir::PacketUpdateDir(Direction nm)
-	: dir(nm)
+	: Packet(PACKET_UPDATE_DIR)
+	, dir(nm)
 {
 }
 

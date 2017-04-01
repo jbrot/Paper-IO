@@ -10,12 +10,14 @@
 #include "protocol.h"
 
 PacketGameEnd::PacketGameEnd()
-	: score(0)
+	: Packet(PACKET_GAME_END)
+	, score(0)
 {
 }
 
 PacketGameEnd::PacketGameEnd(quint8 nm)
-	: score(nm)
+	: Packet(PACKET_GAME_END)
+	, score(nm)
 {
 }
 

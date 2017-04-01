@@ -14,7 +14,8 @@
 #include "protocol.h"
 
 PacketGameJoin::PacketGameJoin()
-	: plid(NULL_ID)
+	: Packet(PACKET_GAME_JOIN)
+	, plid(NULL_ID)
 	, score(0)
 	, ppu()
 	, plu()
@@ -23,7 +24,8 @@ PacketGameJoin::PacketGameJoin()
 }
 
 PacketGameJoin::PacketGameJoin(plid_t id, quint8 sc, const PacketPlayersUpdate &ppuc, const PacketLeaderboardUpdate &pluc, const PacketResendBoard &prbc)
-	: plid(id)
+	: Packet(PACKET_GAME_JOIN)
+	, plid(id)
 	, score(sc)
 	, ppu(ppuc)
 	, plu(pluc)

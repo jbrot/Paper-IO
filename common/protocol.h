@@ -8,6 +8,7 @@
 #include <QByteArray>
 #include <QDataStream>
 #include <QHash>
+#include <unordered_map>
 
 #include "types.h"
 
@@ -115,23 +116,88 @@ const packet_t PACKET_REQUEST_RESEND = 9;
  */
 const packet_t PACKET_GAME_END = 10;
 
+/*
+ * Computes an md4 hash of the linked board for
+ * client/server verification.
+ */
 QByteArray hashBoard(state_t const* const* board);
+
+class Packet;
+
+/*
+ * The PacketFactory classes are used for dynamic allocation of packets to streamline IO handling.
+ * They should be registered with Packet in the main function.
+ */
+class APacketFactory
+{
+public:
+	virtual Packet *instantiate() = 0;
+};
+
+template<class T>
+class PacketFactory : public APacketFactory
+{
+	static_assert(std::is_base_of<Packet, T>::value, "T must derive from Packet!");
+public:
+	Packet *instantiate() override
+	{
+		return new T();
+	}
+};
 
 class Packet
 {
 public:
+	/*
+	 * The stream operators into Packet objects read/write the contents
+	 * of a packet (i.e., not the header byte) into/from an already allocated
+	 * Packet object.
+	 */
 	friend QDataStream &operator>>(QDataStream &str, Packet &packet);
 	friend QDataStream &operator<<(QDataStream &str, const Packet &packet);
 
+	/*
+	 * The stream operators into Packet pointers read/write a full packet
+	 * (i.e., including the header byte). The read operator will dynamically
+	 * allocate the correct packet type. Note that the current value of the
+	 * pointer will be overwritten so make sure that it is properly released.
+	 */
+	friend QDataStream &operator>>(QDataStream &str, Packet *&packet);
+	friend QDataStream &operator<<(QDataStream &str, const Packet *&packet);
+
+	Packet(packet_t id);
 	virtual ~Packet() = 0;
+
+	packet_t getId();
+
+	/*
+	 * This registers a packet type to be used with the pointer stream
+	 * read in operator.
+	 *
+	 * WARNING: The internal map is not locked, so when this method is called
+	 * it must be guaranteed that no other threads will try to read from it
+	 * (e.g., by trying to read in a packet). As a result, it is recommended
+	 * that all packets are registered in the main function before any IO
+	 * occurs.
+	 */
+	static void registerPacket(packet_t id, std::unique_ptr<APacketFactory> fact);
 
 protected:
 	virtual void read(QDataStream &str);
 	virtual void write(QDataStream &str) const;
+
+private:
+	packet_t id;
+	static std::unordered_map<packet_t, std::unique_ptr<APacketFactory>> map;
 };
 
 class PacketKeepAlive : public Packet
 {
+public:
+	PacketKeepAlive()
+		: Packet(PACKET_KEEP_ALIVE)
+	{
+	}
 };
 
 class PacketRequestJoin : public Packet
@@ -153,6 +219,11 @@ private:
 
 class PacketQueued : public Packet
 {
+public:
+	PacketQueued()
+		: Packet(PACKET_QUEUED)
+	{
+	}
 };
 
 class PacketPlayersUpdate : public Packet
@@ -368,6 +439,11 @@ private:
 
 class PacketRequestResend : public Packet
 {
+public:
+	PacketRequestResend()
+		: Packet(PACKET_REQUEST_RESEND)
+	{
+	}
 };
 
 class PacketGameEnd : public Packet

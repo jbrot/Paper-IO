@@ -11,7 +11,8 @@
 #include "protocol.h"
 
 PacketGameTick::PacketGameTick()
-	: tick(0)
+	: Packet(PACKET_GAME_TICK)
+	, tick(0)
 	, dir(0)
 	, score(0)
 	, alloc(true)
@@ -24,7 +25,8 @@ PacketGameTick::PacketGameTick()
 }
 
 PacketGameTick::PacketGameTick(tick_t tck, Direction dr, quint8 sc, const state_t ns[CLIENT_FRAME], state_t *brd[CLIENT_FRAME], const QByteArray &chk)
-	: tick(tck)
+	: Packet(PACKET_GAME_TICK)
+	, tick(tck)
 	, dir(dr)
 	, score(sc)
 	, alloc(false)
