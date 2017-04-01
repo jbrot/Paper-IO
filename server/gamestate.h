@@ -14,6 +14,7 @@
 #ifndef GAMESTATE_H 
 #define GAMESTATE_H
 
+#include <QtCore>
 #include <vector>
 
 #include "Player.h"
@@ -36,50 +37,52 @@ class SquareState
 {
 friend class GameState;
 public:
-	pos_t getX();
-	pos_t getY();
+	pos_t getX() const;
+	pos_t getY() const;
 
-	TrailType getTrailType();
+	TrailType getTrailType() const;
 	void setTrailType(TrailType trail);
 
-	bool hasTrail();
-	Player *getTrailPlayer();
-	void setTrailPlayer(Player *player);
+	bool hasTrail() const;
+	plid_t getTrailPlayerId() const;
 	void setTrailPlayerId(plid_t id);
-	plid_t getTrailPlayerId();
+	Player *getTrailPlayer() const;
+	void setTrailPlayer(Player *player);
 
-    // We define "occupying" to mean having a trail
-	bool isOccupied();
-	Player *getOccupyingPlayer();
-	void setOccupyingPlayer(Player *player);
-	plid_t getOccupyingPlayerId();
+    // A square is occupied if the specified player's current position
+    // is this square. 
+	bool isOccupied() const;
+	plid_t getOccupyingPlayerId() const;
 	void setOccupyingPlayerId(plid_t player);
+	Player *getOccupyingPlayer() const;
+	void setOccupyingPlayer(Player *player);
 
     // We define "owning" to mean being in your body
-	bool isOwned();
-	Player *getOwningPlayer();
-	void setOwningPlayer(Player *player);
-	plid_t getOwningPlayerId();
+	bool isOwned() const;
+	plid_t getOwningPlayerId() const;
 	void setOwningPlayerId(plid_t player);
+	Player *getOwningPlayer() const;
+	void setOwningPlayer(Player *player);
 
 	// "flooded" flag is for the filling algorithms
+	bool isFlooded() const;
 	void markAsFlooded();
 	void markAsUnflooded();
-	bool isFlooded();
 
 	// Marking squares as checked for flood algorithm
-	bool hasBeenChecked();
+	bool hasBeenChecked() const;
 	void markAsChecked();
 	void markAsUnchecked();
 
 private:
-	state_t *state;
-	bool *changed;
-	bool flooded;
-	bool checked;
+	GameState &gs;
+	pos_t x;
+	pos_t y;
+	state_t &state;
+	state_t &diff;
+	quint8 &flags;
 
-	SquareState();
-	SquareState(state_t *state, bool *changed);
+	SquareState(GameState &gs, pos_t x, pos_t y, state_t &state, state_t &diff, quint8 &flags);
 };
 
 class GameState 
