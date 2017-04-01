@@ -9,13 +9,12 @@
 
 #include "gamestate.h"
 
-Player::Player(const GameState &ngs, const plid_t pid, pos_t cx, pos_t cy)
+Player::Player(GameState &ngs, const plid_t pid, pos_t cx, pos_t cy)
 	: gs(ngs)
 	, id(pid)
 	, x(cx)
 	, y(cy)
 	, newDir(Direction::NONE)
-	, dir(Direction::NONE)
 	, dead(false)
 	, winner(false)
 {
@@ -54,6 +53,7 @@ bool Player::setLocation(pos_t newX, pos_t newY)
 
 	// We need to update the state to reflect our new location.
 	SquareState ss = gs.getState(x, y);
+	Direction dir = ss.getDirection();
 	ss.setOccupyingPlayerId(UNOCCUPIED);
 	ss.setDirection(Direction::NONE);
 
@@ -73,15 +73,14 @@ Direction Player::getNewDirection() const
 
 Direction Player::getActualDirection() const
 {
-    return dir;
+	SquareState ss = gs.getState(x, y);
+    return ss.getDirection();
 }
 
 void Player::setActualDirection(Direction nd)
 {
-    dir = nd;
-
 	SquareState ss = gs.getState(x, y);
-	ss.setDirection(dir);
+	ss.setDirection(nd);
 }
 
 bool Player::isDead() const
@@ -89,9 +88,18 @@ bool Player::isDead() const
 	return dead;
 }
 
-void Player::setDead(bool state)
+void Player::kill()
 {
-	dead = state;
+	dead = true;
+
+	SquareState ss = gs.getState(x, y);
+	ss.setOccupyingPlayerId(UNOCCUPIED);
+	ss.setDirection(Direction::NONE);
+
+	// We don't move to -1,-1 because that square
+	// may be used during territory checking.
+	x = -2;
+	y = -2;
 }
 
 bool Player::isWinner() const

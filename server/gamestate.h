@@ -1,5 +1,5 @@
 /**
- * GameState.h
+ * gamestate.h
  *
  * EECS 183, Winter 2017
  * Final Project: Paper-io
@@ -14,8 +14,8 @@
 #ifndef GAMESTATE_H 
 #define GAMESTATE_H
 
+#include <QHash>
 #include <QtCore>
-#include <QString>
 #include <vector>
 
 #include "types.h"
@@ -71,26 +71,34 @@ public:
 	 * clients.
 	 */
 	Direction getActualDirection() const;
-	void setActualDirection(Direction old);
+	void setActualDirection(Direction dir);
 
 	bool isDead() const;
-	void setDead(bool dead);
+
+	/*
+	 * Marks the player as dead and removes the player object from the board.
+	 * This frees the player's current location so another player can occupy it.
+	 *
+	 * WARNING: This does not remove the player's trail or the player's territory.
+	 * They must be removed separately in the same tick as this function is called
+	 * or undefined behavior may occur.
+	 */
+	void kill();
 
 	bool isWinner() const;
 	void setWinner();
 
 private:
-	const GameState &gs;
+	GameState &gs;
 	const plid_t id;
 
 	pos_t x;
 	pos_t y;
-    Direction newDir;
-    Direction dir;
+	Direction newDir;
 	bool dead;
 	bool winner;
 
-	Player(const GameState &gs, const plid_t id, pos_t x, pos_t y);
+	Player(GameState &gs, const plid_t id, pos_t x, pos_t y);
 };
 
 class SquareState 
@@ -190,10 +198,6 @@ public:
 	pos_t getHeight() const;
 
 	/*
-	 * Note: These two functions are marked const because they do not affect the 
-	 * GameState directly. However, any changes made in the objects returned
-	 * WILL affect the GameState.
-	 *
 	 * WARNING: If the coordinates passed to getState() are out of bounds, getState()
 	 * will return an out of bounds SquareState which means the values it will report
 	 * might not be what are expected (see SquareState for details). An out of bounds
@@ -203,22 +207,49 @@ public:
 	 * If an out of bounds SquareState is not adjacent to an in bounds SquareState,
 	 * then the behavior of its flags is undefined.
 	 */
-	SquareState getState(pos_t x, pos_t y) const;
+	SquareState getState(pos_t x, pos_t y);
+
 	Player *lookupPlayer(plid_t id) const;
 
-	const std::vector<Player> &getPlayers() const;
+	/*
+	 * WARNING: This function is relatively inneficient and should
+	 * be used sparingly.
+	 */
+	std::vector<Player> getPlayers() const;
 
 private:
 	const pos_t width;
 	const pos_t height;
 
+	QHash<plid_t, Player *> players;
+
+	state_t oobs;
+	state_t oobd;
+	quint8 oobf;
+
 	state_t **board;
 	state_t **diff;
 	quint8 **flags;
 
-	GameState();
 	GameState(pos_t width, pos_t height);
 	~GameState();
+
+	/*
+	 * Adds the player at the specified location. Note this only adds the
+	 * player, it does not provide the starting territory. If the specified
+	 * location already contains a player object or is out of bounds, this
+	 * function returns false. If a player with the given id already exists,
+	 * this function returns false. If the player is successfully added,
+	 * this function returns true.
+	 */
+	bool addPlayer(plid_t id, pos_t x, pos_t y);
+	/*
+	 * Immediately removes the player from the game.
+	 *
+	 * WARNING: This function does not remove the player's territory or trail.
+	 * They MUST be removed separately within the tick, or behavior is undefined.
+	 */
+	void removePlayer(plid_t id);
 };
 
 #endif // !GAMESTATE_H

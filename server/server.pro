@@ -19,7 +19,7 @@ HEADERS += clienthandler.h \
 	paperserver.h \
 	../common/protocol.h \
 	../common/types.h
-SOURCES += main.cpp clienthandler.cpp paperserver.cpp \
+SOURCES += main.cpp clienthandler.cpp gamestate.cpp paperserver.cpp \
 	player.cpp squarestate.cpp \
 	gamelogic.cpp \
 # Common files
