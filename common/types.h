@@ -8,7 +8,7 @@
 /* Player ID */
 typedef uint8_t plid_t;
 /* In game Coordinate */
-typedef uint16_t pos_t;
+typedef int16_t pos_t;
 /* State of one square in game. */
 typedef uint32_t state_t;
 /* Tick ID (monotonically increasing within a GameThread) */
@@ -20,6 +20,9 @@ const plid_t NULL_ID = 0;
 const plid_t UNOCCUPIED = 0;
 /* This square is not within the bounds of the game */
 const plid_t OUT_OF_BOUNDS = 255;
+
+/* The state of a square which is out of bounds. */
+const state_t OUT_OF_BOUNDS_STATE = 0xFFFFFF00;
 
 /*
  * The possible directions the player can take on.

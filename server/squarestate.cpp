@@ -5,7 +5,7 @@
 
 #include "gamestate.h"
 
-SquareState::SquareState(GameState &gst, pos_t px, pos_t py, state_t &st, state_t &df, quint8 &fl)
+SquareState::SquareState(const GameState &gst, pos_t px, pos_t py, state_t &st, state_t &df, quint8 &fl)
 	: gs(gst)
 	, x(px)
 	, y(py)
@@ -25,6 +25,11 @@ pos_t SquareState::getY() const
 	return y;
 }
 
+bool SquareState::hasTrail() const
+{
+	return getTrailType() != TrailType::NOTRAIL;
+}
+
 TrailType SquareState::getTrailType() const
 {
 	return TrailType(state & 0x07);
@@ -32,15 +37,12 @@ TrailType SquareState::getTrailType() const
 
 void SquareState::setTrailType(TrailType t)
 {
+	if (getTrailPlayerId() == OUT_OF_BOUNDS)
+		return;
+
 	state_t change = (state & 0x07) ^ t;
 	state ^= change;
 	diff ^= change;
-}
-
-bool SquareState::hasTrail() const
-{
-	plid_t id = getTrailPlayerId();
-	return !(id == UNOCCUPIED || id == OUT_OF_BOUNDS);
 }
 
 plid_t SquareState::getTrailPlayerId() const
@@ -50,6 +52,9 @@ plid_t SquareState::getTrailPlayerId() const
 
 void SquareState::setTrailPlayerId(plid_t id)
 {
+	if (id == OUT_OF_BOUNDS || getTrailPlayerId() == OUT_OF_BOUNDS)
+		return;
+
 	state_t change = (state & 0xFF00) ^ (static_cast<state_t>(id) << 8);
 	state ^= change;
 	diff ^= change;
@@ -71,7 +76,7 @@ void SquareState::setTrailPlayer(Player *player)
 bool SquareState::isOccupied() const
 {
 	plid_t id = getOccupyingPlayerId();
-	return !(id == UNOCCUPIED || id == OUT_OF_BOUNDS);
+	return id != UNOCCUPIED;
 }
 
 plid_t SquareState::getOccupyingPlayerId() const
@@ -81,6 +86,9 @@ plid_t SquareState::getOccupyingPlayerId() const
 
 void SquareState::setOccupyingPlayerId(plid_t id)
 {
+	if (id == OUT_OF_BOUNDS || getOccupyingPlayerId() == OUT_OF_BOUNDS)
+		return;
+
 	state_t change = (state & 0xFF0000) ^ (static_cast<state_t>(id) << 16);
 	state ^= change;
 	diff ^= change;
@@ -102,7 +110,7 @@ void SquareState::setOccupyingPlayer(Player *player)
 bool SquareState::isOwned() const
 {
 	plid_t id = getOwningPlayerId();
-	return !(id == UNOCCUPIED || id == OUT_OF_BOUNDS);
+	return id != UNOCCUPIED;
 }
 
 plid_t SquareState::getOwningPlayerId() const
@@ -112,6 +120,9 @@ plid_t SquareState::getOwningPlayerId() const
 
 void SquareState::setOwningPlayerId(plid_t id)
 {
+	if (id == OUT_OF_BOUNDS || getOwningPlayerId() == OUT_OF_BOUNDS)
+		return;
+
 	state_t change = (state & 0xFF000000) ^ (static_cast<state_t>(id) << 24);
 	state ^= change;
 	diff ^= change;
@@ -158,4 +169,16 @@ void SquareState::markAsChecked()
 void SquareState::markAsUnchecked()
 {
 	flags &= 0xFC;
+}
+
+Direction SquareState::getDirection() const
+{
+	return Direction((state & 0x38) >> 3);
+}
+
+void SquareState::setDirection(Direction d)
+{
+	state_t change = (state & 0x38) ^ (static_cast<state_t>(d) << 3);
+	state ^= change;
+	diff ^= change;
 }

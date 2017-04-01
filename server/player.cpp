@@ -1,63 +1,105 @@
 /**
-* Player.cpp
-*
-* EECS 183, Winter 2017
-* Final Project: Paper-io
-*
-* Represents a player
-*/
+ * player.cpp
+ *
+ * EECS 183, Winter 2017
+ * Final Project: Paper-io
+ *
+ * Represents a player
+ */
 
-#include "Player.h"
+#include "gamestate.h"
 
-plid_t Player::getId() {
+Player::Player(const GameState &ngs, const plid_t pid, pos_t cx, pos_t cy)
+	: gs(ngs)
+	, id(pid)
+	, x(cx)
+	, y(cy)
+	, newDir(Direction::NONE)
+	, dir(Direction::NONE)
+	, dead(false)
+	, winner(false)
+{
+}
+
+plid_t Player::getId() const
+{
 	return id;
 }
 
-std::string Player::getName() {
-	return name;
-}
-
-void Player::setX(pos_t newX) {
-	x = newX;
-}
-
-pos_t Player::getX() {
+pos_t Player::getX() const
+{
 	return x;
 }
 
-void Player::setY(pos_t newY) {
-	y = newY;
+bool Player::setX(pos_t newX)
+{
+	return setLocation(y, newX);
 }
 
-pos_t Player::getY() {
+pos_t Player::getY() const
+{
 	return y;
 }
 
-void Player::setLocation(pos_t newX, pos_t newY) {
-	x = newX;
-	y = newY;
+bool Player::setY(pos_t newY)
+{
+	return setLocation(newY, x);
 }
 
-Direction Player::getNewDirection(){
+bool Player::setLocation(pos_t newX, pos_t newY)
+{
+	SquareState ns = gs.getState(x, y);
+	if (ns.isOccupied())
+		return false;
+
+	// We need to update the state to reflect our new location.
+	SquareState ss = gs.getState(x, y);
+	ss.setOccupyingPlayerId(UNOCCUPIED);
+	ss.setDirection(Direction::NONE);
+
+	x = newX;
+	y = newY;
+
+	ns.setOccupyingPlayerId(id);
+	ns.setDirection(dir);
+
+	return true;
+}
+
+Direction Player::getNewDirection() const
+{
     return newDir;
 }
 
-void Player::setNewDirection(Direction newD){
-    newDir = newD;
+Direction Player::getActualDirection() const
+{
+    return dir;
 }
 
-Direction Player::getOldDirection(){
-    return oldDir;
+void Player::setActualDirection(Direction nd)
+{
+    dir = nd;
+
+	SquareState ss = gs.getState(x, y);
+	ss.setDirection(dir);
 }
 
-void Player::setOldDirection(Direction old){
-    oldDir = old;
-}
-
-bool Player::isDead() {
+bool Player::isDead() const
+{
 	return dead;
 }
 
-void Player::setDead(bool state) {
+void Player::setDead(bool state)
+{
 	dead = state;
+}
+
+bool Player::isWinner() const
+{
+	return winner;
+}
+
+void Player::setWinner()
+{
+	winner = true;
 }
