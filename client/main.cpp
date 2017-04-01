@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	QGuiApplication::setApplicationDisplayName(Client::tr("Arduino-IO"));
 	QCoreApplication::setOrganizationName("Delta Epsilon");
 	QCoreApplication::setOrganizationDomain("dank.meeeeee.me");
-	QCoreApplication::setApplicationName("Arduin-IO");
+	QCoreApplication::setApplicationName("Arduino-IO");
 
 	Client client;
 	client.show();

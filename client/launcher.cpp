@@ -6,6 +6,7 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QIntValidator>
+#include <QSettings>
 #include <QtCore/QStringBuilder>
 #include <QVBoxLayout>
 
@@ -61,6 +62,13 @@ Launcher::Launcher(QWidget *parent)
 	QLabel *ip = new QLabel(tr("Server IP Address:"));
 	QLabel *port = new QLabel(tr("Server Port:"));
 	portEdit->setValidator(new QIntValidator(1, 65535, this));
+
+	QSettings settings;
+	settings.beginGroup(QLatin1String("launcher"));
+	nameEdit->setText(settings.value(QLatin1String("name"), QLatin1String("")).toString());
+	ipEdit->setText(settings.value(QLatin1String("ip"), QLatin1String("")).toString());
+	portEdit->setText(settings.value(QLatin1String("port"), QLatin1String("")).toString());
+	settings.endGroup();
 
 	ctc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	ctc->setEnabled(false);
@@ -138,6 +146,13 @@ void Launcher::disableConnect()
 
 void Launcher::doConnect()
 {
+	QSettings settings;
+	settings.beginGroup(QLatin1String("launcher"));
+	settings.setValue(QLatin1String("name"), nameEdit->text());
+	settings.setValue(QLatin1String("ip"), ipEdit->text());
+	settings.setValue(QLatin1String("port"), portEdit->text());
+	settings.endGroup();
+
 	emit connectToServer(ipEdit->text(), portEdit->text().toInt());
 }
 
