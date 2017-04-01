@@ -71,7 +71,8 @@ Launcher::Launcher(QWidget *parent)
 	settings.endGroup();
 
 	ctc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	ctc->setEnabled(false);
+	// If we have saved settings, then we should allow the user to connect immediately
+	toggleConnect();
 
 	QFormLayout *flayout = new QFormLayout();
 	flayout->addRow(name, nameEdit);

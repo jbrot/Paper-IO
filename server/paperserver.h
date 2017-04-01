@@ -14,6 +14,7 @@
 
 struct ThreadClient
 {
+	bool established;
 	QThread *thread;
 	ClientHandler *client;
 };
@@ -26,11 +27,17 @@ public:
 	PaperServer(QObject *parent = 0);
 	~PaperServer();
 
+public slots:
+	void ioError(thid_t source, QAbstractSocket::SocketError err, QString msg);
+	void validateConnection(thid_t id);
+	void queueConnection(thid_t id);
+	void deleteConnection(thid_t id);
+
 protected:
 	void incomingConnection(qintptr socketDescriptor) override;
 
 private:
-	QVector<ThreadClient> connections;
+	QHash<thid_t, ThreadClient> connections;
 };
 
 #endif // !PAPERSERVER_H

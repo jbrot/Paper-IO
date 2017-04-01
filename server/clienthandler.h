@@ -27,7 +27,13 @@ class ClientHandler : public QObject
 	Q_OBJECT
 
 public:
+	/*
+	 * WARNING: This constructor is NOT thread safe. Make
+	 * sure you only construct one ClientHandler at a time.
+	 */
 	ClientHandler(QObject *parent = Q_NULLPTR);
+
+	thid_t getId();
 
 public slots:
 	void transitionState(ClientState news, plid_t pid = NULL_ID);
@@ -38,6 +44,7 @@ public slots:
 
 signals:
 	void error(QAbstractSocket::SocketError error, QString msg);
+	void connected();
 	void disconnected();
 	void requestJoinGame();
 	void changeDirection(Direction dir);
@@ -49,6 +56,9 @@ private slots:
 	void newData();
 
 private:
+	static thid_t idCount;
+
+	const thid_t id;
 	QTimer *keepAlive;
 	QTcpSocket *socket;
 	QDataStream str;

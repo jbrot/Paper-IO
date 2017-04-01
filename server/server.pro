@@ -14,13 +14,13 @@ QT += widgets network
 INCLUDEPATH += . $$PWD/../common
 HEADERS += clienthandler.h \
 	gamelogic.h \
-	GameState.h \
+	gamestate.h \
 	paperserver.h \
-	Player.h \
+	player.h \
 	../common/protocol.h \
 	../common/types.h
 SOURCES += main.cpp clienthandler.cpp paperserver.cpp \
-	Player.cpp gamelogic.cpp \
+	player.cpp gamelogic.cpp \
 # Common files
 	../common/packetgameend.cpp \
 	../common/packetgamejoin.cpp \

@@ -11,6 +11,10 @@
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
+
+	// We need to do this so we can communicate errors across threads.
+	qRegisterMetaType<QAbstractSocket::SocketError>();
+
 	PaperServer server;
 
 	if (!server.listen()) {

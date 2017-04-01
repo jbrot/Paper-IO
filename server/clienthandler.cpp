@@ -7,14 +7,18 @@
 #include "clienthandler.h"
 #include "protocol.h"
 
+quint32 ClientHandler::idCount = 0;
+
 ClientHandler::ClientHandler(QObject *parent)
-	: keepAlive(new QTimer(this))
+	: id(idCount)
+	, keepAlive(new QTimer(this))
 	, socket(new QTcpSocket(this))
 	, state(LIMBO)
 	, player(NULL_ID)
 {
-	// We need to do this so we can communicate errors across threads.
-	qRegisterMetaType<QAbstractSocket::SocketError>();
+	// Note that due to not locking this makes the constructor not
+	// thread safe.
+	ClientHandler::idCount++;
 
 	str.setDevice(socket);
 	str.setVersion(QDataStream::Qt_5_0);
@@ -49,7 +53,9 @@ void ClientHandler::establishConnection(int socketDescriptor)
 
 	keepAlive->start();
 
-	qDebug() << "New connection: " << socket->peerAddress(); 
+	qDebug() << "Connection " << id << " established with: " << socket->peerAddress(); 
+
+	emit connected();
 }
 
 void ClientHandler::sendTick(void *igs, tick_t tick)
@@ -77,11 +83,11 @@ void ClientHandler::kaTimeout()
 {
 	if (lastka.secsTo(QDateTime::currentDateTime()) > TIMEOUT_LEN)
 	{
+		qDebug() << "Connection " << id << ": Haven't received keep alive packet, timing out client.";
 		disconnect();
-		qDebug() << "Haven't received keep alive packet, timing out client.";
 	}
 	str << PACKET_KEEP_ALIVE;
-	qDebug() << "Keep alive sent!";
+	qDebug() << "Connection " << id << ": Keep alive sent!";
 }
 
 void ClientHandler::newData()
@@ -105,10 +111,15 @@ void ClientHandler::newData()
 	switch (pkth) {
 	case PACKET_KEEP_ALIVE:
 		lastka = QDateTime::currentDateTime();
-		qDebug() << "Keep alive received!";
+		qDebug() << "Connection " << id << ": Keep alive received!";
 		break;
 	default:
-		qDebug() << "Received unknown packet: " << pkth;
+		qDebug() << "Connection " << id << ": Received unknown packet: " << pkth;
 		break;
 	}
+}
+
+thid_t ClientHandler::getId()
+{
+	return id;
 }
