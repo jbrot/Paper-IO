@@ -1,6 +1,9 @@
 /*
- * The ClientThread class manages IO with a single client.
+ * The ClientHandler class manages IO with a single client.
  */
+
+#ifndef CLIENTHANDLER_H
+#define CLIENTHANDLER_H
 
 #include <QDataStream>
 #include <QDateTime>
@@ -73,3 +76,5 @@ private:
 
 	QDateTime lastka;
 };
+
+#endif // !CLIENTHANDLER_H

@@ -101,38 +101,35 @@ void ClientHandler::kaTimeout()
 	{
 		qDebug() << "Connection " << id << ": Haven't received keep alive packet, timing out client.";
 		disconnect();
+		return;
+
 	}
-	str << PACKET_KEEP_ALIVE;
+	PacketKeepAlive pka;
+	str << static_cast<Packet *>(&pka);
 	qDebug() << "Connection " << id << ": Keep alive sent!";
 }
 
 void ClientHandler::newData()
 {
-	packet_t pkth = 0;
+	Packet *packet = NULL;
 
 	str.startTransaction();
-	str >> pkth;
-	// We have to do two switches---first to read in the packet and then,
-	// once reading is confirmed successful, to process.
-	switch (pkth) {
-	case PACKET_KEEP_ALIVE:
-		break;
-	default:
-		break;
-	}
-	// If we didn't fully read the packet, then quit.
-	if (!str.commitTransaction())
+	str >> packet;
+	// If we either didn't fully read the packet or read an invalid packet, then quit.
+	if (!str.commitTransaction() || !packet)
 		return;
 
-	switch (pkth) {
+	switch (packet->getId()) {
 	case PACKET_KEEP_ALIVE:
 		lastka = QDateTime::currentDateTime();
 		qDebug() << "Connection " << id << ": Keep alive received!";
 		break;
 	default:
-		qDebug() << "Connection " << id << ": Received unknown packet: " << pkth;
+		qDebug() << "Connection " << id << ": Received unknown packet: " << packet->getId();
 		break;
 	}
+
+	delete packet;
 }
 
 thid_t ClientHandler::getId() const

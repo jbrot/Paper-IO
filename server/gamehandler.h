@@ -5,6 +5,13 @@
  * functions).
  */
 
+#ifndef GAMEHANDLER_H
+#define GAMEHANDLER_H
+
+#include <QHash>
+#include <QTimer>
+
+#include "clienthandler.h"
 #include "types.h"
 
 /* Game ID */
@@ -17,7 +24,7 @@ class GameHandler : public QObject
 public:
 	gid_t getId() const; 
 
-public signals:
+signals:
 	void terminated();
 
 private slots:
@@ -31,4 +38,6 @@ private:
 	const gid_t id;
 	QTimer tickTimer;
 	QHash<plid_t, ClientHandler> players;
-}
+};
+
+#endif // !GAMEHANDLER_H

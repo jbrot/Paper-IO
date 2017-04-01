@@ -17,11 +17,11 @@ HEADERS += clienthandler.h \
 	gamehandler.h \
 	gamestate.h \
 	paperserver.h \
-	player.h \
 	../common/protocol.h \
 	../common/types.h
 SOURCES += main.cpp clienthandler.cpp paperserver.cpp \
-	player.cpp gamelogic.cpp \
+	player.cpp squarestate.cpp \
+	gamelogic.cpp \
 # Common files
 	../common/packetgameend.cpp \
 	../common/packetgamejoin.cpp \
