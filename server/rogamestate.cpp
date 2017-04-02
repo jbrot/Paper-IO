@@ -50,6 +50,11 @@ Direction ROPlayer::getDirection() const
 	return player.getActualDirection();
 }
 
+quint8 ROPlayer::getScore() const
+{
+	return player.getScore();
+}
+
 ROSquareState::ROSquareState(pos_t xp, pos_t yp, const SquareState &s, const ROGameState &rs)
 	: x(xp)
 	, y(yp)

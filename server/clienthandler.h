@@ -7,9 +7,11 @@
 
 #include <QDataStream>
 #include <QDateTime>
+#include <QReadWriteLock>
 #include <QTcpSocket>
 #include <QTimer>
 
+#include "gamestate.h"
 #include "types.h"
 
 /*
@@ -43,10 +45,11 @@ public:
 
 public slots:
 	void enqueue();
-	void beginGame(void *igs);
+	// TODO work out how to send lock between threads.
+	void beginGame(plid_t id, GameState *gs, void *lock);
 	void endGame(quint8 score);
 	void establishConnection(int socketDescriptor);
-	void sendTick(void *igs, tick_t tick);
+	void sendTick();
 	void abort();
 	void disconnect();
 

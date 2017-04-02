@@ -77,8 +77,13 @@ public:
 	 */
 	void kill();
 
-	bool isWinner() const;
-	void setWinner();
+	/*
+	 * A player's score is stored as an unsigned 8 bit integer ranging from 
+	 * 0 to 200, where the player's score in percentage of the board controlled
+	 * can be found by dividing this number in two.
+	 */
+	quint8 getScore() const;
+	void setScore(quint8 score);
 
 private:
 	GameState &gs;
@@ -87,8 +92,8 @@ private:
 	pos_t x;
 	pos_t y;
 	Direction newDir;
+	quint8 score;
 	bool dead;
-	bool winner;
 
 	Player(GameState &gs, const plid_t id, pos_t x, pos_t y);
 };
@@ -247,7 +252,7 @@ private:
 	 * WARNING: This function does not remove the player's territory or trail.
 	 * They MUST be removed separately within the tick, or behavior is undefined.
 	 */
-	void removePlayer(plid_t id);
+	QHash<plid_t, Player *>::iterator removePlayer(QHash<plid_t, Player *>::iterator i);
 };
 
 #endif // !GAMESTATE_H

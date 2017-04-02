@@ -46,6 +46,13 @@ public:
 
 	bool isDead() const;
 
+	/*
+	 * A player's score is stored as an unsigned 8 bit integer ranging from 
+	 * 0 to 200, where the player's score in percentage of the board controlled
+	 * can be found by dividing this number in two.
+	 */
+	quint8 getScore() const;
+
 private:
 	const pos_t xoff;
 	const pos_t yoff;
@@ -151,7 +158,7 @@ class AIPlayer
 public:
 	AIPlayer();
 
-	Direction tick(ROGameState gs);
+	Direction tick(const ROGameState &gs);
 };
 
 #endif // !AIPLAYER_H

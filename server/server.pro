@@ -12,16 +12,24 @@ QT += widgets network
 
 # Input
 INCLUDEPATH += . $$PWD/../common
-HEADERS += clienthandler.h \
-	gamelogic.h \
+HEADERS += aiplayer.h \
+	clienthandler.h \
 	gamehandler.h \
+	gamelogic.h \
 	gamestate.h \
 	paperserver.h \
 	../common/protocol.h \
 	../common/types.h
-SOURCES += main.cpp clienthandler.cpp gamestate.cpp paperserver.cpp \
-	player.cpp squarestate.cpp \
-	gamelogic.cpp \
+SOURCES += main.cpp \
+	aiplayer.cpp \
+	clienthandler.cpp \
+	gamehandler.cpp \
+#	gamelogic.cpp \
+	gamestate.cpp \
+	paperserver.cpp \
+	player.cpp \
+	rogamestate.cpp \
+	squarestate.cpp \
 # Common files
 	../common/packetgameend.cpp \
 	../common/packetgamejoin.cpp \

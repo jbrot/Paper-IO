@@ -43,7 +43,7 @@ void ClientHandler::enqueue()
 	// TODO Inform client of transition
 }
 
-void ClientHandler::beginGame(void *igs)
+void ClientHandler::beginGame(plid_t id, GameState *gs, void *lock)
 {
 	state = INGAME;
 	// TODO player = ??;
@@ -74,7 +74,7 @@ void ClientHandler::establishConnection(int socketDescriptor)
 	emit connected();
 }
 
-void ClientHandler::sendTick(void *igs, tick_t tick)
+void ClientHandler::sendTick()
 {
 	// TODO Send update
 }

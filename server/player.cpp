@@ -15,8 +15,8 @@ Player::Player(GameState &ngs, const plid_t pid, pos_t cx, pos_t cy)
 	, x(cx)
 	, y(cy)
 	, newDir(Direction::NONE)
+	, score(0)
 	, dead(false)
-	, winner(false)
 {
 }
 
@@ -102,12 +102,12 @@ void Player::kill()
 	y = -2;
 }
 
-bool Player::isWinner() const
+quint8 Player::getScore() const
 {
-	return winner;
+	return score;
 }
 
-void Player::setWinner()
+void Player::setScore(quint8 sc)
 {
-	winner = true;
+	score = sc;
 }

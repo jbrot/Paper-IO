@@ -26,6 +26,14 @@
  */
 std::vector<std::pair<pos_t, pos_t> > findSpawns(int num);
 
+/*
+ * Configures the spawn area for the given player. The player
+ * will already have been added to the game at a location
+ * provided by findSpawns, so their location can be queried with
+ * getX() and getY(). This should set up the initial territory.
+ */
+void configureSpawn(Player *pl);
+
 void updateGame(GameState &state);
 
 #endif // !GAMELOGIC_H

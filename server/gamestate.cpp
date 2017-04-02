@@ -116,30 +116,26 @@ bool GameState::addPlayer(plid_t id, pos_t x, pos_t y)
 	return true;
 }
 
-void GameState::removePlayer(plid_t id)
+QHash<plid_t, Player *>::iterator GameState::removePlayer(QHash<plid_t, Player *>::iterator i)
 {
-	if (!players.contains(id))
-	{
-		qWarning() << "Tried to remove non-existant player" << id << "!";
-		return;
-	}
-
-	Player *pl = players.value(id);
-	players.remove(id);
+	Player *pl = i.value();
+	auto ret = players.erase(i);
 
 	if (!pl)
 	{
-		qWarning() << "Player" << id << "is NULL!";
-		return;
+		qWarning() << "Player" << i.key() << "is NULL!";
+		return ret;
 	}
 
 	// If the player is still on the board, remove them.
 	SquareState ss = getState(pl->getX(), pl->getY());
-	if (ss.getOccupyingPlayerId() == id)
+	if (ss.getOccupyingPlayerId() == i.key())
 	{
 		ss.setOccupyingPlayerId(UNOCCUPIED);
 		ss.setDirection(Direction::NONE);
 	}
 
 	delete pl;
+
+	return ret;
 }
