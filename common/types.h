@@ -38,4 +38,18 @@ enum Direction
 	RIGHT	 = 4,
 };
 
+/*
+ * The possible types of trail that can be in a square.
+ */
+enum TrailType 
+{
+	NOTRAIL = 0,
+	EASTTOWEST = 1,
+	NORTHTOSOUTH = 2,
+	NORTHTOEAST = 3,
+	NORTHTOWEST = 4,
+	SOUTHTOEAST = 5,
+	SOUTHTOWEST = 6,
+};
+
 #endif // !PI_TYPES_H

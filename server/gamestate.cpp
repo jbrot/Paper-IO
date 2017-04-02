@@ -8,6 +8,7 @@ GameState::GameState(pos_t w, pos_t h)
 	: width(w)
 	, height(h)
 	, players()
+	, tick(0)
 	, oobs(OUT_OF_BOUNDS_STATE)
 	, oobd(0)
 	, oobf(0)
@@ -47,6 +48,26 @@ GameState::~GameState()
 
 	delete[] flags[0];
 	delete[] flags;
+}
+
+pos_t GameState::getWidth() const
+{
+	return width;
+}
+
+pos_t GameState::getHeight() const
+{
+	return height;
+}
+
+tick_t GameState::getTick() const
+{
+	return tick;
+}
+
+void GameState::nextTick()
+{
+	tick++;
 }
 
 SquareState GameState::getState(pos_t x, pos_t y)

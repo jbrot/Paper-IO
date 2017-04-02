@@ -10,7 +10,6 @@
 #include <QtCore>
 
 #include "gamelogic.h"
-#include "Player.h"
 
 void updatePosition(Player& player);
 void leaveTrail(Player &player, GameState &state);

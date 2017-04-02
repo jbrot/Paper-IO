@@ -7,7 +7,7 @@
 #include "clienthandler.h"
 #include "protocol.h"
 
-quint32 ClientHandler::idCount = 0;
+thid_t ClientHandler::idCount = 0;
 
 ClientHandler::ClientHandler(QObject *parent)
 	: id(idCount)

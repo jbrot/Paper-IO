@@ -21,23 +21,15 @@
 #include "types.h"
 
 class GameHandler;
+class ROGameState;
+
 class GameState;
 class SquareState;
-
-enum TrailType 
-{
-	NOTRAIL = 0,
-	EASTTOWEST = 1,
-	NORTHTOSOUTH = 2,
-	NORTHTOEAST = 3,
-	NORTHTOWEST = 4,
-	SOUTHTOEAST = 5,
-	SOUTHTOWEST = 6,
-};
 
 class Player
 {
 friend class GameState;
+friend class GameHandler;
 public:
 	plid_t getId() const;
 
@@ -193,9 +185,12 @@ private:
 class GameState 
 {
 friend class GameHandler;
+friend class ROGameState;
 public:
 	pos_t getWidth() const;
 	pos_t getHeight() const;
+
+	tick_t getTick() const;
 
 	/*
 	 * WARNING: If the coordinates passed to getState() are out of bounds, getState()
@@ -222,6 +217,7 @@ private:
 	const pos_t height;
 
 	QHash<plid_t, Player *> players;
+	tick_t tick;
 
 	state_t oobs;
 	state_t oobd;
@@ -233,6 +229,8 @@ private:
 
 	GameState(pos_t width, pos_t height);
 	~GameState();
+
+	void nextTick();
 
 	/*
 	 * Adds the player at the specified location. Note this only adds the

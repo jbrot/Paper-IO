@@ -35,6 +35,8 @@ public:
 	PaperServer(QObject *parent = 0);
 	~PaperServer();
 
+	QList<ClientHandler *> dequeueClients(int num);
+
 protected:
 	void incomingConnection(qintptr socketDescriptor) override;
 
@@ -44,14 +46,16 @@ private slots:
 	void queueConnection(thid_t id);
 	void deleteConnection(thid_t id);
 	void launchGame();
-	void gameTerminated(gid_t id);
+	void deleteGame(gid_t id);
 
 private:
 	QHash<gid_t, ThreadGame> games;
 
-	// TODO Add locks
+	QMutex ctclock;
 	QHash<thid_t, ThreadClient> connections;
 	QQueue<thid_t> waiting;
+
+	QTimer *ngt;
 };
 
 #endif // !PAPERSERVER_H
