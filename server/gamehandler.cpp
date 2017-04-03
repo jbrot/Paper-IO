@@ -100,7 +100,7 @@ void GameHandler::tickAIs()
 
 void GameHandler::spawnPlayers()
 {
-	std::vector<std::pair<pos_t, pos_t> > spawns = findSpawns(playerCount - gs.players.size());
+	std::vector<std::pair<pos_t, pos_t> > spawns = findSpawns(playerCount - gs.players.size(), gs);
 	QList<ClientHandler *> clients = ps.dequeueClients(spawns.size());
 
 	auto siter = spawns.begin();
@@ -126,7 +126,7 @@ void GameHandler::spawnPlayers()
 		connect(this, &GameHandler::tickComplete, *citer, &ClientHandler::sendTick);
 
 		players.insert(currentId, *citer);
-		configureSpawn(gs.lookupPlayer(currentId));
+		configureSpawn(gs.lookupPlayer(currentId), gs);
 
 		findNextId();
 	}
@@ -137,7 +137,7 @@ void GameHandler::spawnPlayers()
 
 		AIPlayer *ai = new AIPlayer();
 		ais.insert(currentId, ai);
-		configureSpawn(gs.lookupPlayer(currentId));
+		configureSpawn(gs.lookupPlayer(currentId), gs);
 
 		findNextId();
 	}

@@ -21,6 +21,9 @@ void fillInBody(Player player, GameState &state);
 void checkForCompletedLoop(Player player, GameState &state);
 bool detectWin(Player player, GameState &state);
 
+std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state);
+bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state);
+
 void updateGame(GameState &state)
 {
 
@@ -260,6 +263,52 @@ bool detectWin(Player player, GameState &state){
 		for (int j = 1; j <= state.getHeight(); ++j)
 		{
 			if (state.getState(i, j).getOwningPlayerId() != player.getId())
+				return false;
+		}
+	}
+
+	return true;
+}
+
+
+
+std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state)
+{
+
+	std::vector<SquareState> availableSpawns;
+	std::vector<std::pair<pos_t, pos_t>> randomSpawns;
+
+	for (int i = 2; i <= state.getWidth() - 1; i = i + 3)
+	{
+		for (int j = 2; j <= state.getHeight() - 1; j = j + 3)
+		{
+			if (checkIfSpawnable(i, j, state))
+				availableSpawns.push_back(state.getState(i, j));
+		}
+	}
+
+	for (int k = 0; k < availableSpawns.size() && k < num; ++k)
+	{
+		std::swap(availableSpawns[k], availableSpawns[k + (rand() % (availableSpawns.size() - k))]);
+	}
+
+	for (int m = 0; m < availableSpawns.size() && m < num; ++m)
+	{
+		std::pair<pos_t, pos_t> pair;
+		pair = std::make_pair(availableSpawns[m].getX(), availableSpawns[m].getY());
+		randomSpawns.push_back(pair);
+	}
+
+	return randomSpawns;
+}
+
+bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state){
+
+	for (int i = xPos - 1; i <= xPos + 1; ++i)
+	{
+		for (int j = yPos - 1; j <= yPos + 1; ++j)
+		{
+			if (state.getState(i, j).hasTrail() || state.getState(i, j).isOccupied() || state.getState(i, j).isOwned())
 				return false;
 		}
 	}

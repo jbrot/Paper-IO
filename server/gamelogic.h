@@ -24,7 +24,7 @@
  * okay to return fewer locations than requested (even none!)
  * and then fewer players will be spawned.
  */
-std::vector<std::pair<pos_t, pos_t> > findSpawns(int num);
+std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state);
 
 /*
  * Configures the spawn area for the given player. The player
@@ -32,7 +32,7 @@ std::vector<std::pair<pos_t, pos_t> > findSpawns(int num);
  * provided by findSpawns, so their location can be queried with
  * getX() and getY(). This should set up the initial territory.
  */
-void configureSpawn(Player *pl);
+void configureSpawn(Player *pl, GameState &state);
 
 void updateGame(GameState &state);
 

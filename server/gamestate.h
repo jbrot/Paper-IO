@@ -111,13 +111,13 @@ public:
 	 * A square has a trail if a player has gone through it after
 	 * leaving their territory but has not yet returned to their territory/
 	 *
-	 * WARNING: If a square is outsife of the game board, it will report
+	 * WARNING: If a square is outside of the game board, it will report
 	 * false for hasTrail(), NOTRAIL for getTrailType(), OUT_OF_BOUNDS for
 	 * getTrailPLayerId(), and NULL for getTrailPlayer(). Furthermore,
 	 * setTrailType(), setTrailPlayerId(), and setTrailPlayer() will have
 	 * no effect.
 	 *
-	 * WARNING: setTraiilPlayerId(OUT_OF_BOUNDS) will have no effect as this
+	 * WARNING: setTrailPlayerId(OUT_OF_BOUNDS) will have no effect as this
 	 * is an invalid call.
 	 */
 	bool hasTrail() const;

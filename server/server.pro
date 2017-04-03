@@ -24,7 +24,7 @@ SOURCES += main.cpp \
 	aiplayer.cpp \
 	clienthandler.cpp \
 	gamehandler.cpp \
-#	gamelogic.cpp \
+        gamelogic.cpp \
 	gamestate.cpp \
 	paperserver.cpp \
 	player.cpp \
