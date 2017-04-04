@@ -13,6 +13,7 @@ PacketResendBoard::PacketResendBoard()
 	, alloc(true)
 {
 	allocBoard();
+	std::fill(board[0], board[0] + (CLIENT_FRAME * CLIENT_FRAME), 0);
 
 	chksum = hashBoard(board);
 }
@@ -46,6 +47,34 @@ PacketResendBoard::~PacketResendBoard()
 {
 	if (alloc)
 		delete[] board[0];
+}
+
+PacketResendBoard &PacketResendBoard::operator =(const PacketResendBoard &other)
+{
+	if (this == &other)
+		return *this;
+
+	tick = other.tick;
+	chksum = other.chksum;
+
+	if (other.alloc)
+	{
+		if (!alloc)
+		{
+			alloc = true;
+			allocBoard();
+		}
+		std::copy(other.board[0], other.board[0] + (CLIENT_FRAME * CLIENT_FRAME), board[0]);
+	} else {
+		if (alloc)
+		{
+			alloc = false;
+			delete[] board[0];
+		}
+		std::copy(other.board, other.board + CLIENT_FRAME, board);
+	}
+
+	return *this;
 }
 
 void PacketResendBoard::allocBoard()

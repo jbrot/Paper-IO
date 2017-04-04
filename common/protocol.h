@@ -299,6 +299,8 @@ public:
 	PacketResendBoard(const PacketResendBoard &other);
 	~PacketResendBoard();
 
+	PacketResendBoard &operator =(const PacketResendBoard &other);
+
 	tick_t getTick() const;
 	void setTick(tick_t tick);
 
@@ -384,7 +386,13 @@ public:
 	 * Initializes a new PacketGameTick holding pointers to the diff.
 	 */
 	PacketGameTick(tick_t tick, Direction dir, quint8 score, const state_t news[CLIENT_FRAME], state_t *diff[CLIENT_FRAME], const QByteArray &chksum);
+	/*
+	 * Copy constructor.
+	 */
+	PacketGameTick(const PacketGameTick &other);
 	~PacketGameTick();
+
+	PacketGameTick &operator =(const PacketGameTick &other);
 
 	tick_t getTick() const;
 	void setTick(tick_t tick);
@@ -425,6 +433,8 @@ private:
 	state_t *diff[CLIENT_FRAME];
 
 	QByteArray chksum;
+
+	void allocDiff();
 };
 
 class PacketUpdateDir : public Packet

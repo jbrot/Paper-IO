@@ -19,9 +19,8 @@ PacketGameTick::PacketGameTick()
 	, chksum(0)
 {
 	std::fill(news, news + CLIENT_FRAME, 0);
-	diff[0] = new state_t[CLIENT_FRAME * CLIENT_FRAME];
-	for (int i = 1; i < CLIENT_FRAME; i++)
-		diff[i] = diff[0] + i * CLIENT_FRAME;
+	allocDiff();
+	std::fill(diff[0], diff[0] + CLIENT_FRAME * CLIENT_FRAME, 0);
 }
 
 PacketGameTick::PacketGameTick(tick_t tck, Direction dr, quint8 sc, const state_t ns[CLIENT_FRAME], state_t *brd[CLIENT_FRAME], const QByteArray &chk)
@@ -36,10 +35,68 @@ PacketGameTick::PacketGameTick(tick_t tck, Direction dr, quint8 sc, const state_
 	std::copy(brd, brd + CLIENT_FRAME, diff);
 }
 
+PacketGameTick::PacketGameTick(const PacketGameTick &other)
+	: Packet(PACKET_GAME_TICK)
+	, tick(other.tick)
+	, dir(other.dir)
+	, score(other.score)
+	, alloc(other.alloc)
+	, chksum(other.chksum)
+{
+	std::copy(other.news, other.news + CLIENT_FRAME, news);
+	if (alloc)
+	{
+		allocDiff();
+		std::copy(other.diff[0], other.diff[0] + (CLIENT_FRAME * CLIENT_FRAME), diff[0]);
+	} else {
+		std::copy(other.diff, other.diff + CLIENT_FRAME, diff);
+	}
+}
+
 PacketGameTick::~PacketGameTick()
 {
 	if (alloc)
 		delete[] diff[0];
+}
+
+PacketGameTick &PacketGameTick::operator =(const PacketGameTick &other)
+{
+	if (this == &other)
+		return *this;
+
+	tick = other.tick;
+	dir = other.dir;
+	score = other.score;
+
+	chksum = other.chksum;
+
+	std::copy(other.news, other.news + CLIENT_FRAME, news);
+
+	if (other.alloc)
+	{
+		if (!alloc)
+		{
+			alloc = true;
+			allocDiff();
+		}
+		std::copy(other.diff[0], other.diff[0] + CLIENT_FRAME * CLIENT_FRAME, diff[0]);
+	} else {
+		if (alloc)
+		{
+			alloc = false;
+			delete[] diff[0];
+		} 
+		std::copy(other.diff, other.diff + CLIENT_FRAME, diff);
+	}
+	
+	return *this;
+}
+
+void PacketGameTick::allocDiff()
+{
+	diff[0] = new state_t[CLIENT_FRAME * CLIENT_FRAME];
+	for (int i = 1; i < CLIENT_FRAME; i++)
+		diff[i] = diff[0] + i * CLIENT_FRAME;
 }
 
 tick_t PacketGameTick::getTick() const
