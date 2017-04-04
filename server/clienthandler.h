@@ -12,6 +12,7 @@
 #include <QTimer>
 
 #include "gamestate.h"
+#include "protocol.h"
 #include "types.h"
 
 /*
@@ -56,7 +57,7 @@ signals:
 	void error(QAbstractSocket::SocketError error, QString msg);
 	void connected();
 	void disconnected();
-	void requestJoinGame();
+	void requestJoinGame(const QString &name);
 	void changeDirection(Direction dir);
 	void requestResync();
 
@@ -76,8 +77,13 @@ private:
 	ClientState state;
 	GameState *gs;
 	plid_t player;
+	QString name;
 
 	QDateTime lastka;
+
+	PacketPlayersUpdate makePPU();
+	PacketLeaderboardUpdate makePLU();
+	PacketResendBoard makePRB();
 };
 
 #endif // !CLIENTHANDLER_H

@@ -100,37 +100,36 @@ void GameHandler::tickAIs()
 void GameHandler::spawnPlayers()
 {
 	std::vector<std::pair<pos_t, pos_t> > spawns = findSpawns(playerCount - gs.players.size(), gs);
-	QList<ClientHandler *> clients = ps.dequeueClients(spawns.size());
+	QList<QPair<ClientHandler *, QString>> clients = ps.dequeueClients(spawns.size());
 
 	auto siter = spawns.begin();
 	auto citer = clients.begin();
 	for (; siter < spawns.end() && citer < clients.end(); siter++, citer++)
 	{
-		if (!*citer)
+		ClientHandler *ch = citer->first;
+		if (!ch)
 		{
 			qWarning() << "Game" << id << ": dequeueClients retval included NULL.";
 			siter--;
 			continue;
 		}
 
-		// TODO Add name
-		if (!gs.addPlayer(currentId, "", siter->first, siter->second))
+		if (!gs.addPlayer(currentId, citer->second, siter->first, siter->second))
 		{
 			citer--;
 			continue;
 		}
 
-		QMetaObject::invokeMethod(*citer, "beginGame", Q_ARG(plid_t, currentId),
-		                          Q_ARG(GameState *, &gs));
-		connect(this, &GameHandler::tickComplete, *citer, &ClientHandler::sendTick);
+		QMetaObject::invokeMethod(ch, "beginGame", Q_ARG(plid_t, currentId), Q_ARG(GameState *, &gs));
+		connect(this, &GameHandler::tickComplete, ch, &ClientHandler::sendTick);
 		// We need this indirection so we can capture the id in the lambda without
 		// it changing when additional clients are registered.
 		plid_t pid = currentId;
-		connect(*citer, &ClientHandler::disconnected, this, [this, pid] {
+		connect(ch, &ClientHandler::disconnected, this, [this, pid] {
 			playerDisconnected(currentId);
 		});
 
-		players.insert(currentId, *citer);
+		players.insert(currentId, ch);
 		configureSpawn(gs.lookupPlayer(currentId), gs);
 
 		findNextId();
@@ -138,7 +137,7 @@ void GameHandler::spawnPlayers()
 	for (; siter < spawns.end(); siter++)
 	{
 		// TODO Add name
-		if (!gs.addPlayer(currentId, "", siter->first, siter->second))
+		if (!gs.addPlayer(currentId, QLatin1String("AI"), siter->first, siter->second))
 			continue;
 
 		AIPlayer *ai = new AIPlayer();
@@ -154,13 +153,13 @@ void GameHandler::spawnPlayers()
 	qWarning() << "Game" << id << ": Did not place all requested players. Requeuing...";
 	for (; citer < clients.end(); citer++)
 	{
-		if (!*citer)
+		if (!citer->first)
 		{
 			qWarning() << "Game" << id << ": dequeueClients retval included NULL.";
 			continue;
 		}
 
-		QMetaObject::invokeMethod(&ps, "queueConnection", Q_ARG(thid_t, (*citer)->getId()));
+		QMetaObject::invokeMethod(&ps, "queueConnection", Q_ARG(thid_t, citer->first->getId()));
 	}
 }
 

@@ -10,11 +10,13 @@
 thid_t ClientHandler::idCount = 0;
 
 ClientHandler::ClientHandler(QObject *parent)
-	: id(idCount)
+	: QObject(parent)
+	, id(idCount)
 	, keepAlive(new QTimer(this))
 	, socket(new QTcpSocket(this))
 	, state(LIMBO)
 	, player(NULL_ID)
+	, name(QLatin1String(""))
 {
 	// Note that due to not locking this makes the constructor not
 	// thread safe.
@@ -35,6 +37,11 @@ ClientHandler::ClientHandler(QObject *parent)
 	connect(socket, &QIODevice::readyRead, this, &ClientHandler::newData);
 }
 
+thid_t ClientHandler::getId() const
+{
+	return id;
+}
+
 void ClientHandler::enqueue()
 {
 	state = QUEUEING;
@@ -45,13 +52,34 @@ void ClientHandler::enqueue()
 	str << static_cast<Packet *>(&pq);
 }
 
-void ClientHandler::beginGame(plid_t id, GameState *g)
+void ClientHandler::beginGame(plid_t pid, GameState *g)
 {
+	if (state != QUEUEING)
+	{
+		qWarning() << "Connection" << id <<": beginGame() received when not queueing!";
+		return;
+	}
+	if (!g)
+	{
+		qCritical() << "Connection" << id << ": beginGame() passed NULL GameState!";
+		return;
+	}
+
+	Player *pl = g->lookupPlayer(pid);
+	if (!pl)
+	{
+		qCritical() << "Connection" << id << ": beginGame() passed player id which maps to NULL!";
+		return;
+	}
+
 	state = INGAME;
-	player = id;
+	player = pid;
 	gs = g;
 
-	// TODO Inform client of transition
+	gs->lockForRead();
+	PacketGameJoin pgj(pid, pl->getScore(), makePPU(), makePLU(), makePRB());
+	str << static_cast<Packet *>(&pgj);
+	gs->unlock();
 }
 
 void ClientHandler::endGame(quint8 score)
@@ -72,13 +100,98 @@ void ClientHandler::endGame(quint8 score)
 
 void ClientHandler::sendTick()
 {
-	if (state != INGAME)
+	if (state != INGAME || !gs)
 	{
-		qWarning() << "Connection" << id <<": Received sendTick() while not in game!";
+		qWarning() << "Connection" << id <<": Received sendTick() while not in game or with invalid game state!";
 		return;
 	}
 
-	// TODO Send update
+	gs->lockForRead();
+
+	Player *pl = gs->lookupPlayer(player);
+	if (!pl)
+	{
+		qWarning() << "Connection" << id << ": Could not look up Player object!";
+		gs->unlock();
+		return;
+	}
+
+	pos_t px = pl->getX() - (CLIENT_FRAME / 2);
+	pos_t py = pl->getY() - (CLIENT_FRAME / 2);
+	pos_t my = gs->getHeight();
+	pos_t mx = gs->getWidth();
+	state_t news[CLIENT_FRAME];
+
+	// Compute the new row.
+	switch (pl->getActualDirection())
+	{
+	case UP:
+		if (py < 0)
+			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
+		else
+			std::copy(gs->board[py] + px, gs->board[py] + px + CLIENT_FRAME, news);
+		break;
+	case DOWN:
+		if (py + CLIENT_FRAME > my)
+			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
+		else
+			std::copy(gs->board[py + CLIENT_FRAME - 1] + px, gs->board[py + CLIENT_FRAME - 1] + px + CLIENT_FRAME, news);
+		break;
+	case LEFT:
+		if (mx < 0)
+			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
+		else
+			for (pos_t y = 0; y < CLIENT_FRAME; y++)
+				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][mx] : OUT_OF_BOUNDS_STATE;
+		break;
+	case RIGHT:
+		if (mx + CLIENT_FRAME > mx)
+			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
+		else
+			for (pos_t y = 0; y < CLIENT_FRAME; y++)
+				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][mx + CLIENT_FRAME - 1] : OUT_OF_BOUNDS_STATE;
+		break;
+	// When we don't move, the new data is ignored.
+	case NONE:
+		break;
+	}
+
+	state_t *dptrs[CLIENT_FRAME];
+	state_t *bptrs[CLIENT_FRAME];
+	for (int y = 0; y < CLIENT_FRAME; y++)
+	{
+		if (py + y < 0 || py + y >= my)
+		{
+			dptrs[y] = gs->diffStart;
+			bptrs[y] = gs->boardStart;
+		} else {
+			dptrs[y] = gs->diff[y] + px;
+			bptrs[y] = gs->board[y] + px;
+		}
+	}
+
+	QByteArray chksum = hashBoard(bptrs);
+
+	PacketGameTick pgt(gs->getTick(), pl->getActualDirection(), pl->getScore(), news, dptrs, chksum);
+	str << static_cast<Packet *>(&pgt);
+
+	// TODO Set these values
+	bool playersUpdate = false;
+	bool leaderboardUpdate = false;
+
+	if (playersUpdate)
+	{
+		PacketPlayersUpdate ppu = makePPU();
+		str << static_cast<Packet *>(&ppu);
+	}
+
+	if (leaderboardUpdate)
+	{
+		PacketLeaderboardUpdate plu = makePLU();
+		str << static_cast<Packet *>(&plu);
+	}
+
+	gs->unlock();
 }
 
 void ClientHandler::establishConnection(int socketDescriptor)
@@ -130,26 +243,120 @@ void ClientHandler::newData()
 {
 	Packet *packet = NULL;
 
-	str.startTransaction();
-	str >> packet;
-	// If we either didn't fully read the packet or read an invalid packet, then quit.
-	if (!str.commitTransaction() || !packet)
-		return;
+	// Read all available packets.
+	while (true)
+	{
+		str.startTransaction();
+		str >> packet;
+		if (!str.commitTransaction())
+			return;
+		if (!packet)
+			continue;
 
-	switch (packet->getId()) {
-	case PACKET_KEEP_ALIVE:
-		lastka = QDateTime::currentDateTime();
-		qDebug() << "Connection " << id << ": Keep alive received!";
-		break;
-	default:
-		qDebug() << "Connection " << id << ": Received unknown packet: " << packet->getId();
-		break;
+		switch (packet->getId()) {
+		case PACKET_KEEP_ALIVE:
+			lastka = QDateTime::currentDateTime();
+			qDebug() << "Connection" << id << ": Keep alive received!";
+			break;
+		case PACKET_REQUEST_JOIN:
+		{
+			QString nme = static_cast<PacketRequestJoin *>(packet)->getName();
+			if (nme.isEmpty())
+				nme = name;
+			else
+				name = nme;
+
+			qDebug() << "Connection" << id << ": Requesting join with name:" << nme;
+			emit requestJoinGame(nme);
+			break;
+		}
+		case PACKET_UPDATE_DIR:
+		{
+			Direction dir = static_cast<PacketUpdateDir *>(packet)->getDirection();
+			qDebug() << "Connection" << id << ": Requesting new direction:" << dir;
+			emit changeDirection(dir);
+			break;
+		}
+		case PACKET_REQUEST_RESEND:
+		{
+			qDebug() << "Connection" << id << ": Requesting resend!";
+			if (state != INGAME || !gs)
+			{
+				qWarning() << "Connection" << id << ": Can't resend data because we're not in game or the game state is NULL!";
+				break;
+			}
+
+			gs->lockForRead();
+			PacketResendBoard prb = makePRB();
+			str << static_cast<Packet *>(&prb);
+			gs->unlock();
+			break;
+		}
+		default:
+			qDebug() << "Connection" << id << ": Received unexpected packet: " << packet->getId();
+			break;
+		}
+
+		delete packet;
 	}
-
-	delete packet;
 }
 
-thid_t ClientHandler::getId() const
+PacketPlayersUpdate ClientHandler::makePPU()
 {
-	return id;
+	if (state != INGAME || !gs)
+	{
+		qWarning() << "Connection" << id << ": Requested PacketPlayersUpdate while not in game or with invalid game state!";
+		return PacketPlayersUpdate();
+	}
+
+	QHash<plid_t, QString> players;
+	players.reserve(gs->players.size());
+	for (auto iter = gs->players.cbegin(); iter != gs->players.cend(); iter++)
+		if (iter.value())
+			players.insert(iter.key(), iter.value()->getName());
+
+	return PacketPlayersUpdate(gs->getTick(), players);
+}
+
+PacketLeaderboardUpdate ClientHandler::makePLU()
+{
+	if (state != INGAME || !gs)
+	{
+		qWarning() << "Connection" << id << ": Requested PacketLeaderboardUpdate while not in game or with invalid game state!";
+		return PacketLeaderboardUpdate();
+	}
+
+	// TODO Add in leaderboard
+	return PacketLeaderboardUpdate();
+}
+
+PacketResendBoard ClientHandler::makePRB()
+{
+	if (state != INGAME || !gs)
+	{
+		qWarning() << "Connection" << id << ": Requested PacketResendBoard while not in game or with invalid game state!";
+		return PacketResendBoard();
+	}
+
+	Player * pl = gs->lookupPlayer(player);
+	if (!pl)
+	{
+		qWarning() << "Connection" << id << ": makePRB: GameState does not include our player:" << player;
+		return PacketResendBoard();
+	}
+
+	pos_t px = pl->getX() - (CLIENT_FRAME / 2);
+	pos_t py = pl->getY() - (CLIENT_FRAME / 2);
+	pos_t my = gs->getHeight();
+	state_t *ptrs[CLIENT_FRAME];
+	for (int y = 0; y < CLIENT_FRAME; y++)
+	{
+		if (py + y < 0 || py + y >= my)
+			ptrs[y] = gs->boardStart;
+		else
+			ptrs[y] = gs->board[y] + px;
+			
+	}
+
+	return PacketResendBoard(gs->getTick(), ptrs);
 }

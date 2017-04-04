@@ -3,7 +3,6 @@
  * to a game.
  */
 
-#include "gamehandler.h"
 #include "paperserver.h"
 
 struct PaperServer::ThreadClient
@@ -11,6 +10,7 @@ struct PaperServer::ThreadClient
 	bool established;
 	QThread *thread;
 	ClientHandler *client;
+	QString name;
 };
 
 struct PaperServer::ThreadGame
@@ -76,8 +76,8 @@ void PaperServer::incomingConnection(qintptr socketDescriptor)
 		this->validateConnection(id);
 	} ); 
 	connect(chand, &ClientHandler::disconnected, cthrd, &QThread::quit);
-	connect(chand, &ClientHandler::requestJoinGame, [id,this] {
-		this->queueConnection(id);
+	connect(chand, &ClientHandler::requestJoinGame, [id,this] (const QString &name) {
+		this->queueConnection(id, name);
 	} ); 
 
 	connect(cthrd, &QThread::finished, chand, &QObject::deleteLater);
@@ -87,7 +87,7 @@ void PaperServer::incomingConnection(qintptr socketDescriptor)
 
 	cthrd->start();
 
-	ThreadClient tc{false, cthrd, chand};
+	ThreadClient tc{false, cthrd, chand, QLatin1String("")};
 	ctclock.lock();
 	connections.insert(id, tc);
 	ctclock.unlock();
@@ -132,7 +132,7 @@ void PaperServer::validateConnection(thid_t id)
 	ctclock.unlock();
 }
 
-void PaperServer::queueConnection(thid_t id)
+void PaperServer::queueConnection(thid_t id, const QString &name)
 {
 	ctclock.lock();
 	if (!connections.contains(id))
@@ -144,6 +144,7 @@ void PaperServer::queueConnection(thid_t id)
 
 	waiting.enqueue(id);
 	ThreadClient tc = connections.value(id);
+	tc.name = name;
 	QMetaObject::invokeMethod( tc.client, "enqueue");
 
 	if (!games.size())
@@ -203,9 +204,9 @@ void PaperServer::deleteGame(gid_t id)
 		qDebug() << "Game" << id << " reports being terminated, but is not registered!";
 }
 
-QList<ClientHandler *> PaperServer::dequeueClients(int num)
+QList<QPair<ClientHandler *, QString>> PaperServer::dequeueClients(int num)
 {
-	QList<ClientHandler *> ret;
+	QList<QPair<ClientHandler *, QString>> ret;
 
 	ctclock.lock();
 	ret.reserve(std::min(waiting.size(), num));
@@ -219,7 +220,8 @@ QList<ClientHandler *> PaperServer::dequeueClients(int num)
 			continue;
 		}
 	
-		ret.append(connections.value(id).client);
+		ThreadClient tc = connections.value(id);
+		ret.append(qMakePair(tc.client, tc.name));
 	}
 
 	ctclock.unlock();

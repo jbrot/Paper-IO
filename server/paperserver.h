@@ -7,10 +7,12 @@
 #define PAPERSERVER_H
 
 #include <QHash>
+#include <QPair>
 #include <QQueue>
 #include <QTcpServer>
 #include <QThread>
 
+#include "gamehandler.h"
 #include "clienthandler.h"
 
 class PaperServer : public QTcpServer
@@ -21,7 +23,7 @@ public:
 	PaperServer(QObject *parent = 0);
 	~PaperServer();
 
-	QList<ClientHandler *> dequeueClients(int num);
+	QList<QPair<ClientHandler *, QString>> dequeueClients(int num);
 
 protected:
 	void incomingConnection(qintptr socketDescriptor) override;
@@ -29,7 +31,7 @@ protected:
 private slots:
 	void ioError(thid_t source, QAbstractSocket::SocketError err, QString msg);
 	void validateConnection(thid_t id);
-	void queueConnection(thid_t id);
+	void queueConnection(thid_t id, const QString &name);
 	void deleteConnection(thid_t id);
 	void launchGame();
 	void deleteGame(gid_t id);

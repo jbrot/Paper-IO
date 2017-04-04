@@ -115,5 +115,5 @@ quint8 Player::getScore() const
 
 void Player::setScore(quint8 sc)
 {
-	score = sc;
+	score = sc > 200 ? 200 : sc;
 }
