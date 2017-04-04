@@ -89,7 +89,7 @@ public:
 	void setScore(quint8 score);
 
 private:
-	const GameState &gs;
+	GameState &gs;
 	const plid_t id;
 	const QString name;
 
@@ -99,7 +99,7 @@ private:
 	quint8 score;
 	bool dead;
 
-	Player(const GameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
+	Player(GameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
 };
 
 class SquareState 
@@ -195,6 +195,7 @@ class GameState
 {
 friend class ClientHandler;
 friend class GameHandler;
+friend class Player;
 friend class ROGameState;
 public:
 	pos_t getWidth() const;
@@ -230,7 +231,13 @@ private:
 	QReadWriteLock lock;
 
 	QHash<plid_t, Player *> players;
+	bool playersChanged;
 	tick_t tick;
+
+	// Since plid_t = quint8 = "score"
+	quint8 leaderboard[10];
+	bool scoresChanged;
+	bool leaderboardChanged;
 
 	state_t *boardStart;
 	state_t **board;
@@ -266,6 +273,14 @@ private:
 	 * They MUST be removed separately within the tick, or behavior is undefined.
 	 */
 	QHash<plid_t, Player *>::iterator removePlayer(QHash<plid_t, Player *>::iterator i);
+
+	bool havePlayersChanged() const;
+
+	void markScoresChanged();
+	bool haveScoresChanged() const;
+
+	void recomputeLeaderboard();
+	bool hasLeaderboardChanged() const;
 
 	/*
 	 * Interface with the internal lock.

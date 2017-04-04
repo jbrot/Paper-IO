@@ -175,17 +175,13 @@ void ClientHandler::sendTick()
 	PacketGameTick pgt(gs->getTick(), pl->getActualDirection(), pl->getScore(), news, dptrs, chksum);
 	str << static_cast<Packet *>(&pgt);
 
-	// TODO Set these values
-	bool playersUpdate = false;
-	bool leaderboardUpdate = false;
-
-	if (playersUpdate)
+	if (gs->havePlayersChanged())
 	{
 		PacketPlayersUpdate ppu = makePPU();
 		str << static_cast<Packet *>(&ppu);
 	}
 
-	if (leaderboardUpdate)
+	if (gs->hasLeaderboardChanged())
 	{
 		PacketLeaderboardUpdate plu = makePLU();
 		str << static_cast<Packet *>(&plu);

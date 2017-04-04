@@ -9,7 +9,7 @@
 
 #include "gamestate.h"
 
-Player::Player(const GameState &ngs, const plid_t pid, const QString &nm, pos_t cx, pos_t cy)
+Player::Player(GameState &ngs, const plid_t pid, const QString &nm, pos_t cx, pos_t cy)
 	: gs(ngs)
 	, id(pid)
 	, name(nm)
@@ -115,5 +115,10 @@ quint8 Player::getScore() const
 
 void Player::setScore(quint8 sc)
 {
-	score = sc > 200 ? 200 : sc;
+	sc = sc > 200 ? 200 : sc;
+	if (sc == score)
+		return;
+
+	score = sc;
+	gs.markScoresChanged();
 }

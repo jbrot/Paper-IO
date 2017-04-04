@@ -12,8 +12,13 @@ GameState::GameState(pos_t w, pos_t h)
 	, height(h)
 	, lock()
 	, players()
+	, playersChanged(false)
 	, tick(0)
+	, scoresChanged(false)
+	, leaderboardChanged(false)
 {
+	std::fill(leaderboard, leaderboard + 10, 0);
+
 	// The board and diff array start with a CLIENT_FRAME length section
 	// of out of bounds, which clients will link to if an entire row is
 	// out of range. Then they consist of each row of the board padded
@@ -90,6 +95,10 @@ void GameState::nextTick()
 	// Reset the diffs. Note we don't need to touch the initial
 	// CLIENT_STATE buffer as it can never change.
 	std::fill(diff[0], diff[0] + (width + EXTRA_BUFFER) * height, 0);
+
+	playersChanged = false;
+	scoresChanged = false;
+	leaderboardChanged = false;
 }
 
 SquareState GameState::getState(pos_t x, pos_t y) const
@@ -118,7 +127,8 @@ std::vector<Player> GameState::getPlayers() const
 	std::vector<Player> pls;
 	foreach (Player *pl, players)
 	{
-		pls.push_back(*pl);
+		if (pl)
+			pls.push_back(*pl);
 	}
 
 	return pls;
@@ -134,6 +144,8 @@ bool GameState::addPlayer(plid_t id, const QString &name, pos_t x, pos_t y)
 	ss.setDirection(Direction::NONE);
 
 	players.insert(id, new Player(*this, id, name, x, y));
+
+	playersChanged = true;
 
 	return true;
 }
@@ -159,7 +171,67 @@ QHash<plid_t, Player *>::iterator GameState::removePlayer(QHash<plid_t, Player *
 
 	delete pl;
 
+	playersChanged = true;
+
 	return ret;
+}
+
+bool GameState::havePlayersChanged() const
+{
+	return playersChanged;
+}
+
+void GameState::markScoresChanged()
+{
+	scoresChanged = true;
+}
+
+bool GameState::haveScoresChanged() const
+{
+	return scoresChanged;
+}
+
+void GameState::recomputeLeaderboard()
+{
+	QList<Player *> pls = players.values();
+	std::sort(pls.begin(), pls.end(), [] (Player *a, Player *b) -> bool {
+		if (!a && !b)
+			return false;
+		if (!a)
+			return false;
+		if (!b)
+			return true;
+
+		return a->getScore() > b->getScore();
+	});
+	int i = 0;
+	for (auto iter = pls.cbegin(); iter < pls.cend() && i < 10; iter++, i += 2)
+	{
+		if (!leaderboardChanged)
+		{
+			if (*iter) leaderboardChanged = !(leaderboard[i] == (*iter)->getId() && leaderboard[i + 1] == (*iter)->getScore());
+			else leaderboardChanged = !(leaderboard[i] == NULL_ID && leaderboard[i + 1] == 0);
+		} 
+		if (*iter)
+		{
+			leaderboard[i] = (*iter)->getId();
+			leaderboard[i + 1] = (*iter)->getScore();
+		} else {
+			leaderboard[i] = NULL_ID;
+			leaderboard[i + 1] = 0;
+		}
+	}
+
+	for (; i < 10; i += 2)
+	{
+		leaderboard[i] = NULL_ID;
+		leaderboard[i + 1] = 0;
+	}
+}
+
+bool GameState::hasLeaderboardChanged() const
+{
+	return leaderboardChanged;
 }
 
 void GameState::lockForRead()
