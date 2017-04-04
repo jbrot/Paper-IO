@@ -15,11 +15,13 @@
 #define GAMESTATE_H
 
 #include <QHash>
+#include <QReadWriteLock>
 #include <QtCore>
 #include <vector>
 
 #include "types.h"
 
+class ClientHandler;
 class GameHandler;
 class ROGameState;
 
@@ -32,6 +34,7 @@ friend class GameState;
 friend class GameHandler;
 public:
 	plid_t getId() const;
+	QString getName() const;
 
 	/*
 	 * setX(), setY(), and setLocation() return true if the location
@@ -86,8 +89,9 @@ public:
 	void setScore(quint8 score);
 
 private:
-	GameState &gs;
+	const GameState &gs;
 	const plid_t id;
+	const QString name;
 
 	pos_t x;
 	pos_t y;
@@ -95,7 +99,7 @@ private:
 	quint8 score;
 	bool dead;
 
-	Player(GameState &gs, const plid_t id, pos_t x, pos_t y);
+	Player(const GameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
 };
 
 class SquareState 
@@ -189,6 +193,7 @@ private:
 
 class GameState 
 {
+friend class ClientHandler;
 friend class GameHandler;
 friend class ROGameState;
 public:
@@ -207,7 +212,7 @@ public:
 	 * If an out of bounds SquareState is not adjacent to an in bounds SquareState,
 	 * then the behavior of its flags is undefined.
 	 */
-	SquareState getState(pos_t x, pos_t y);
+	SquareState getState(pos_t x, pos_t y) const;
 
 	Player *lookupPlayer(plid_t id) const;
 
@@ -217,21 +222,29 @@ public:
 	 */
 	std::vector<Player> getPlayers() const;
 
+
 private:
 	const pos_t width;
 	const pos_t height;
 
+	QReadWriteLock lock;
+
 	QHash<plid_t, Player *> players;
 	tick_t tick;
 
-	state_t oobs;
-	state_t oobd;
-	quint8 oobf;
-
+	state_t *boardStart;
 	state_t **board;
+	state_t *diffStart;
 	state_t **diff;
 	quint8 **flags;
 
+	/*
+	 * If width and height are less than one, bad things will happen.
+	 * In general they should both be at least 15. If they are too
+	 * close to the upper bound of pos_t, bad things will also happen.
+	 * However, the board should never be anywhere close to that large
+	 * for memory reasons.
+	 */
 	GameState(pos_t width, pos_t height);
 	~GameState();
 
@@ -245,7 +258,7 @@ private:
 	 * this function returns false. If the player is successfully added,
 	 * this function returns true.
 	 */
-	bool addPlayer(plid_t id, pos_t x, pos_t y);
+	bool addPlayer(plid_t id, const QString &name, pos_t x, pos_t y);
 	/*
 	 * Immediately removes the player from the game.
 	 *
@@ -253,6 +266,15 @@ private:
 	 * They MUST be removed separately within the tick, or behavior is undefined.
 	 */
 	QHash<plid_t, Player *>::iterator removePlayer(QHash<plid_t, Player *>::iterator i);
+
+	/*
+	 * Interface with the internal lock.
+	 */
+	void lockForRead();
+	void lockForWrite();
+	void unlock();
 };
+
+Q_DECLARE_METATYPE(GameState *)
 
 #endif // !GAMESTATE_H

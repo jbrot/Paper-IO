@@ -12,9 +12,7 @@ PacketResendBoard::PacketResendBoard()
 	, tick(0)
 	, alloc(true)
 {
-	board[0] = new state_t[CLIENT_FRAME * CLIENT_FRAME];
-	for (int i = 1; i < CLIENT_FRAME; i++)
-		board[i] = board[0] + i * CLIENT_FRAME;
+	allocBoard();
 
 	chksum = hashBoard(board);
 }
@@ -29,10 +27,32 @@ PacketResendBoard::PacketResendBoard(tick_t tck, state_t *brd[CLIENT_FRAME])
 	chksum = hashBoard(board);
 }
 
+PacketResendBoard::PacketResendBoard(const PacketResendBoard &other)
+	: Packet(PACKET_RESEND_BOARD)
+	, tick(other.tick)
+	, alloc(other.alloc)
+	, chksum(other.chksum)
+{
+	if (alloc)
+	{
+		allocBoard();
+		std::copy(other.board[0], other.board[0] + (CLIENT_FRAME * CLIENT_FRAME), board[0]);
+	} else {
+		std::copy(other.board, other.board + CLIENT_FRAME, board);
+	}
+}
+
 PacketResendBoard::~PacketResendBoard()
 {
 	if (alloc)
 		delete[] board[0];
+}
+
+void PacketResendBoard::allocBoard()
+{
+	board[0] = new state_t[CLIENT_FRAME * CLIENT_FRAME];
+	for (int i = 1; i < CLIENT_FRAME; i++)
+		board[i] = board[0] + i * CLIENT_FRAME;
 }
 
 tick_t PacketResendBoard::getTick() const
@@ -63,11 +83,7 @@ void PacketResendBoard::setBoardPointer(state_t *brd[CLIENT_FRAME])
 void PacketResendBoard::setBoardCopy(state_t const *brd[CLIENT_FRAME])
 {
 	if (!alloc)
-	{
-		board[0] = new state_t[CLIENT_FRAME * CLIENT_FRAME];
-		for (int i = 1; i < CLIENT_FRAME; i++)
-			board[i] = board[0] + i * CLIENT_FRAME;
-	}
+		allocBoard();
 	alloc = true;
 
 	for (int i = 0; i < CLIENT_FRAME; i++)

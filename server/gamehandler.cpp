@@ -20,7 +20,6 @@ GameHandler::GameHandler(PaperServer &pss, pos_t w, pos_t h, int ti, plid_t mp, 
 	, players()
 	, ais()
 	, currentId(1)
-	, grwl()
 	, gs(w, h)
 {
 	GameHandler::idCount++;
@@ -46,7 +45,7 @@ void GameHandler::tick()
 	tickAIs();
 
 	// Now we are ready to begin the tick.
-	grwl.lockForWrite();
+	gs.lockForWrite();
 
 	gs.nextTick();
 
@@ -60,7 +59,7 @@ void GameHandler::tick()
 	// Check for dead players and remove.
 	removePlayers();
 
-	grwl.unlock();
+	gs.unlock();
 
 	// If we have no players left, quit.
 	if (players.size() == 0)
@@ -74,7 +73,7 @@ void GameHandler::tick()
 
 void GameHandler::tickAIs()
 {
-	grwl.lockForRead();
+	gs.lockForRead();
 	auto iter = ais.begin();
 	while(iter != ais.end())
 	{
@@ -95,7 +94,7 @@ void GameHandler::tickAIs()
 
 		iter++;
 	}
-	grwl.unlock();
+	gs.unlock();
 }
 
 void GameHandler::spawnPlayers()
@@ -114,16 +113,22 @@ void GameHandler::spawnPlayers()
 			continue;
 		}
 
-		if (!gs.addPlayer(currentId, siter->first, siter->second))
+		// TODO Add name
+		if (!gs.addPlayer(currentId, "", siter->first, siter->second))
 		{
 			citer--;
 			continue;
 		}
 
-		// TODO This might need set up before it can work.
 		QMetaObject::invokeMethod(*citer, "beginGame", Q_ARG(plid_t, currentId),
-		                          Q_ARG(GameState *, &gs), Q_ARG(QReadWriteLock, grwl));
+		                          Q_ARG(GameState *, &gs));
 		connect(this, &GameHandler::tickComplete, *citer, &ClientHandler::sendTick);
+		// We need this indirection so we can capture the id in the lambda without
+		// it changing when additional clients are registered.
+		plid_t pid = currentId;
+		connect(*citer, &ClientHandler::disconnected, this, [this, pid] {
+			playerDisconnected(currentId);
+		});
 
 		players.insert(currentId, *citer);
 		configureSpawn(gs.lookupPlayer(currentId), gs);
@@ -132,7 +137,8 @@ void GameHandler::spawnPlayers()
 	}
 	for (; siter < spawns.end(); siter++)
 	{
-		if (!gs.addPlayer(currentId, siter->first, siter->second))
+		// TODO Add name
+		if (!gs.addPlayer(currentId, "", siter->first, siter->second))
 			continue;
 
 		AIPlayer *ai = new AIPlayer();
@@ -199,7 +205,8 @@ void GameHandler::removePlayers()
 			{
 				qWarning() << "Game" << id << ": Client" << iter.key() << "is NULL!";
 			} else {
-				disconnect(this, &GameHandler::tickComplete, ch, &ClientHandler::sendTick);
+				disconnect(this, 0, ch, 0);
+				disconnect(ch, 0, this, 0);
 				QMetaObject::invokeMethod(ch, "endGame", Q_ARG(quint8, pl->getScore()));
 			}
 		} else {
@@ -215,13 +222,13 @@ void GameHandler::playerDisconnected(plid_t pid)
 	// We are just going to set the dead flag without actually
 	// killing the player. This flag is a server side only one
 	// so we don't need to lockForWrite to change it.
-	grwl.lockForRead();
+	gs.lockForRead();
 	Player *pl = gs.lookupPlayer(pid);
 	if (pl)
 		pl->dead = true;
 	else
 		qWarning() << "Game" << id << ": Received disconnect change from unregistered player " << pid << "!";
-	grwl.unlock();
+	gs.unlock();
 
 	// Since the player has disconnected, the connection object is invalid
 	// so we need to remove it immediately.
@@ -236,13 +243,13 @@ void GameHandler::playerMoved(plid_t pid, Direction dir)
 	// the game logic when advancing ticks. So, securing a readlock is enough
 	// as it prevents writes which might invalidate the player while not
 	// kicking out all of the IO threads.
-	grwl.lockForRead();
+	gs.lockForRead();
 	Player *pl = gs.lookupPlayer(pid);
 	if (pl)
 		pl->newDir = dir;
 	else
 		qWarning() << "Game" << id << ": Received direction change from unregistered player " << pid << "!";
-	grwl.unlock();
+	gs.unlock();
 }
 
 void GameHandler::startGame()

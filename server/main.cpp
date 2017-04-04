@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QtNetwork>
 
+#include "gamestate.h"
 #include "paperserver.h"
 #include "protocol.h"
 
@@ -15,8 +16,9 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
-	// We need to do this so we can communicate errors across threads.
+	// Queued Connection type registrations
 	qRegisterMetaType<QAbstractSocket::SocketError>();
+	qRegisterMetaType<GameState *>();
 
 	// Make sure the protocol is set up
 	registerPackets();

@@ -9,9 +9,10 @@
 
 #include "gamestate.h"
 
-Player::Player(GameState &ngs, const plid_t pid, pos_t cx, pos_t cy)
+Player::Player(const GameState &ngs, const plid_t pid, const QString &nm, pos_t cx, pos_t cy)
 	: gs(ngs)
 	, id(pid)
+	, name(nm)
 	, x(cx)
 	, y(cy)
 	, newDir(Direction::NONE)
@@ -23,6 +24,11 @@ Player::Player(GameState &ngs, const plid_t pid, pos_t cx, pos_t cy)
 plid_t Player::getId() const
 {
 	return id;
+}
+
+QString Player::getName() const
+{
+	return name;
 }
 
 pos_t Player::getX() const

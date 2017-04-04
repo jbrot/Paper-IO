@@ -70,7 +70,6 @@ private:
 
 	plid_t currentId;
 
-	QReadWriteLock grwl;
 	GameState gs;
 
 	void tickAIs();

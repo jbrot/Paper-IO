@@ -45,8 +45,7 @@ public:
 
 public slots:
 	void enqueue();
-	// TODO work out how to send lock between threads.
-	void beginGame(plid_t id, GameState *gs, void *lock);
+	void beginGame(plid_t id, GameState *gs);
 	void endGame(quint8 score);
 	void establishConnection(int socketDescriptor);
 	void sendTick();
@@ -75,6 +74,7 @@ private:
 	QDataStream str;
 
 	ClientState state;
+	GameState *gs;
 	plid_t player;
 
 	QDateTime lastka;

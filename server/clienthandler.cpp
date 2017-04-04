@@ -39,24 +39,46 @@ void ClientHandler::enqueue()
 {
 	state = QUEUEING;
 	player = NULL_ID;
+	gs = NULL;
 
-	// TODO Inform client of transition
+	PacketQueued pq;
+	str << static_cast<Packet *>(&pq);
 }
 
-void ClientHandler::beginGame(plid_t id, GameState *gs, void *lock)
+void ClientHandler::beginGame(plid_t id, GameState *g)
 {
 	state = INGAME;
-	// TODO player = ??;
+	player = id;
+	gs = g;
 
 	// TODO Inform client of transition
 }
 
 void ClientHandler::endGame(quint8 score)
 {
+	if (state != INGAME)
+	{
+		qWarning() << "Connection" << id <<": Received endGame() while not in game!";
+		return;
+	}
+
 	state = LIMBO;
 	player = NULL_ID;
+	gs = NULL;
 
-	// TODO Inform client of transition
+	PacketGameEnd pge(score);
+	str << static_cast<Packet *>(&pge);
+}
+
+void ClientHandler::sendTick()
+{
+	if (state != INGAME)
+	{
+		qWarning() << "Connection" << id <<": Received sendTick() while not in game!";
+		return;
+	}
+
+	// TODO Send update
 }
 
 void ClientHandler::establishConnection(int socketDescriptor)
@@ -69,14 +91,9 @@ void ClientHandler::establishConnection(int socketDescriptor)
 
 	keepAlive->start();
 
-	qDebug() << "Connection " << id << " established with: " << socket->peerAddress(); 
+	qDebug() << "Connection" << id << "established with:" << socket->peerAddress(); 
 
 	emit connected();
-}
-
-void ClientHandler::sendTick()
-{
-	// TODO Send update
 }
 
 void ClientHandler::abort()

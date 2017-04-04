@@ -293,6 +293,10 @@ public:
 	 * the board state.
 	 */
 	PacketResendBoard(tick_t tick, state_t *board[CLIENT_FRAME]);
+	/*
+	 * Copy constructor.
+	 */
+	PacketResendBoard(const PacketResendBoard &other);
 	~PacketResendBoard();
 
 	tick_t getTick() const;
@@ -321,6 +325,8 @@ private:
 	state_t *board[CLIENT_FRAME];
 
 	QByteArray chksum;
+
+	void allocBoard();
 };
 
 class PacketGameJoin : public Packet
