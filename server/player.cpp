@@ -1,4 +1,4 @@
-/**
+/*
  * player.cpp
  *
  * EECS 183, Winter 2017

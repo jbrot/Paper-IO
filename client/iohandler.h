@@ -12,6 +12,8 @@
 #include <QTcpSocket>
 #include <QTimer>
 
+#include "types.h"
+
 class IOHandler : public QObject
 {
 	Q_OBJECT
@@ -20,14 +22,22 @@ public:
 	IOHandler(QObject *parent = Q_NULLPTR);
 
 public slots:
-	void connectToServer(const QString &host, quint16 port);
+	void connectToServer(const QString &host, quint16 port, const QString &name);
 	void abort();
 	void disconnect();
+
+	void enterQueue();
+	void changeDirection(Direction dir);
+	void requestResend();
 
 signals:
 	void connected();
 	void disconnected();
 	void error(QAbstractSocket::SocketError error, QString msg);
+
+	void queued();
+	void enteredGame();
+	void gameEnded(quint8 score);
 
 private slots:
 	void ierror(QAbstractSocket::SocketError error);
@@ -40,6 +50,8 @@ private:
 
 	QTimer *keepAlive;
 	QDateTime lastka;
+
+	QString name;
 };
 
 #endif // !IOHANDLER_H

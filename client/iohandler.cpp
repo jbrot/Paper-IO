@@ -14,10 +14,8 @@ IOHandler::IOHandler(QObject *parent)
 	: QObject(parent)
 	, socket(new QTcpSocket(this))
 	, keepAlive(new QTimer(this))
+	, name(QLatin1String(""))
 {
-	// We need to do this so we can communicate errors across threads.
-	qRegisterMetaType<QAbstractSocket::SocketError>();
-
 	str.setDevice(socket);
 	str.setVersion(QDataStream::Qt_5_0);
 
@@ -37,11 +35,13 @@ IOHandler::IOHandler(QObject *parent)
 	connect(socket, &QIODevice::readyRead, this, &IOHandler::newData);
 }
 
-void IOHandler::connectToServer(const QString &host, quint16 port)
+void IOHandler::connectToServer(const QString &host, quint16 port, const QString &nm)
 {
 	// The abort call is kind of overkill, but it's better to be safe than sorry
 	socket->abort();
 	socket->connectToHost(host, port);
+
+	name = nm;
 }
 
 void IOHandler::abort()
@@ -60,6 +60,24 @@ void IOHandler::ierror(QAbstractSocket::SocketError err)
 	emit error(err, socket->errorString());
 }
 
+void IOHandler::enterQueue()
+{
+	PacketRequestJoin prj(name);
+	str << static_cast<Packet *>(&prj);
+}
+
+void IOHandler::changeDirection(Direction dir)
+{
+	PacketUpdateDir pud(dir);
+	str << static_cast<Packet *>(&pud);
+}
+
+void IOHandler::requestResend()
+{
+	PacketRequestResend prr;
+	str << static_cast<Packet *>(&prr);
+}
+
 void IOHandler::kaTimeout()
 {
 	if (lastka.secsTo(QDateTime::currentDateTime()) > TIMEOUT_LEN)
@@ -68,35 +86,41 @@ void IOHandler::kaTimeout()
 		qDebug() << "Haven't received keep alive packet, timing out client.";
 		return;
 	}
-	str << PACKET_KEEP_ALIVE;
+	PacketKeepAlive pka;
+	str << static_cast<Packet *>(&pka);
 	qDebug() << "Sent keep alive!";
 }
 
 void IOHandler::newData()
 {
-	packet_t packet = 0;
+	Packet *packet = NULL;
 
-	str.startTransaction();
-	str >> packet;
-	// We have to do two switches---first to read in the packet and then,
-	// once reading is confirmed successful, to process.
-	switch (packet) {
-	case PACKET_KEEP_ALIVE:
-		break;
-	default:
-		break;
-	}
-	// If we didn't fully read the packet, then quit.
-	if (!str.commitTransaction())
-		return;
+	// Read all available packets.
+	while (true)
+	{
+		str.startTransaction();
+		str >> packet;
+		if (!str.commitTransaction())
+			return;
+		if (!packet)
+			continue;
 
-	switch (packet) {
-	case PACKET_KEEP_ALIVE:
-		lastka = QDateTime::currentDateTime();
-		qDebug() << "Keep alive received!";
-		break;
-	default:
-		qDebug() << "Received unknown packet: " << packet;
-		break;
+		switch (packet->getId()) {
+		case PACKET_KEEP_ALIVE:
+			lastka = QDateTime::currentDateTime();
+			qDebug() << "Keep alive received!";
+			break;
+		case PACKET_QUEUED:
+			emit queued();
+			break;
+		case PACKET_GAME_END:
+			emit gameEnded(static_cast<PacketGameEnd *>(packet)->getScore());
+			break;
+		default:
+			qDebug() << "Received unknown packet: " << packet;
+			break;
+		}
+
+		delete packet;
 	}
 }

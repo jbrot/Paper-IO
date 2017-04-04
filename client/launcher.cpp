@@ -154,7 +154,7 @@ void Launcher::doConnect()
 	settings.setValue(QLatin1String("port"), portEdit->text());
 	settings.endGroup();
 
-	emit connectToServer(ipEdit->text(), portEdit->text().toInt());
+	emit connectToServer(ipEdit->text(), portEdit->text().toInt(), nameEdit->text());
 }
 
 void Launcher::setStatus(const QString &msg)

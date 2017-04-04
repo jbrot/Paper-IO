@@ -32,7 +32,7 @@ private slots:
 	void toggleConnect();
 
 signals:
-	void connectToServer(const QString &host, quint16 port);
+	void connectToServer(const QString &host, quint16 port, const QString &name);
 
 private:
 	QLabel *status;

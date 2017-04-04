@@ -1,29 +1,22 @@
 /*
- * This class represents an AI Player in the game.
+ * The various classes provided here represent the client's view of the
+ * game state. Their values are set in iohandler and processed by the renderer.
  */
+#ifndef CLIENTGAMESTATE_H
+#define CLIENTGAMESTATE_H
 
-#ifndef AIPLAYER_H
-#define AIPLAYER_H
+#include <QMutex>
 
-#include <QHash>
-#include <vector>
+#include "protocol.h"
 
-#include "types.h"
+class ClientGameState;
 
-class GameHandler;
-
-class GameState;
-class SquareState;
-class Player;
-
-class ROGameState;
-class ROSquareState;
-
-class ROPlayer
+class ClientPlayer
 {
-friend class ROGameState;
+friend class ClientGameState;
 public:
 	plid_t getId() const;
+	QString getName() const;
 
 	/*
 	 * These coordinates are relative to the player. If they are not
@@ -38,26 +31,35 @@ public:
 	 */
 	Direction getDirection() const;
 
-	bool isDead() const;
-
 	/*
 	 * A player's score is stored as an unsigned 8 bit integer ranging from 
 	 * 0 to 200, where the player's score in percentage of the board controlled
-	 * can be found by dividing this number in two.
+	 * can be found by dividing this number in two. This is only available
+	 * if the player is in the leaderboard.
 	 */
 	quint8 getScore() const;
 
 private:
-	const pos_t xoff;
-	const pos_t yoff;
-	const Player &player;
+	const ClientGameState &gs;
+	const plid_t id;
+	const QString name;
 
-	ROPlayer(pos_t xoff, pos_t yoff, const Player &pl);
+	pos_t x;
+	pos_t y;
+	quint8 score;
+
+	void setX(pos_t x);
+	void setY(pos_t y);
+
+	void setScore(quint8 score);
+
+	ClientPlayer(const ClientGameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
 };
 
-class ROSquareState
+class ClientSquareState
 {
-friend class ROGameState;
+friend class ClientPlayer;
+friend class ClientGameState;
 public:
 	pos_t getX() const;
 	pos_t getY() const;
@@ -66,16 +68,14 @@ public:
 	 * A square has a trail if a player has gone through it after
 	 * leaving their territory but has not yet returned to their territory/
 	 *
-	 * WARNING: If a square is outsife of the game board, it will report
+	 * WARNING: If a square is outside of the game board, it will report
 	 * false for hasTrail(), NOTRAIL for getTrailType(), OUT_OF_BOUNDS for
-	 * getTrailPLayerId(), and NULL for getTrailPlayer(). Furthermore,
-	 * setTrailType(), setTrailPlayerId(), and setTrailPlayer() will have
-	 * no effect.
+	 * getTrailPlayerId(), and NULL for getTrailPlayer().
 	 */
 	bool hasTrail() const;
 	TrailType getTrailType() const;
 	plid_t getTrailPlayerId() const;
-	ROPlayer *getTrailPlayer() const;
+	ClientPlayer *getTrailPlayer() const;
 
     /*
      * A square is occupied if the specified player's current position
@@ -88,7 +88,7 @@ public:
      */
 	bool isOccupied() const;
 	plid_t getOccupyingPlayerId() const;
-	ROPlayer *getOccupyingPlayer() const;
+	ClientPlayer *getOccupyingPlayer() const;
 
 	/*
 	 * A square is owned if it is in a player's "body"---that is, the square is
@@ -102,19 +102,20 @@ public:
 	 */
 	bool isOwned() const;
 	plid_t getOwningPlayerId() const;
-	ROPlayer *getOwningPlayer() const;
+	ClientPlayer *getOwningPlayer() const;
 private:
+	const ClientGameState &gs;
 	const pos_t x;
 	const pos_t y;
-	const SquareState &state;
-	const ROGameState &rgs;
+	const state_t &state;
 
-	ROSquareState(pos_t x, pos_t y, const SquareState &state, const ROGameState &rgs);
+	Direction getDirection() const;
+
+	ClientSquareState(const ClientGameState &gs, pos_t x, pos_t y, const state_t &state);
 };
 
-class ROGameState
+class ClientGameState
 {
-friend class GameHandler;
 public:
 	tick_t getTick() const;
 
@@ -128,31 +129,27 @@ public:
 	 * If an out of bounds SquareState is not adjacent to an in bounds SquareState,
 	 * then the behavior of its flags is undefined.
 	 */
-	ROSquareState getState(pos_t x, pos_t y) const;
+	ClientSquareState getState(pos_t x, pos_t y) const;
 
-	ROPlayer *lookupPlayer(plid_t id) const;
+	ClientPlayer *lookupPlayer(plid_t id) const;
 
-	/*
-	 * WARNING: This function is relatively inneficient and should
-	 * be used sparingly.
-	 */
-	std::vector<ROPlayer> getPlayers() const;
+	std::vector<ClientPlayer> getPlayers() const;
 private:
-	const pos_t xoff;
-	const pos_t yoff;
-	GameState &gs;
-	QHash<plid_t, ROPlayer *> pls;
+	QMutex lock;
 
-	ROGameState(pos_t xoff, pos_t yoff, GameState &gs);
-	~ROGameState();
+	QHash<plid_t, ClientPlayer *> players;
+	tick_t tick;
+
+	// This can probably be handled better.
+	quint8 leaderboard[10];
+
+	state_t board[CLIENT_FRAME][CLIENT_FRAME];
+
+	void lockState();
+	void unlock();
+
+	ClientGameState();
+	~ClientGameState();
 };
 
-class AIPlayer
-{
-public:
-	AIPlayer();
-
-	Direction tick(const ROGameState &gs);
-};
-
-#endif // !AIPLAYER_H
+#endif // !CLIENTGAMESTATE_H

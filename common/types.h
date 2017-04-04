@@ -24,6 +24,9 @@ const plid_t OUT_OF_BOUNDS = 255;
 /* The state of a square which is out of bounds. */
 const state_t OUT_OF_BOUNDS_STATE = 0xFFFFFF00;
 
+/* This positiion in either x or y means the object is out of view. */
+const pos_t OUT_OF_VIEW = 32767;
+
 /*
  * The possible directions the player can take on.
  * Origin is defined to be the top left of the screen

@@ -16,6 +16,9 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("Delta Epsilon");
 	QCoreApplication::setOrganizationDomain("dank.meeeeee.me");
 	QCoreApplication::setApplicationName("Arduino-IO");
+	//
+	// We need to do this so we can communicate errors across threads.
+	qRegisterMetaType<QAbstractSocket::SocketError>();
 
 	registerPackets();
 

@@ -322,8 +322,7 @@ PacketLeaderboardUpdate ClientHandler::makePLU()
 		return PacketLeaderboardUpdate();
 	}
 
-	// TODO Add in leaderboard
-	return PacketLeaderboardUpdate();
+	return PacketLeaderboardUpdate(gs->getTick(), gs->leaderboard);
 }
 
 PacketResendBoard ClientHandler::makePRB()

@@ -16,11 +16,18 @@ RESOURCES = client.qrc
 # Inputs
 INCLUDEPATH += . $$PWD/../common
 HEADERS += client.h \
+	clientgamestate.h \
 	iohandler.h \
 	launcher.h \
 	../common/protocol.h \
 	../common/types.h
-SOURCES += main.cpp client.cpp iohandler.cpp launcher.cpp \
+SOURCES += main.cpp \
+	client.cpp \
+	clientgamestate.cpp \
+	clientplayer.cpp \
+	clientsquarestate.cpp \
+	iohandler.cpp \
+	launcher.cpp \
 # Common files
 	../common/packetgameend.cpp \
 	../common/packetgamejoin.cpp \

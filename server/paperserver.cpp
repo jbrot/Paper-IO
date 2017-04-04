@@ -144,7 +144,8 @@ void PaperServer::queueConnection(thid_t id, const QString &name)
 
 	waiting.enqueue(id);
 	ThreadClient tc = connections.value(id);
-	tc.name = name;
+	if (!name.isEmpty())
+		tc.name = name;
 	QMetaObject::invokeMethod( tc.client, "enqueue");
 
 	if (!games.size())
