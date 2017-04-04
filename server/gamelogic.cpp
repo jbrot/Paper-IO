@@ -24,17 +24,13 @@ bool detectWin(Player player, GameState &state);
 std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state);
 bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state);
 
+void configureSpawn(Player *pl, GameState &state);
+
 void updateGame(GameState &state)
 {
 
-	if (!state.getPlayers())
-	{
-		qCritical() << "ERROR: Players vector is NULL";
-		return;
-	}
-
 	// Create vector of all Players
-	std::vector<Player> allPlayers = *state.getPlayers();
+	std::vector<Player> allPlayers = state.getPlayers();
 
 	// Loop over all Players
 	for (int i = 0; i < allPlayers.size(); ++i)
@@ -54,10 +50,6 @@ void updateGame(GameState &state)
 
 		// Check if player completed a loop
 		checkForCompletedLoop(allPlayers[i], state);
-
-		// Check if player wins
-		if (detectWin(allPlayers[i], state))
-			allPlayers[i].setWinner();
 
 	}
 	
@@ -87,7 +79,7 @@ void updatePosition(Player& player)
 		break;
 	}
 
-	player.setOldDirection(newD);
+	player.setActualDirection(newD);
 
 }
 
@@ -96,12 +88,12 @@ void leaveTrail(Player &player, GameState &state)
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
 
-	Direction old = player.getOldDirection();
+	Direction old = player.getActualDirection();
 	Direction newD = player.getNewDirection();
 
 	SquareState square = state.getState(xpos, ypos);
 
-	square.setOccupyingPlayer(&player);
+	square.setTrailPlayer(&player);
 
 	if (old == newD)
 	{
@@ -142,13 +134,12 @@ void killPlayers(GameState &state)
 
 			// Check if square is occupied and kill accordingly
 			if (square.getOccupyingPlayer() && square.getOccupyingPlayer()->isDead()){
-			    square.setTrailType(NOTRAIL);
-			    square.setOccupyingPlayerId(UNOCCUPIED);
+				square.setTrailType(NOTRAIL);
 			}
 
 			// Check if square is owned and kill accordingly
 			if (square.getOwningPlayer() && square.getOwningPlayer()->isDead()){
-			    square.setOwningPlayerId(UNOCCUPIED);
+				square.setOwningPlayerId(UNOCCUPIED);
 			}
 		}
 	}
@@ -158,12 +149,11 @@ void checkForTrail(Player player, GameState &state)
 {
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
-	bool dead = true;
 	
 	SquareState square = state.getState(xpos, ypos);
 	
 	if (square.getTrailType() != 0){
-		square.getOccupyingPlayer()->setDead(dead);
+		square.getOccupyingPlayer()->kill();
 	}
 }
 
@@ -172,12 +162,11 @@ void checkForBoundary(Player player, GameState &state)
 
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
-	bool dead = true;
 
 	if (xpos < 1 || xpos > state.getWidth())
-		player.setDead(dead);
+		player.kill();
 	if (ypos < 1 || ypos > state.getHeight())
-		player.setDead(dead);
+		player.kill();
 }
 
 void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos)
@@ -221,14 +210,12 @@ void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos)
 void fillInBody(Player player, GameState &state)
 {
 
-	SquareState square = state.getState(0, 0);
-
 	for (int i = 0; i <= (state.getWidth() + 1); ++i)
 	{
 		for (int j = 0; j <= (state.getHeight() + 1); ++i)
 		{
 
-			square = state.getState(i, j);
+			SquareState square = state.getState(i, j);
 			if (!square.isFlooded())
 				square.setOwningPlayerId(player.getId());
 
@@ -275,7 +262,7 @@ bool detectWin(Player player, GameState &state){
 std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state)
 {
 
-	std::vector<SquareState> availableSpawns;
+	std::vector<std::pair<pos_t, pos_t>> availableSpawns;
 	std::vector<std::pair<pos_t, pos_t>> randomSpawns;
 
 	for (int i = 2; i <= state.getWidth() - 1; i = i + 3)
@@ -283,7 +270,7 @@ std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state)
 		for (int j = 2; j <= state.getHeight() - 1; j = j + 3)
 		{
 			if (checkIfSpawnable(i, j, state))
-				availableSpawns.push_back(state.getState(i, j));
+				availableSpawns.push_back({i,j});
 		}
 	}
 
@@ -294,9 +281,7 @@ std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state)
 
 	for (int m = 0; m < availableSpawns.size() && m < num; ++m)
 	{
-		std::pair<pos_t, pos_t> pair;
-		pair = std::make_pair(availableSpawns[m].getX(), availableSpawns[m].getY());
-		randomSpawns.push_back(pair);
+		randomSpawns.push_back(availableSpawns[m]);
 	}
 
 	return randomSpawns;
@@ -314,4 +299,23 @@ bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state){
 	}
 
 	return true;
+}
+
+
+
+
+void configureSpawn(Player *pl, GameState &state)
+{
+
+	int xPos = pl->getX();
+	int yPos = pl->getY();
+
+	for (int i = xPos - 1; i <= xPos + 1; ++i)
+	{
+		for (int j = yPos - 1; j <= yPos + 1; ++j)
+		{
+			state.getState(i, j).setOwningPlayer(pl);
+		}
+	}
+
 }

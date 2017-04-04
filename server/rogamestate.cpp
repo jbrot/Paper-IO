@@ -147,7 +147,7 @@ tick_t ROGameState::getTick() const
 
 ROSquareState ROGameState::getState(pos_t x, pos_t y) const
 {
-	if (x < -15 || x > 15 || y < -15 | y > 15)
+	if (x < -15 || x > 15 || y < -15 || y > 15)
 		return ROSquareState(x, y, gs.getState(-2, -2), *this);
 
 	return ROSquareState(x, y, gs.getState(x + xoff, y + yoff), *this);

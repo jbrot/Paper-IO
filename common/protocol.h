@@ -5,6 +5,7 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#include <memory>
 #include <QByteArray>
 #include <QDataStream>
 #include <QHash>

@@ -1,6 +1,7 @@
 # Main Config
 TEMPLATE = app
 TARGET = server
+CONFIG += c++11
 
 # Build/Install Directories
 MOC_DIR = $$PWD/../build/server/moc

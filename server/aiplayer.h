@@ -23,7 +23,7 @@ class ROSquareState;
  * This positiion in either x or y means the object
  * is out of view.
  */
-pos_t OUT_OF_VIEW = 32767;
+const pos_t OUT_OF_VIEW = 32767;
 
 class ROPlayer
 {
