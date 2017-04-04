@@ -12,20 +12,6 @@
 #include <QThread>
 
 #include "clienthandler.h"
-#include "gamehandler.h"
-
-struct ThreadClient
-{
-	bool established;
-	QThread *thread;
-	ClientHandler *client;
-};
-
-struct ThreadGame
-{
-	QThread *thread;
-	GameHandler *game;
-};
 
 class PaperServer : public QTcpServer
 {
@@ -49,6 +35,8 @@ private slots:
 	void deleteGame(gid_t id);
 
 private:
+	struct ThreadClient;
+	struct ThreadGame;
 	QHash<gid_t, ThreadGame> games;
 
 	QMutex ctclock;

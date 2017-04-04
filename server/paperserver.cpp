@@ -3,7 +3,21 @@
  * to a game.
  */
 
+#include "gamehandler.h"
 #include "paperserver.h"
+
+struct PaperServer::ThreadClient
+{
+	bool established;
+	QThread *thread;
+	ClientHandler *client;
+};
+
+struct PaperServer::ThreadGame
+{
+	QThread *thread;
+	GameHandler *game;
+};
 
 // If more than this many players are queueing, then we start a new game.
 const int MAX_QUEUE = 4;
