@@ -48,8 +48,7 @@ void ClientHandler::enqueue()
 	player = NULL_ID;
 	gs = NULL;
 
-	PacketQueued pq;
-	str << static_cast<Packet *>(&pq);
+	Packet::writePacket(str, PacketQueued());
 }
 
 void ClientHandler::beginGame(plid_t pid, GameState *g)
@@ -77,8 +76,7 @@ void ClientHandler::beginGame(plid_t pid, GameState *g)
 	gs = g;
 
 	gs->lockForRead();
-	PacketGameJoin pgj(pid, pl->getScore(), makePPU(), makePLU(), makePRB());
-	str << static_cast<Packet *>(&pgj);
+	Packet::writePacket(str, PacketGameJoin(pid, pl->getScore(), makePPU(), makePLU(), makePRB()));
 	gs->unlock();
 }
 
@@ -94,8 +92,7 @@ void ClientHandler::endGame(quint8 score)
 	player = NULL_ID;
 	gs = NULL;
 
-	PacketGameEnd pge(score);
-	str << static_cast<Packet *>(&pge);
+	Packet::writePacket(str, PacketGameEnd(score));
 }
 
 void ClientHandler::sendTick()
@@ -172,20 +169,13 @@ void ClientHandler::sendTick()
 
 	QByteArray chksum = hashBoard(bptrs);
 
-	PacketGameTick pgt(gs->getTick(), pl->getActualDirection(), pl->getScore(), news, dptrs, chksum);
-	str << static_cast<Packet *>(&pgt);
+	Packet::writePacket(str, PacketGameTick(gs->getTick(), pl->getActualDirection(), pl->getScore(), news, dptrs, chksum));
 
 	if (gs->havePlayersChanged())
-	{
-		PacketPlayersUpdate ppu = makePPU();
-		str << static_cast<Packet *>(&ppu);
-	}
+		Packet::writePacket(str, makePPU());
 
 	if (gs->hasLeaderboardChanged())
-	{
-		PacketLeaderboardUpdate plu = makePLU();
-		str << static_cast<Packet *>(&plu);
-	}
+		Packet::writePacket(str, makePLU());
 
 	gs->unlock();
 }
@@ -230,8 +220,7 @@ void ClientHandler::kaTimeout()
 		return;
 
 	}
-	PacketKeepAlive pka;
-	str << static_cast<Packet *>(&pka);
+	Packet::writePacket(str, PacketKeepAlive());
 	qDebug() << "Connection " << id << ": Keep alive sent!";
 }
 
@@ -243,7 +232,7 @@ void ClientHandler::newData()
 	while (true)
 	{
 		str.startTransaction();
-		str >> packet;
+		packet = Packet::readPacket(str);
 		if (!str.commitTransaction())
 			return;
 		if (!packet)
@@ -283,8 +272,7 @@ void ClientHandler::newData()
 			}
 
 			gs->lockForRead();
-			PacketResendBoard prb = makePRB();
-			str << static_cast<Packet *>(&prb);
+			Packet::writePacket(str, makePRB());
 			gs->unlock();
 			break;
 		}

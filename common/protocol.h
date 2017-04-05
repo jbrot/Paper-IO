@@ -158,19 +158,13 @@ public:
 	friend QDataStream &operator>>(QDataStream &str, Packet &packet);
 	friend QDataStream &operator<<(QDataStream &str, const Packet &packet);
 
-	/*
-	 * The stream operators into Packet pointers read/write a full packet
-	 * (i.e., including the header byte). The read operator will dynamically
-	 * allocate the correct packet type. Note that the current value of the
-	 * pointer will be overwritten so make sure that it is properly released.
-	 */
-	friend QDataStream &operator>>(QDataStream &str, Packet *&packet);
-	friend QDataStream &operator<<(QDataStream &str, const Packet *&packet);
+	static Packet *readPacket(QDataStream &str);
+	static void writePacket(QDataStream &str, const Packet &packet);
 
 	Packet(packet_t id);
 	virtual ~Packet() = 0;
 
-	packet_t getId();
+	packet_t getId() const;
 
 	/*
 	 * This registers a packet type to be used with the pointer stream

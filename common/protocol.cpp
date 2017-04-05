@@ -31,7 +31,7 @@ Packet::~Packet()
 {
 }
 
-packet_t Packet::getId()
+packet_t Packet::getId() const
 {
 	return id;
 }
@@ -57,48 +57,49 @@ QDataStream &operator>>(QDataStream &str, Packet &packet)
 	return str;
 }
 
-QDataStream &operator<<(QDataStream &str, Packet *&packet)
+void Packet::writePacket(QDataStream &str, const Packet &packet)
 {
-	if (!packet) return str;
-
-	str << packet->getId() << packet;
-	return str;
+	str << packet.getId() << packet;
+	qDebug() << "Sent packet:" << packet.getId();
 }
 
-QDataStream &operator>>(QDataStream &str, Packet *&packet)
+Packet *Packet::readPacket(QDataStream &str)
 {
 	// This is relatively involved, so we don't want to deal
 	// with a broken stream.
-	if (str.status()) return str;
+	if (str.status()) return NULL;
 
 	packet_t id;
 	str >> id;
-	if (str.status()) return str;
+	if (str.status()) return NULL;
+
+	qDebug() << "Received packet header:" << id;
 
 	auto factory = Packet::map.find(id);
 	if (factory == Packet::map.end())
 	{
 		qWarning() << "Tried to read in unregistered packet:" << id;
-		return str;
+		return NULL;
 	} else if (!factory->second) {
 		qWarning() << "Tried to read in improperly registered packet:" << id;
-		return str;
+		return NULL;
 	}
 
 	Packet *obj = factory->second->instantiate();
 	if (!obj)
 	{
 		qWarning() << "Could not allocate packet:" << id;
-		return str;
+		return NULL;
 	}
 
-	str >> *obj;
+	obj->read(str);
 	if (str.status())
 	{
+		qDebug() << "Read in failed:" << str.status();
 		// If reading in failed, clean up after ourselves.
 		delete obj;
-		return str;
+		return NULL;
 	}
-	packet = obj;
-	return str;
+	qDebug() << "Read packet:" << id;
+	return obj;
 }

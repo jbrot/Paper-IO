@@ -63,20 +63,17 @@ void IOHandler::ierror(QAbstractSocket::SocketError err)
 
 void IOHandler::enterQueue()
 {
-	PacketRequestJoin prj(name);
-	str << static_cast<Packet *>(&prj);
+	Packet::writePacket(str, PacketRequestJoin(name));
 }
 
 void IOHandler::changeDirection(Direction dir)
 {
-	PacketUpdateDir pud(dir);
-	str << static_cast<Packet *>(&pud);
+	Packet::writePacket(str, PacketUpdateDir(dir));
 }
 
 void IOHandler::requestResend()
 {
-	PacketRequestResend prr;
-	str << static_cast<Packet *>(&prr);
+	Packet::writePacket(str, PacketRequestResend());
 }
 
 void IOHandler::kaTimeout()
@@ -87,8 +84,7 @@ void IOHandler::kaTimeout()
 		qDebug() << "Haven't received keep alive packet, timing out client.";
 		return;
 	}
-	PacketKeepAlive pka;
-	str << static_cast<Packet *>(&pka);
+	Packet::writePacket(str, PacketKeepAlive());
 	qDebug() << "Sent keep alive!";
 }
 
@@ -303,7 +299,7 @@ void IOHandler::newData()
 	while (true)
 	{
 		str.startTransaction();
-		str >> packet;
+		packet = Packet::readPacket(str);
 		if (!str.commitTransaction())
 			return;
 		if (!packet)
