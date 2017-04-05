@@ -112,9 +112,10 @@ void IOHandler::updatePlayerPositions()
 	}
 }
 
-void IOHandler::processPlayersUpdate(const PacketPlayersUpdate &ppu, bool up)
+void IOHandler::processPlayersUpdate(const PacketPlayersUpdate &ppu, bool nested)
 {
-	cgs.lockState();
+	if (!nested)
+		cgs.lockState();
 
 	if (cgs.getTick() != ppu.getTick())
 		qWarning() << "PPU Packet is on tick" << ppu.getTick() << ", but we're on tick" << cgs.getTick() << "!";
@@ -136,15 +137,17 @@ void IOHandler::processPlayersUpdate(const PacketPlayersUpdate &ppu, bool up)
 	for (auto iter = players.cbegin(); iter != players.cend(); iter++)
 		cgs.players.insert(iter.key(), new ClientPlayer(cgs, iter.key(), iter.value(), OUT_OF_VIEW, OUT_OF_VIEW));
 
-	if (up)
+	if (!nested)
+	{
 		updatePlayerPositions();
-
-	cgs.unlock();
+		cgs.unlock();
+	}
 }
 
-void IOHandler::processLeaderboardUpdate(const PacketLeaderboardUpdate &plu)
+void IOHandler::processLeaderboardUpdate(const PacketLeaderboardUpdate &plu, bool nested)
 {
-	cgs.lockState();
+	if (!nested)
+		cgs.lockState();
 
 	if (cgs.getTick() != plu.getTick())
 		qWarning() << "PLU Packet is on tick" << plu.getTick() << ", but we're on tick" << cgs.getTick() << "!";
@@ -162,12 +165,14 @@ void IOHandler::processLeaderboardUpdate(const PacketLeaderboardUpdate &plu)
 		cp->setScore(lb[i + 1]);
 	}
 
-	cgs.unlock();
+	if (!nested)
+		cgs.unlock();
 }
 
-void IOHandler::processFullBoard(const PacketResendBoard &prb, bool up)
+void IOHandler::processFullBoard(const PacketResendBoard &prb, bool nested)
 {
-	cgs.lockState();
+	if (!nested)
+		cgs.lockState();
 
 	if (cgs.getTick() != prb.getTick())
 		qWarning() << "PRB Packet is on tick" << prb.getTick() << ", but we're on tick" << cgs.getTick() << "!";
@@ -187,10 +192,11 @@ void IOHandler::processFullBoard(const PacketResendBoard &prb, bool up)
 		requestResend();
 	}
 
-	if (up)
-			updatePlayerPositions();
-
-	cgs.unlock();
+	if (!nested)
+	{
+		updatePlayerPositions();
+		cgs.unlock();
+	}
 }
 
 void IOHandler::processJoinGame(const PacketGameJoin &pgj)
@@ -198,11 +204,14 @@ void IOHandler::processJoinGame(const PacketGameJoin &pgj)
 	cgs.lockState();
 
 	cgs.client = pgj.getId();
+	qDebug() << "Id" << cgs.client;
 	cgs.tick = pgj.getPPU().getTick();
-
-	processPlayersUpdate(pgj.getPPU(), false);
-	processLeaderboardUpdate(pgj.getPLU());
-	processFullBoard(pgj.getPRB());
+	qDebug() << "Tick" << cgs.tick;
+	
+	processPlayersUpdate(pgj.getPPU(), true);
+	processLeaderboardUpdate(pgj.getPLU(), true);
+	processFullBoard(pgj.getPRB(), true);
+	updatePlayerPositions();
 
 	if (!cgs.getClient())
 		qWarning() << "PGJ: No client player set up!";
@@ -216,8 +225,13 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 {
 	cgs.lockState();
 
-	if (cgs.getTick() > pgt.getTick())
-		qWarning() << "PGT: New tick" << pgt.getTick() << "is older than curren tick:" << cgs.getTick();
+	if (cgs.getTick() >= pgt.getTick())
+	{
+		// This is most likely the first tick.
+		qWarning() << "PGT: New tick" << pgt.getTick() << "is not larger than current tick:" << cgs.getTick() << ". Ignoring.";
+		cgs.unlock();
+		return;
+	}
 
 	cgs.tick = pgt.getTick();
 	qDebug() << "Tick:" << cgs.getTick();
@@ -295,15 +309,17 @@ void IOHandler::newData()
 {
 	Packet *packet = NULL;
 
-	qDebug() << "new data.";
-
 	// Read all available packets.
 	while (true)
 	{
 		str.startTransaction();
 		packet = Packet::readPacket(str);
 		if (!str.commitTransaction())
+		{
+			if (str.status() == QDataStream::ReadPastEnd)
+				str.resetStatus();
 			return;
+		}
 		if (!packet)
 			continue;
 

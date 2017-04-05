@@ -85,10 +85,10 @@ void PacketGameJoin::setPRB(const PacketResendBoard &prbc)
 
 void PacketGameJoin::read(QDataStream &str)
 {
-	str >> ppu >> plu >> prb;
+	str >> plid >> score >> ppu >> plu >> prb;
 }
 
 void PacketGameJoin::write(QDataStream &str) const
 {
-	str << ppu << plu << prb;
+	str << plid << score << ppu << plu << prb;
 }

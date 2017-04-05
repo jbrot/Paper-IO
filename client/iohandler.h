@@ -60,9 +60,9 @@ private:
 	 */
 	void updatePlayerPositions();
 
-	void processPlayersUpdate(const PacketPlayersUpdate &ppu, bool updatePlayers = true);
-	void processLeaderboardUpdate(const PacketLeaderboardUpdate &plu);
-	void processFullBoard(const PacketResendBoard &prb, bool updatePlayers = true);
+	void processPlayersUpdate(const PacketPlayersUpdate &ppu, bool nested = false);
+	void processLeaderboardUpdate(const PacketLeaderboardUpdate &plu, bool nested = false);
+	void processFullBoard(const PacketResendBoard &prb, bool nested = false);
 	void processJoinGame(const PacketGameJoin &pgj);
 	void processGameTick(const PacketGameTick &pgt);
 };

@@ -43,11 +43,11 @@ void PacketPlayersUpdate::setPlayers(const QHash<plid_t, QString> &pls)
 
 void PacketPlayersUpdate::read(QDataStream &str)
 {
-	str >> players;
+	str >> tick >> players;
 }
 
 void PacketPlayersUpdate::write(QDataStream &str) const
 {
-	str << players;
+	str << tick << players;
 }
 

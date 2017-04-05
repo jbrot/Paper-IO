@@ -8,6 +8,7 @@
  * Direction: Server to Client
  */
 
+#include <QtCore>
 #include "protocol.h"
 
 PacketGameTick::PacketGameTick()
@@ -217,7 +218,8 @@ void PacketGameTick::write(QDataStream &str) const
 			if (diff[i][j] == cv)
 			{
 				count++;
-				if (count < count + 1)
+				// Overflow check. The cast is very important!
+				if (count < static_cast<quint8>(count + 1))
 					continue;
 			}
 
