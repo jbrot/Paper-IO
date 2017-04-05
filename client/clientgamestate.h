@@ -9,11 +9,14 @@
 
 #include "protocol.h"
 
+class Client;
 class ClientGameState;
+class IOHandler;
 
 class ClientPlayer
 {
 friend class ClientGameState;
+friend class IOHandler;
 public:
 	plid_t getId() const;
 	QString getName() const;
@@ -116,6 +119,8 @@ private:
 
 class ClientGameState
 {
+friend class Client;
+friend class IOHandler;
 public:
 	tick_t getTick() const;
 
@@ -134,6 +139,10 @@ public:
 	ClientPlayer *lookupPlayer(plid_t id) const;
 
 	std::vector<ClientPlayer> getPlayers() const;
+
+	plid_t getClientId() const;
+	ClientPlayer *getClient() const;
+
 private:
 	QMutex lock;
 
@@ -144,6 +153,8 @@ private:
 	quint8 leaderboard[10];
 
 	state_t board[CLIENT_FRAME][CLIENT_FRAME];
+
+	plid_t client;
 
 	void lockState();
 	void unlock();

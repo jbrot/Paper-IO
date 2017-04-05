@@ -15,7 +15,7 @@ Client::Client(QWidget *parent)
 	: QWidget(parent)
 	, launcher(new Launcher)
 	, timeout(new QTimer(this))
-	, ioh(new IOHandler(Q_NULLPTR))
+	, ioh(new IOHandler(cgs))
 	, iothread(new QThread(this))
 	, session(Q_NULLPTR)
 {

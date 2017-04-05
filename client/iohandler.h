@@ -12,6 +12,7 @@
 #include <QTcpSocket>
 #include <QTimer>
 
+#include "clientgamestate.h"
 #include "types.h"
 
 class IOHandler : public QObject
@@ -19,7 +20,7 @@ class IOHandler : public QObject
 	Q_OBJECT
 
 public:
-	IOHandler(QObject *parent = Q_NULLPTR);
+	IOHandler(ClientGameState &cgs, QObject *parent = Q_NULLPTR);
 
 public slots:
 	void connectToServer(const QString &host, quint16 port, const QString &name);
@@ -52,6 +53,18 @@ private:
 	QDateTime lastka;
 
 	QString name;
+	ClientGameState &cgs;
+
+	/*
+	 * WARNING: This function must be called within a lock.
+	 */
+	void updatePlayerPositions();
+
+	void processPlayersUpdate(const PacketPlayersUpdate &ppu, bool updatePlayers = true);
+	void processLeaderboardUpdate(const PacketLeaderboardUpdate &plu);
+	void processFullBoard(const PacketResendBoard &prb, bool updatePlayers = true);
+	void processJoinGame(const PacketGameJoin &pgj);
+	void processGameTick(const PacketGameTick &pgt);
 };
 
 #endif // !IOHANDLER_H

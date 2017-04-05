@@ -140,6 +140,7 @@ class PacketFactory : public APacketFactory
 {
 	static_assert(std::is_base_of<Packet, T>::value, "T must derive from Packet!");
 public:
+
 	Packet *instantiate() override
 	{
 		return new T();

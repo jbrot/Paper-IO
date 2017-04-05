@@ -11,6 +11,7 @@
 #include <QThread>
 #include <QWidget>
 
+#include "clientgamestate.h"
 #include "iohandler.h"
 #include "launcher.h"
 
@@ -34,6 +35,8 @@ private slots:
 
 private:
 	Launcher *launcher;
+
+	ClientGameState cgs;
 
 	QTimer *timeout;
 	IOHandler *ioh;
