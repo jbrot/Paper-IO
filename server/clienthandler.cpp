@@ -97,6 +97,7 @@ void ClientHandler::endGame(quint8 score)
 
 void ClientHandler::sendTick()
 {
+	qDebug() << "Sending tick...";
 	if (state != INGAME || !gs)
 	{
 		qWarning() << "Connection" << id <<": Received sendTick() while not in game or with invalid game state!";
@@ -234,7 +235,11 @@ void ClientHandler::newData()
 		str.startTransaction();
 		packet = Packet::readPacket(str);
 		if (!str.commitTransaction())
+		{
+			if (str.status() == QDataStream::ReadPastEnd)
+				str.resetStatus();
 			return;
+		}
 		if (!packet)
 			continue;
 

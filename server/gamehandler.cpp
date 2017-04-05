@@ -41,6 +41,8 @@ gid_t GameHandler::getId() const
 
 void GameHandler::tick()
 {
+	qDebug() << "Game" << id << ": Tick" << gs.getTick();
+
 	// First update AIs.
 	tickAIs();
 
@@ -54,7 +56,7 @@ void GameHandler::tick()
 		spawnPlayers();
 
 	// Run the core game logic.
-	updateGame(gs);
+	//updateGame(gs);
 
 	// Check for dead players and remove.
 	removePlayers();
@@ -64,6 +66,7 @@ void GameHandler::tick()
 	// If we have no players left, quit.
 	if (players.size() == 0)
 	{
+		qDebug() << "Game" << id << ": No more players. Terminating...";
 		tickTimer->stop();
 		emit terminated();
 	} else {
@@ -126,7 +129,7 @@ void GameHandler::spawnPlayers()
 		// it changing when additional clients are registered.
 		plid_t pid = currentId;
 		connect(ch, &ClientHandler::disconnected, this, [this, pid] {
-			playerDisconnected(currentId);
+			playerDisconnected(pid);
 		});
 
 		players.insert(currentId, ch);

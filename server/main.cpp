@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 	// Queued Connection type registrations
 	qRegisterMetaType<QAbstractSocket::SocketError>();
 	qRegisterMetaType<GameState *>();
+	qRegisterMetaType<plid_t>("plid_t");
 
 	// Make sure the protocol is set up
 	registerPackets();

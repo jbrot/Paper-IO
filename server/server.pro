@@ -1,7 +1,7 @@
 # Main Config
 TEMPLATE = app
 TARGET = server
-CONFIG += c++11
+CONFIG += c++11 debug
 
 # Build/Install Directories
 MOC_DIR = $$PWD/../build/server/moc
@@ -10,6 +10,8 @@ DESTDIR = $$PWD/../bin
 
 # Meta Inputs
 QT += widgets network
+
+CXXFLAGS += -g
 
 # Input
 INCLUDEPATH += . $$PWD/../common

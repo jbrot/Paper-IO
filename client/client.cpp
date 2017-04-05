@@ -50,7 +50,7 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::error, timeout, &QTimer::stop);
 	connect(ioh, &IOHandler::connected, this, &Client::connected);
 	connect(ioh, &IOHandler::connected, timeout, &QTimer::stop);
-	//connect(ioh, &IOHandler::connected, ioh, &IOHandler::enterQueue);
+	connect(ioh, &IOHandler::connected, ioh, &IOHandler::enterQueue);
 	connect(ioh, &IOHandler::disconnected, this, &Client::disconnected);
 	connect(ioh, &IOHandler::disconnected, launcher, &Launcher::enable);
 

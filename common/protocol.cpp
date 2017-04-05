@@ -61,6 +61,7 @@ void Packet::writePacket(QDataStream &str, const Packet &packet)
 {
 	str << packet.getId() << packet;
 	qDebug() << "Sent packet:" << packet.getId();
+	qDebug() << "Status" << str.status();
 }
 
 Packet *Packet::readPacket(QDataStream &str)

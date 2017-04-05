@@ -64,6 +64,7 @@ PaperServer::~PaperServer()
 
 void PaperServer::incomingConnection(qintptr socketDescriptor)
 {
+	qDebug() << "Received connection!";
 	QThread *cthrd = new QThread(this);
 	ClientHandler *chand = new ClientHandler;
 	thid_t id = chand->getId();
@@ -72,11 +73,11 @@ void PaperServer::incomingConnection(qintptr socketDescriptor)
 	connect(chand, &ClientHandler::error, [id,this] (QAbstractSocket::SocketError error, QString msg) {
 		this->ioError(id, error, msg);
 	} ); 
-	connect(chand, &ClientHandler::connected, [id,this] {
+	connect(chand, &ClientHandler::connected, this, [id,this] {
 		this->validateConnection(id);
 	} ); 
 	connect(chand, &ClientHandler::disconnected, cthrd, &QThread::quit);
-	connect(chand, &ClientHandler::requestJoinGame, [id,this] (const QString &name) {
+	connect(chand, &ClientHandler::requestJoinGame, this, [id,this] (const QString &name) {
 		this->queueConnection(id, name);
 	} ); 
 
@@ -122,7 +123,7 @@ void PaperServer::validateConnection(thid_t id)
 	if (!connections.contains(id))
 	{
 		ctclock.unlock();
-		qWarning() << "Warning: Connection " << id << " is not registered but claims to be established!";
+		qWarning() << "Warning: Connection" << id << "is not registered but claims to be established!";
 		return;
 	}
 
@@ -130,6 +131,8 @@ void PaperServer::validateConnection(thid_t id)
 	tc.established = true;
 	connections.insert(id, tc);
 	ctclock.unlock();
+
+	qDebug() << "Connection" << id << "validated!";
 }
 
 void PaperServer::queueConnection(thid_t id, const QString &name)
@@ -138,7 +141,7 @@ void PaperServer::queueConnection(thid_t id, const QString &name)
 	if (!connections.contains(id))
 	{
 		ctclock.unlock();
-		qWarning() << "Warning: Connection " << id << " is not registered but requests to be queued!";
+		qWarning() << "Warning: Connection" << id << "is not registered but requests to be queued!";
 		return;
 	}
 
@@ -148,12 +151,14 @@ void PaperServer::queueConnection(thid_t id, const QString &name)
 		tc.name = name;
 	QMetaObject::invokeMethod( tc.client, "enqueue");
 
+	ctclock.unlock();
+
+	qDebug() << "Connection" << id << "queued.";
+
 	if (!games.size())
 		launchGame();
 	else if (waiting.size() > MAX_QUEUE && !ngt->isActive())
 		ngt->start();
-
-	ctclock.unlock();
 }
 
 void PaperServer::deleteConnection(thid_t id)
@@ -197,6 +202,8 @@ void PaperServer::launchGame()
 	games.insert(id, gc);
 
 	QMetaObject::invokeMethod(ghand, "startGame");
+
+	qDebug() << "Game" << id << "launched.";
 }
 
 void PaperServer::deleteGame(gid_t id)

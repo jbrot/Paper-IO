@@ -295,6 +295,8 @@ void IOHandler::newData()
 {
 	Packet *packet = NULL;
 
+	qDebug() << "new data.";
+
 	// Read all available packets.
 	while (true)
 	{
