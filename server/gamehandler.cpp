@@ -51,27 +51,32 @@ void GameHandler::tick()
 
 	gs.nextTick();
 
-	// Spawn new players if needed.
-	if (gs.players.size() < playerCount)
-		spawnPlayers();
+	qDebug() << "Game" << id << ": Player number" << gs.players.size();
 
 	// Run the core game logic.
-	//updateGame(gs);
+	updateGame(gs);
 
 	// Check for dead players and remove.
 	removePlayers();
 
-	gs.unlock();
+	// Spawn new players if needed.
+	if (gs.players.size() < playerCount)
+		spawnPlayers();
 
 	// If we have no players left, quit.
 	if (players.size() == 0)
 	{
+		gs.unlock();
+
 		qDebug() << "Game" << id << ": No more players. Terminating...";
 		tickTimer->stop();
 		emit terminated();
-	} else {
-		emit tickComplete();
+		return;
 	}
+
+	gs.unlock();
+
+	emit tickComplete();
 }
 
 void GameHandler::tickAIs()
@@ -102,8 +107,12 @@ void GameHandler::tickAIs()
 
 void GameHandler::spawnPlayers()
 {
+	qDebug() << "Game" << id << ": Spawning...";
+
 	std::vector<std::pair<pos_t, pos_t> > spawns = findSpawns(playerCount - gs.players.size(), gs);
 	QList<QPair<ClientHandler *, QString>> clients = ps.dequeueClients(spawns.size());
+
+	qDebug() << "Game" << id <<": Found" << spawns.size() << "locations and" << clients.size() << "players.";
 
 	auto siter = spawns.begin();
 	auto citer = clients.begin();

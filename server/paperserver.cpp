@@ -111,9 +111,8 @@ void PaperServer::ioError(thid_t id, QAbstractSocket::SocketError err, QString m
 	// If the connection is established, it will most likely emit a disconnected event and be removed there
 	// However, if it is not established, then the socket couldn't be opened so we need to remove it from the map.
 	ThreadClient tc = connections.value(id);
-	if (tc.established)
-		return;
-	connections.remove(id);
+	if (!tc.established)
+		connections.remove(id);
 	ctclock.unlock();
 }
 
