@@ -20,7 +20,7 @@ struct PaperServer::ThreadGame
 };
 
 // If more than this many players are queueing, then we start a new game.
-const int MAX_QUEUE = 4;
+const int MAX_QUEUE = 2;
 
 PaperServer::PaperServer(QObject *parent) 
 	: QTcpServer(parent)
@@ -31,6 +31,7 @@ PaperServer::PaperServer(QObject *parent)
 	, ngt(new QTimer(this))
 {
 	ngt->setInterval(5000);
+	connect(ngt, &QTimer::timeout, this, &PaperServer::launchGame);
 }
 
 PaperServer::~PaperServer()
