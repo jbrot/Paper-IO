@@ -19,8 +19,10 @@ CXXFLAGS += -g
 INCLUDEPATH += . $$PWD/../common
 HEADERS += client.h \
 	clientgamestate.h \
+	font.h \
 	iohandler.h \
 	launcher.h \
+	waiting.h \
 	../common/protocol.h \
 	../common/types.h
 SOURCES += main.cpp \
@@ -28,8 +30,10 @@ SOURCES += main.cpp \
 	clientgamestate.cpp \
 	clientplayer.cpp \
 	clientsquarestate.cpp \
+	font.cpp \
 	iohandler.cpp \
 	launcher.cpp \
+	waiting.cpp \
 # Common files
 	../common/packetgameend.cpp \
 	../common/packetgamejoin.cpp \

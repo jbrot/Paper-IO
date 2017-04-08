@@ -5,6 +5,7 @@
 #include <QApplication>
 
 #include "client.h"
+#include "font.h"
 #include "protocol.h"
 
 void registerPackets();
@@ -16,11 +17,54 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("Delta Epsilon");
 	QCoreApplication::setOrganizationDomain("dank.meeeeee.me");
 	QCoreApplication::setApplicationName("Arduino-IO");
-	//
+	
 	// We need to do this so we can communicate errors across threads.
 	qRegisterMetaType<QAbstractSocket::SocketError>();
 
 	registerPackets();
+
+	QString style = R"css(
+QWidget {
+	background-color: #333;
+	color: #FFF;
+}
+
+QPushButton { 
+	background-color: #FC6;
+	border-radius: 0px;
+	border-style: solid;
+	border-color: #F60;
+	border-bottom-width: 8px;
+	font-size: 40px;
+	font-weight: 600;
+	color: #F60;
+	padding: 6px 0.8em;
+}
+
+QPushButton:hover {
+	background-color: #FC0;
+}
+
+QPushButton:pressed {
+	background-color: #F90;
+}
+
+QLineEdit {
+	background-color: #FFE5CC;
+	border-radius: 0px;
+	border-style: solid;
+	border-color: #A6683F;
+	border-bottom-width: 8px;
+	font-size: 40px;
+	font-weight: 200;
+	color: #603920;
+	padding: 6px;
+}
+
+	)css";
+
+	app.setStyleSheet(style);
+	QApplication::setFont(getDejaVuFont());
 
 	Client client;
 	client.show();

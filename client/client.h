@@ -3,8 +3,8 @@
  * handles most of the high-level set up.
  */
 
-#ifndef Client_H
-#define Client_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #include <QNetworkSession>
 #include <QTimer>
@@ -12,15 +12,18 @@
 #include <QWidget>
 
 #include "clientgamestate.h"
+//#include "gamerenderer.h"
+//#include "gameover.h"
 #include "iohandler.h"
 #include "launcher.h"
+#include "waiting.h"
 
 class Client : public QWidget
 {
 	Q_OBJECT
 
 public:
-	Client(QWidget *parent = 0);
+	Client(QWidget *parent = Q_NULLPTR);
 	~Client();
 
 	QSize sizeHint() const override;
@@ -29,7 +32,6 @@ private slots:
 	void displayError(QAbstractSocket::SocketError socketError, QString msg);
 	void displayError2(QNetworkSession::SessionError sessionError);
 	void sessionOpened();
-	void connected();
 	void disconnected();
 	void connectTimeout();
 
@@ -41,6 +43,13 @@ private:
 	QTimer *timeout;
 	IOHandler *ioh;
 	QThread *iothread;
+
+	Waiting *waiting;
+
+//	QTimer *rtimer;
+//	GameRenderer *render;
+
+//	GameOver *gameover;
 
 	QNetworkSession *session;
 };

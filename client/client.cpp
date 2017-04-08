@@ -7,6 +7,7 @@
 #include <QNetworkConfigurationManager>
 #include <QMessageBox>
 #include <QSettings>
+#include <QStackedLayout>
 #include <QVBoxLayout>
 
 #include "client.h"
@@ -14,16 +15,23 @@
 Client::Client(QWidget *parent)
 	: QWidget(parent)
 	, launcher(new Launcher)
+	, cgs()
 	, timeout(new QTimer(this))
 	, ioh(new IOHandler(cgs))
 	, iothread(new QThread(this))
+	, waiting(new Waiting)
 	, session(Q_NULLPTR)
 {
 	setWindowTitle(tr("Arduino-IO"));
 
+	QStackedLayout *stack = new QStackedLayout();
+	stack->addWidget(launcher);
+	stack->addWidget(waiting);
+	//stack->setCurrentIndex(1);
+
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
-	layout->addWidget(launcher);
+	layout->addLayout(stack);
 	setLayout(layout);
 
 	// Network setup
@@ -48,11 +56,18 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::error, this, &Client::displayError);
 	connect(ioh, &IOHandler::error, launcher, &Launcher::enable);
 	connect(ioh, &IOHandler::error, timeout, &QTimer::stop);
-	connect(ioh, &IOHandler::connected, this, &Client::connected);
 	connect(ioh, &IOHandler::connected, timeout, &QTimer::stop);
 	connect(ioh, &IOHandler::connected, ioh, &IOHandler::enterQueue);
 	connect(ioh, &IOHandler::disconnected, this, &Client::disconnected);
 	connect(ioh, &IOHandler::disconnected, launcher, &Launcher::enable);
+	connect(ioh, &IOHandler::disconnected, stack, [stack] {
+		stack->setCurrentIndex(0);
+	});
+	connect(ioh, &IOHandler::queued, stack, [stack] {
+		stack->setCurrentIndex(1);
+	});
+
+	connect(waiting, &Waiting::cancel, ioh, &IOHandler::disconnect);
 
 	iothread->start();
 
@@ -148,11 +163,6 @@ void Client::displayError2(QNetworkSession::SessionError sessionError)
 	                         tr("The following error occurred: %1.").arg(session->errorString()));
 }
 
-void Client::connected()
-{
-	QMessageBox::information(this, tr("Arduino-IO"),
-	                         tr("Connected!"));
-}
 
 void Client::disconnected()
 {

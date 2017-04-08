@@ -1,5 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
 	<file>fonts/Freshman.ttf</file>
+	<file>fonts/DejaVuSans.ttf</file>
+	<file>fonts/DejaVuSans-Bold.ttf</file>
 </qresource>
 </RCC>

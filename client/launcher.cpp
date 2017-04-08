@@ -2,14 +2,13 @@
  * This is the implementaton of Launcher, the initial client GUI.
  */
 
-#include <QFontDatabase>
-#include <QFormLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QIntValidator>
 #include <QSettings>
 #include <QtCore/QStringBuilder>
-#include <QVBoxLayout>
 
+#include "font.h"
 #include "launcher.h"
 
 static QString getTitleString(QString base)
@@ -34,14 +33,11 @@ Launcher::Launcher(QWidget *parent)
 	, nameEdit(new QLineEdit())
 	, ipEdit(new QLineEdit())
 	, portEdit(new QLineEdit())
-	, ctc(new QPushButton(tr("Connect")))
+	, ctc(new QPushButton(tr("CONNECT")))
 	, enabled(true)
 	, ctenabled(true)
 {
-	// Load custom font. Code from http://stackoverflow.com/questions/30973781/qt-add-custom-font-from-resource
-	int id = QFontDatabase::addApplicationFont(":/fonts/Freshman.ttf");
-	QString family = QFontDatabase::applicationFontFamilies(id).at(0);
-	QFont freshman(family);
+	QFont freshman = getFreshmanFont();
 	freshman.setPointSize(72);
 	
 	// GUI Set up
@@ -49,58 +45,75 @@ Launcher::Launcher(QWidget *parent)
 	title->setTextInteractionFlags(Qt::NoTextInteraction);
 	title->setAlignment(Qt::AlignCenter);
 	title->setFont(freshman);
-	title->setStyleSheet("QLabel { background-color: #333; }");
-	title->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
 	status->setAlignment(Qt::AlignLeft);
 	status->setStyleSheet("QLabel { background-color: #333; color: #FFF; }");
 	status->setIndent(10);
 	status->setMargin(3);
 
-	QLabel *name = new QLabel(tr("Name:"));
-
-	QLabel *ip = new QLabel(tr("Server IP Address:"));
-	QLabel *port = new QLabel(tr("Server Port:"));
-	portEdit->setValidator(new QIntValidator(1, 65535, this));
-
 	QSettings settings;
 	settings.beginGroup(QLatin1String("launcher"));
+
 	nameEdit->setText(settings.value(QLatin1String("name"), QLatin1String("")).toString());
+	nameEdit->setPlaceholderText("Your Name");
+	nameEdit->setAttribute(Qt::WA_MacShowFocusRect, 0);
+	nameEdit->setMaximumWidth(400);
+
 	ipEdit->setText(settings.value(QLatin1String("ip"), QLatin1String("")).toString());
+	ipEdit->setPlaceholderText("Server IP");
+	ipEdit->setAttribute(Qt::WA_MacShowFocusRect, 0);
+	ipEdit->setMaximumWidth(350);
+
 	portEdit->setText(settings.value(QLatin1String("port"), QLatin1String("")).toString());
+	portEdit->setPlaceholderText("Port");
+	portEdit->setValidator(new QIntValidator(1, 65535, this));
+	portEdit->setAttribute(Qt::WA_MacShowFocusRect, 0);
+	portEdit->setMaximumWidth(150);
+	portEdit->setMaxLength(5);
+
 	settings.endGroup();
 
 	ctc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	// If we have saved settings, then we should allow the user to connect immediately
 	toggleConnect();
 
-	QFormLayout *flayout = new QFormLayout();
-	flayout->addRow(name, nameEdit);
-	flayout->addRow(ip, ipEdit);
-	flayout->addRow(port, portEdit);
-	flayout->setSizeConstraint(QLayout::SetFixedSize);
+	QHBoxLayout *nlayout = new QHBoxLayout();
+	nlayout->setContentsMargins(0, 0, 0, 0);
+	nlayout->setSpacing(0);
+	nlayout->addItem(new QSpacerItem(10, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding));
+	nlayout->addWidget(nameEdit);
+	nlayout->addItem(new QSpacerItem(10, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding));
 
-	QSpacerItem *ls = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	QSpacerItem *rs = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	QHBoxLayout *slayout = new QHBoxLayout();
+	slayout->setContentsMargins(0, 0, 0, 0);
+	slayout->setSpacing(0);
+	slayout->addItem(new QSpacerItem(10, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding));
+	slayout->addWidget(ipEdit);
+	slayout->addItem(new QSpacerItem(10, 0, QSizePolicy::Fixed, QSizePolicy::Expanding));
+	slayout->addWidget(portEdit);
+	slayout->addItem(new QSpacerItem(10, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding));
 
-	QSpacerItem *ms = new QSpacerItem(0, 10, QSizePolicy::Expanding, QSizePolicy::Fixed);
+	QGridLayout *layout = new QGridLayout();
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setSpacing(0);
+	layout->addItem(new QSpacerItem(0, 10, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 0, 0, 1, 5);
+	layout->addItem(new QSpacerItem(20, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding), 1, 0, 7, 1);
+	layout->addItem(new QSpacerItem(20, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding), 1, 4, 7, 1);
+	layout->addItem(new QSpacerItem(0, 10, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 8, 0, 1, 5);
 
-	QHBoxLayout *hlayout = new QHBoxLayout();
-	hlayout->addSpacerItem(ls);
-	hlayout->addLayout(flayout);
-	hlayout->addWidget(ctc);
-	hlayout->addSpacerItem(rs);
-	hlayout->setSpacing(10);
+	layout->addWidget(title, 1, 1, 1, 3);
+	layout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed), 2, 1, 1, 3);
+	layout->addLayout(nlayout, 3, 1, 1, 3);
+	layout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed), 4, 1, 1, 3);
+	layout->addLayout(slayout, 5, 1, 1, 3);
+	layout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed), 6, 1, 1, 3);
+	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 7, 1, 1, 1);
+	layout->addWidget(ctc, 7, 2);
+	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 7, 3, 1, 1);
 
-	QVBoxLayout *vlayout = new QVBoxLayout();
-	vlayout->setContentsMargins(0, 0, 0, 10);
-	vlayout->setSpacing(0);
-	vlayout->addWidget(title);
-	vlayout->addWidget(status);
-	vlayout->addSpacerItem(ms);
-	vlayout->addLayout(hlayout);
+	layout->addWidget(status, 9, 0, 1, 5);
 
-	setLayout(vlayout);
+	setLayout(layout);
 
 	connect(nameEdit, &QLineEdit::textChanged, this, &Launcher::toggleConnect);
 	connect(ipEdit, &QLineEdit::textChanged, this, &Launcher::toggleConnect);
