@@ -21,8 +21,10 @@ HEADERS += client.h \
 	clientgamestate.h \
 	font.h \
 	gameover.h \
+	gamewidget.h \
 	iohandler.h \
 	launcher.h \
+	render.h \
 	waiting.h \
 	../common/protocol.h \
 	../common/types.h
@@ -33,8 +35,10 @@ SOURCES += main.cpp \
 	clientsquarestate.cpp \
 	font.cpp \
 	gameover.cpp \
+	gamewidget.cpp \
 	iohandler.cpp \
 	launcher.cpp \
+	render.cpp \
 	waiting.cpp \
 # Common files
 	../common/packetgameend.cpp \

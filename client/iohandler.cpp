@@ -342,6 +342,7 @@ void IOHandler::newData()
 			break;
 		case PACKET_GAME_JOIN:
 			processJoinGame(*static_cast<PacketGameJoin *>(packet));
+			emit enteredGame();
 			break;
 		case PACKET_GAME_TICK:
 			processGameTick(*static_cast<PacketGameTick *>(packet));

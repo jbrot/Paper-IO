@@ -11,6 +11,7 @@
 
 class Client;
 class ClientGameState;
+class GameWidget;
 class IOHandler;
 
 class ClientPlayer
@@ -120,6 +121,7 @@ private:
 class ClientGameState
 {
 friend class Client;
+friend class GameWidget;
 friend class IOHandler;
 public:
 	tick_t getTick() const;

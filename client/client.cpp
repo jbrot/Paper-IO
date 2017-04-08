@@ -20,6 +20,8 @@ Client::Client(QWidget *parent)
 	, ioh(new IOHandler(cgs))
 	, iothread(new QThread(this))
 	, waiting(new Waiting)
+	, rtimer(new QTimer(this))
+	, render(new GameWidget(cgs))
 	, gameover(new GameOver)
 	, session(Q_NULLPTR)
 {
@@ -28,15 +30,15 @@ Client::Client(QWidget *parent)
 	QStackedLayout *stack = new QStackedLayout();
 	stack->addWidget(launcher);
 	stack->addWidget(waiting);
-	QLabel *temp = new QLabel("temp", this);
-	stack->addWidget(temp);
+	stack->addWidget(render);
 	stack->addWidget(gameover);
-	//stack->setCurrentIndex(3);
 
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->addLayout(stack);
 	setLayout(layout);
+
+	rtimer->setInterval(30);
 
 	// Network setup
 	ioh->moveToThread(iothread);
@@ -64,18 +66,26 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::connected, ioh, &IOHandler::enterQueue);
 	connect(ioh, &IOHandler::disconnected, this, &Client::disconnected);
 	connect(ioh, &IOHandler::disconnected, launcher, &Launcher::enable);
+	connect(ioh, &IOHandler::disconnected, rtimer, &QTimer::stop);
 	connect(ioh, &IOHandler::disconnected, stack, [stack] {
 		stack->setCurrentIndex(0);
 	});
 	connect(ioh, &IOHandler::queued, stack, [stack] {
 		stack->setCurrentIndex(1);
 	});
+	connect(ioh, &IOHandler::enteredGame, rtimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+	connect(ioh, &IOHandler::enteredGame, stack, [stack] {
+		stack->setCurrentIndex(2);
+	});
+	connect(ioh, &IOHandler::gameEnded, rtimer, &QTimer::stop);
 	connect(ioh, &IOHandler::gameEnded, gameover, &GameOver::setScore);
 	connect(ioh, &IOHandler::gameEnded, stack, [stack] {
 		stack->setCurrentIndex(3);
 	});
 
 	connect(waiting, &Waiting::cancel, ioh, &IOHandler::disconnect);
+
+	connect(rtimer, &QTimer::timeout, render, &GameWidget::animate);
 
 	connect(gameover, &GameOver::playAgain, ioh, &IOHandler::enterQueue);
 	connect(gameover, &GameOver::disconnect, ioh, &IOHandler::disconnect);

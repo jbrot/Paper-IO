@@ -12,7 +12,7 @@
 #include <QWidget>
 
 #include "clientgamestate.h"
-//#include "gamerenderer.h"
+#include "gamewidget.h"
 #include "gameover.h"
 #include "iohandler.h"
 #include "launcher.h"
@@ -46,8 +46,8 @@ private:
 
 	Waiting *waiting;
 
-//	QTimer *rtimer;
-//	GameRenderer *render;
+	QTimer *rtimer;
+	GameWidget *render;
 
 	GameOver *gameover;
 
