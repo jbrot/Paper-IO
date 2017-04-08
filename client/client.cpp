@@ -20,6 +20,7 @@ Client::Client(QWidget *parent)
 	, ioh(new IOHandler(cgs))
 	, iothread(new QThread(this))
 	, waiting(new Waiting)
+	, gameover(new GameOver)
 	, session(Q_NULLPTR)
 {
 	setWindowTitle(tr("Arduino-IO"));
@@ -27,7 +28,10 @@ Client::Client(QWidget *parent)
 	QStackedLayout *stack = new QStackedLayout();
 	stack->addWidget(launcher);
 	stack->addWidget(waiting);
-	//stack->setCurrentIndex(1);
+	QLabel *temp = new QLabel("temp", this);
+	stack->addWidget(temp);
+	stack->addWidget(gameover);
+	//stack->setCurrentIndex(3);
 
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -66,8 +70,15 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::queued, stack, [stack] {
 		stack->setCurrentIndex(1);
 	});
+	connect(ioh, &IOHandler::gameEnded, gameover, &GameOver::setScore);
+	connect(ioh, &IOHandler::gameEnded, stack, [stack] {
+		stack->setCurrentIndex(3);
+	});
 
 	connect(waiting, &Waiting::cancel, ioh, &IOHandler::disconnect);
+
+	connect(gameover, &GameOver::playAgain, ioh, &IOHandler::enterQueue);
+	connect(gameover, &GameOver::disconnect, ioh, &IOHandler::disconnect);
 
 	iothread->start();
 

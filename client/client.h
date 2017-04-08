@@ -13,7 +13,7 @@
 
 #include "clientgamestate.h"
 //#include "gamerenderer.h"
-//#include "gameover.h"
+#include "gameover.h"
 #include "iohandler.h"
 #include "launcher.h"
 #include "waiting.h"
@@ -49,7 +49,7 @@ private:
 //	QTimer *rtimer;
 //	GameRenderer *render;
 
-//	GameOver *gameover;
+	GameOver *gameover;
 
 	QNetworkSession *session;
 };

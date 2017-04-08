@@ -20,6 +20,7 @@ INCLUDEPATH += . $$PWD/../common
 HEADERS += client.h \
 	clientgamestate.h \
 	font.h \
+	gameover.h \
 	iohandler.h \
 	launcher.h \
 	waiting.h \
@@ -31,6 +32,7 @@ SOURCES += main.cpp \
 	clientplayer.cpp \
 	clientsquarestate.cpp \
 	font.cpp \
+	gameover.cpp \
 	iohandler.cpp \
 	launcher.cpp \
 	waiting.cpp \

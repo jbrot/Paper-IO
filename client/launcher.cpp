@@ -11,6 +11,7 @@
 #include "font.h"
 #include "launcher.h"
 
+// TODO Merge with copy in gameover.cpp
 static QString getTitleString(QString base)
 {
 	QStringList colors;
