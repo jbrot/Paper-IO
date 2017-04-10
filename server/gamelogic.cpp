@@ -20,6 +20,7 @@ void floodMarkSquares(Player player, GameState &state);
 void fillInBody(Player player, GameState &state);
 void checkForCompletedLoop(Player player, GameState &state);
 bool detectWin(Player player, GameState &state);
+bool squareChecks(Player player, SquareState square, GameState &state);
 
 std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state);
 bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state);
@@ -50,6 +51,10 @@ void updateGame(GameState &state)
 
 		// Check if player completed a loop
 		checkForCompletedLoop(allPlayers[i], state);
+
+		// Check for winner
+		if (detectWin(allPlayers[i], state))
+			allPlayers[i].kill();
 
 	}
 	
@@ -127,13 +132,13 @@ void leaveTrail(Player &player, GameState &state)
 void killPlayers(GameState &state)
 {
 	// Loop over all squares
-	for (int j = 0; j <= (state.getWidth() + 1); ++j){
-		for (int k = 0; k <= (state.getHeight() + 1); ++k){
+	for (int j = 0; j <= (state.getWidth() - 1); ++j){
+		for (int k = 0; k <= (state.getHeight() - 1); ++k){
 
 			SquareState square = state.getState(j, k);
 
-			// Check if square is occupied and kill accordingly
-			if (square.getOccupyingPlayer() && square.getOccupyingPlayer()->isDead()){
+			// Check if square is has a trail and kill accordingly
+			if (square.getTrailPlayer() && square.getTrailPlayer()->isDead()){
 				square.setTrailType(NOTRAIL);
 			}
 
@@ -152,14 +157,13 @@ void checkForTrail(Player player, GameState &state)
 	
 	SquareState square = state.getState(xpos, ypos);
 	
-	if (square.getTrailType() != 0){
-		square.getOccupyingPlayer()->kill();
+	if (square.hasTrail()){
+		square.getTrailPlayer()->kill();
 	}
 }
 
 void checkForBoundary(Player player, GameState &state)
 {
-
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
 
@@ -185,29 +189,25 @@ void floodMarkSquares(Player player, GameState &state)
 		SquareState left = state.getState(last.first - 1, last.second);
 		SquareState right = state.getState(last.first + 1, last.second);
 
-		if (!(up.isOutOfBounds() || up.getOwningPlayerId() == player.getId()
-			|| up.getTrailPlayerId() == player.getId() || up.hasBeenChecked()))
+		if (squareChecks(player, up, state))
 		{
 			coordinatesStack.push_back({up.getX(),up.getY()});
 			up.markAsChecked();
 			continue;
 		}
-		if (!(down.isOutOfBounds() || player.getId() == down.getOwningPlayerId() || player.getId()
-			== down.getTrailPlayerId() || down.hasBeenChecked()))
+		if (squareChecks(player, down, state))
 		{
 			coordinatesStack.push_back({down.getX(),down.getY()});
 			down.markAsChecked();
 			continue;
 		}
-		if (!(left.isOutOfBounds() || player.getId() == left.getOwningPlayerId() || player.getId()
-			== left.getTrailPlayerId() || left.hasBeenChecked()))
+		if (squareChecks(player, left, state))
 		{
 			coordinatesStack.push_back({left.getX(),left.getY()});
 			left.markAsChecked();
 			continue;
 		}
-		if (!(right.isOutOfBounds() || player.getId() == right.getOwningPlayerId() || player.getId()
-			== right.getTrailPlayerId() || right.hasBeenChecked()))
+		if (squareChecks(player, right, state))
 		{
 			coordinatesStack.push_back({right.getX(),right.getY()});
 			right.markAsChecked();
@@ -220,7 +220,21 @@ void floodMarkSquares(Player player, GameState &state)
 
 }
 
-bool shouldContinue;
+bool squareChecks(Player player, SquareState square, GameState &state)
+{
+	if (square.getX() < -1 || square.getY() < -1 ||
+		square.getX() > state.getWidth() || square.getY() > state.getHeight())
+		return false;
+	if (square.getOwningPlayer() && square.getOwningPlayerId() == player.getId())
+		return false;
+	if (square.getTrailPlayer() && square.getTrailPlayerId() == player.getId())
+		return false;
+	if (square.hasBeenChecked())
+		return false;
+
+	return true;
+
+}
 
 void fillInBody(Player player, GameState &state)
 {
@@ -233,10 +247,10 @@ void fillInBody(Player player, GameState &state)
 			SquareState square = state.getState(i, j);
 			if (!square.isFlooded())
 			{
-				square.setOwningPlayerId(player.getId());
-
 				if (square.getOwningPlayer())
 					square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
+
+				square.setOwningPlayerId(player.getId());
 
 				player.setScore(player.getScore() + 1);
 			}
@@ -250,8 +264,8 @@ void fillInBody(Player player, GameState &state)
 
 void checkForCompletedLoop(Player player, GameState &state)
 {
-	plid_t xpos = player.getX();
-	plid_t ypos = player.getY();
+	pos_t xpos = player.getX();
+	pos_t ypos = player.getY();
 
 	bool trailExists = false;
 
@@ -276,11 +290,9 @@ void checkForCompletedLoop(Player player, GameState &state)
 
 bool detectWin(Player player, GameState &state){
 
-	SquareState square = state.getState(1, 1);
-
-	for (int i = 1; i <= state.getWidth(); ++i)
+	for (int i = 0; i <= state.getWidth() -1 ; ++i)
 	{
-		for (int j = 1; j <= state.getHeight(); ++j)
+		for (int j = 0; j <= state.getHeight() - 1; ++j)
 		{
 			if (state.getState(i, j).getOwningPlayerId() != player.getId())
 				return false;
@@ -298,9 +310,9 @@ std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state)
 	std::vector<std::pair<pos_t, pos_t>> availableSpawns;
 	std::vector<std::pair<pos_t, pos_t>> randomSpawns;
 
-	for (int i = 2; i <= state.getWidth() - 1; i = i + 3)
+	for (int i = 2; i <= state.getWidth() - 3; i = i + 3)
 	{
-		for (int j = 2; j <= state.getHeight() - 1; j = j + 3)
+		for (int j = 2; j <= state.getHeight() - 3; j = j + 3)
 		{
 			if (checkIfSpawnable(i, j, state))
 				availableSpawns.push_back({i,j});
@@ -322,9 +334,9 @@ std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state)
 
 bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state){
 
-	for (int i = xPos - 1; i <= xPos + 1; ++i)
+	for (int i = xPos - 2; i <= xPos + 2; ++i)
 	{
-		for (int j = yPos - 1; j <= yPos + 1; ++j)
+		for (int j = yPos - 2; j <= yPos + 2; ++j)
 		{
 			if (state.getState(i, j).hasTrail() || state.getState(i, j).isOccupied() || state.getState(i, j).isOwned())
 				return false;
@@ -339,8 +351,8 @@ bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state){
 void configureSpawn(Player *pl, GameState &state)
 {
 
-	int xPos = pl->getX();
-	int yPos = pl->getY();
+	pos_t xPos = pl->getX();
+	pos_t yPos = pl->getY();
 
 	for (int i = xPos - 1; i <= xPos + 1; ++i)
 	{
