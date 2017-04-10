@@ -220,6 +220,8 @@ void floodMarkSquares(Player player, GameState &state)
 
 }
 
+bool shouldContinue;
+
 void fillInBody(Player player, GameState &state)
 {
 

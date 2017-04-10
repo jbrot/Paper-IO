@@ -108,14 +108,13 @@ void Player::kill()
 	y = -2;
 }
 
-quint16 Player::getScore() const
+score_t Player::getScore() const
 {
 	return score;
 }
 
-void Player::setScore(quint16 sc)
+void Player::setScore(score_t sc)
 {
-	sc = sc > 200 ? 200 : sc;
 	if (sc == score)
 		return;
 
