@@ -35,22 +35,17 @@ Launcher::Launcher(QWidget *parent)
 	, ipEdit(new QLineEdit())
 	, portEdit(new QLineEdit())
 	, ctc(new QPushButton(tr("CONNECT")))
+	, ard(new QPushButton(tr("CONNECT TO ARDUINO")))
 	, enabled(true)
 	, ctenabled(true)
+	, aenabled(true)
 {
-	QFont freshman = getFreshmanFont();
-	freshman.setPointSize(72);
-	
 	// GUI Set up
 	QLabel *title = new QLabel(getTitleString(tr("Arduino-IO")));
 	title->setTextInteractionFlags(Qt::NoTextInteraction);
-	title->setAlignment(Qt::AlignCenter);
-	title->setFont(freshman);
-
-	status->setAlignment(Qt::AlignLeft);
-	status->setStyleSheet("QLabel { background-color: #333; color: #FFF; }");
-	status->setIndent(10);
-	status->setMargin(3);
+	title->setAlignment(Qt::AlignCenter | Qt::AlignBottom);
+	title->setFont(getFreshmanFont());
+	title->setStyleSheet("QLabel { font-size: 72px; }");
 
 	QSettings settings;
 	settings.beginGroup(QLatin1String("launcher"));
@@ -78,6 +73,10 @@ Launcher::Launcher(QWidget *parent)
 	// If we have saved settings, then we should allow the user to connect immediately
 	toggleConnect();
 
+	ard->setStyleSheet("QPushButton { font-size: 20px; }");
+	ard->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+	// Center sublayouts
 	QHBoxLayout *nlayout = new QHBoxLayout();
 	nlayout->setContentsMargins(0, 0, 0, 0);
 	nlayout->setSpacing(0);
@@ -94,25 +93,36 @@ Launcher::Launcher(QWidget *parent)
 	slayout->addWidget(portEdit);
 	slayout->addItem(new QSpacerItem(10, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding));
 
+	// Bottom row
+	QHBoxLayout *blayout = new QHBoxLayout();
+	blayout->setContentsMargins(10, 0, 10, 0);
+	blayout->addWidget(status, 0, Qt::AlignBottom);
+	blayout->addStretch(1);
+	blayout->addWidget(ard);
+
 	QGridLayout *layout = new QGridLayout();
-	layout->setContentsMargins(0, 0, 0, 0);
-	layout->setSpacing(0);
-	layout->addItem(new QSpacerItem(0, 10, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 0, 0, 1, 5);
-	layout->addItem(new QSpacerItem(20, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding), 1, 0, 7, 1);
-	layout->addItem(new QSpacerItem(20, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Expanding), 1, 4, 7, 1);
-	layout->addItem(new QSpacerItem(0, 10, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 8, 0, 1, 5);
+	layout->setContentsMargins(0, 10, 0, 10);
+	layout->setHorizontalSpacing(0);
+	layout->setVerticalSpacing(20);
 
+	// Spacing around outside
+	layout->setRowMinimumHeight(0,20);
+	layout->setRowStretch(0,1);
+	layout->setRowMinimumHeight(5,20);
+	layout->setRowStretch(5,1);
+	layout->setColumnMinimumWidth(0,20);
+	layout->setColumnStretch(0,1);
+	layout->setColumnMinimumWidth(4,20);
+	layout->setColumnStretch(4,1);
+
+	// Center content
 	layout->addWidget(title, 1, 1, 1, 3);
-	layout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed), 2, 1, 1, 3);
-	layout->addLayout(nlayout, 3, 1, 1, 3);
-	layout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed), 4, 1, 1, 3);
-	layout->addLayout(slayout, 5, 1, 1, 3);
-	layout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed), 6, 1, 1, 3);
-	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 7, 1, 1, 1);
-	layout->addWidget(ctc, 7, 2);
-	layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::MinimumExpanding), 7, 3, 1, 1);
+	layout->addLayout(nlayout, 2, 1, 1, 3);
+	layout->addLayout(slayout, 3, 1, 1, 3);
+	layout->addWidget(ctc, 4, 2);
 
-	layout->addWidget(status, 9, 0, 1, 5);
+	// Bottom
+	layout->addLayout(blayout, 6, 0, 1, 5);
 
 	setLayout(layout);
 
@@ -120,6 +130,7 @@ Launcher::Launcher(QWidget *parent)
 	connect(ipEdit, &QLineEdit::textChanged, this, &Launcher::toggleConnect);
 	connect(portEdit, &QLineEdit::textChanged, this, &Launcher::toggleConnect);
 	connect(ctc, &QAbstractButton::clicked, this, &Launcher::doConnect);
+	connect(ard, &QAbstractButton::clicked, this, &Launcher::connectToArduino);
 }
 
 void Launcher::toggleConnect()
@@ -157,6 +168,16 @@ void Launcher::disableConnect()
 {
 	ctenabled = false;
 	toggleConnect();
+}
+
+void Launcher::enableArduino()
+{
+	ard->setEnabled(true);
+}
+
+void Launcher::disableArduino()
+{
+	ard->setEnabled(false);
 }
 
 void Launcher::doConnect()

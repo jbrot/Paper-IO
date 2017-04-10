@@ -67,6 +67,7 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::disconnected, this, &Client::disconnected);
 	connect(ioh, &IOHandler::disconnected, launcher, &Launcher::enable);
 	connect(ioh, &IOHandler::disconnected, rtimer, &QTimer::stop);
+	connect(ioh, &IOHandler::disconnected, render, &QWidget::clearFocus);
 	connect(ioh, &IOHandler::disconnected, stack, [stack] {
 		stack->setCurrentIndex(0);
 	});
@@ -77,7 +78,9 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::enteredGame, stack, [stack] {
 		stack->setCurrentIndex(2);
 	});
+	connect(ioh, &IOHandler::enteredGame, render, static_cast<void (QWidget::*)()>(&QWidget::setFocus));
 	connect(ioh, &IOHandler::gameEnded, rtimer, &QTimer::stop);
+	connect(ioh, &IOHandler::gameEnded, render, &QWidget::clearFocus);
 	connect(ioh, &IOHandler::gameEnded, gameover, &GameOver::setScore);
 	connect(ioh, &IOHandler::gameEnded, stack, [stack] {
 		stack->setCurrentIndex(3);

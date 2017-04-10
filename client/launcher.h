@@ -25,6 +25,9 @@ public slots:
 	void enableConnect();
 	void disableConnect();
 
+	void enableArduino();
+	void disableArduino();
+
 	void setStatus(const QString &msg);
 
 private slots:
@@ -33,6 +36,7 @@ private slots:
 
 signals:
 	void connectToServer(const QString &host, quint16 port, const QString &name);
+	void connectToArduino();
 
 private:
 	QLabel *status;
@@ -40,9 +44,11 @@ private:
 	QLineEdit *ipEdit;
 	QLineEdit *portEdit;
 	QPushButton *ctc;
+	QPushButton *ard;
 
 	bool enabled;
 	bool ctenabled;
+	bool aenabled;
 };
 
 #endif // !LAUNCHER_H

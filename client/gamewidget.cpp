@@ -2,15 +2,18 @@
  * This widget draws the game.
  */
 
+#include <QPainter>
+#include <QtCore>
+
 #include "gamewidget.h"
 #include "render.h"
-
-#include <QPainter>
 
 GameWidget::GameWidget(ClientGameState &gs, QWidget *parent)
 	: QOpenGLWidget(parent)
 	, cgs(gs)
 {
+	setFocusPolicy(Qt::StrongFocus);
+	setAttribute(Qt::WA_MacShowFocusRect, 0);
 }
 
 void GameWidget::animate()
@@ -27,4 +30,11 @@ void GameWidget::paintEvent(QPaintEvent *event)
 	renderGame(cgs, &painter, event);
 	cgs.unlock();
 	painter.end();
+}
+
+void GameWidget::keyPressEvent(QKeyEvent *event)
+{
+	qDebug() << "Key press:" << event->text();
+
+	QOpenGLWidget::keyPressEvent(event);
 }

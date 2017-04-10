@@ -24,12 +24,14 @@ int main(int argc, char *argv[])
 	registerPackets();
 
 	QString style = R"css(
-QWidget {
+QWidget
+{
 	background-color: #333;
 	color: #FFF;
 }
 
-QPushButton { 
+QPushButton
+{ 
 	background-color: #FC6;
 	border-radius: 0px;
 	border-style: solid;
@@ -41,15 +43,23 @@ QPushButton {
 	padding: 6px 0.8em;
 }
 
-QPushButton:hover {
+QMessageBox QPushButton
+{
+	font-size: 20px;
+}
+
+QPushButton:hover
+{
 	background-color: #FC0;
 }
 
-QPushButton:pressed {
+QPushButton:pressed
+{
 	background-color: #F90;
 }
 
-QLineEdit {
+QLineEdit
+{
 	background-color: #FFE5CC;
 	border-radius: 0px;
 	border-style: solid;
@@ -59,6 +69,11 @@ QLineEdit {
 	font-weight: 200;
 	color: #603920;
 	padding: 6px;
+}
+
+QLabel
+{
+	font-size: 15px;
 }
 
 	)css";
