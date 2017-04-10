@@ -141,6 +141,12 @@ void SquareState::setOwningPlayer(Player *player)
 		setOwningPlayerId(UNOCCUPIED);
 }
 
+bool SquareState::isOutOfBounds() const
+{
+	plid_t id = getOwningPlayerId();
+	return id == OUT_OF_BOUNDS;
+}
+
 bool SquareState::isFlooded() const
 {
 	return flags & 0x01;

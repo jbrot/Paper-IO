@@ -81,12 +81,12 @@ public:
 	void kill();
 
 	/*
-	 * A player's score is stored as an unsigned 8 bit integer ranging from 
-	 * 0 to 200, where the player's score in percentage of the board controlled
-	 * can be found by dividing this number in two.
+	 * A player's score is stored as an unsigned 16 bit integer ranging from
+	 * 0 to whatever, where the player's score in percentage of the board controlled
+	 * can be found by dividing this number by how many valid squares there are.
 	 */
-	quint8 getScore() const;
-	void setScore(quint8 score);
+	quint16 getScore() const;
+	void setScore(quint16 score);
 
 private:
 	GameState &gs;
@@ -96,7 +96,7 @@ private:
 	pos_t x;
 	pos_t y;
 	Direction newDir;
-	quint8 score;
+	quint16 score;
 	bool dead;
 
 	Player(GameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
@@ -163,6 +163,8 @@ public:
 	void setOwningPlayerId(plid_t player);
 	Player *getOwningPlayer() const;
 	void setOwningPlayer(Player *player);
+
+	bool isOutOfBounds() const;
 
 	// "flooded" flag is for the filling algorithms
 	bool isFlooded() const;

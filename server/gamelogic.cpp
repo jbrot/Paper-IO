@@ -16,7 +16,7 @@ void leaveTrail(Player &player, GameState &state);
 void killPlayers(GameState &state);
 void checkForTrail(Player player, GameState &state);
 void checkForBoundary(Player player, GameState &state);
-void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos);
+void floodMarkSquares(Player player, GameState &state);
 void fillInBody(Player player, GameState &state);
 void checkForCompletedLoop(Player player, GameState &state);
 bool detectWin(Player player, GameState &state);
@@ -163,48 +163,61 @@ void checkForBoundary(Player player, GameState &state)
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
 
-	if (xpos < 1 || xpos > state.getWidth())
+	if (xpos < 0 || xpos > state.getWidth() - 1)
 		player.kill();
-	if (ypos < 1 || ypos > state.getHeight())
+	if (ypos < 0 || ypos > state.getHeight() - 1)
 		player.kill();
 }
 
-void floodMarkSquares(Player player, GameState &state, pos_t xpos, pos_t ypos)
+void floodMarkSquares(Player player, GameState &state)
 {
+	std::vector<std::pair<pos_t, pos_t>> coordinatesStack;
+	coordinatesStack.push_back({-1,-1});
+	state.getState(-1,-1).markAsChecked();
 
-	// Note: I have NO IDEA what I'm doing in this function
-	// God have mercy upon this code
-	// This is meant to recursively check adjacent squares
-	// A square which is reachable is marked as "flooded"
+	while (!coordinatesStack.empty())
+	{
+		auto last = coordinatesStack.back();
 
-	// Fix square
-	SquareState square = state.getState(xpos, ypos);
+		SquareState thisSquare = state.getState(last.first, last.second);
+		SquareState up = state.getState(last.first, last.second - 1);
+		SquareState down = state.getState(last.first, last.second + 1);
+		SquareState left = state.getState(last.first - 1, last.second);
+		SquareState right = state.getState(last.first + 1, last.second);
 
-	// Check if already checked
-	if (square.hasBeenChecked())
-		return;
+		if (!(up.isOutOfBounds() || up.getOwningPlayerId() == player.getId()
+			|| up.getTrailPlayerId() == player.getId() || up.hasBeenChecked()))
+		{
+			coordinatesStack.push_back({up.getX(),up.getY()});
+			up.markAsChecked();
+			continue;
+		}
+		if (!(down.isOutOfBounds() || player.getId() == down.getOwningPlayerId() || player.getId()
+			== down.getTrailPlayerId() || down.hasBeenChecked()))
+		{
+			coordinatesStack.push_back({down.getX(),down.getY()});
+			down.markAsChecked();
+			continue;
+		}
+		if (!(left.isOutOfBounds() || player.getId() == left.getOwningPlayerId() || player.getId()
+			== left.getTrailPlayerId() || left.hasBeenChecked()))
+		{
+			coordinatesStack.push_back({left.getX(),left.getY()});
+			left.markAsChecked();
+			continue;
+		}
+		if (!(right.isOutOfBounds() || player.getId() == right.getOwningPlayerId() || player.getId()
+			== right.getTrailPlayerId() || right.hasBeenChecked()))
+		{
+			coordinatesStack.push_back({right.getX(),right.getY()});
+			right.markAsChecked();
+			continue;
+		}
 
-	// Mark square as checked
-	square.markAsChecked();
+		thisSquare.markAsFlooded();
+		coordinatesStack.pop_back();
+	}
 
-	// Check if out of bounds
-	if (xpos < 0 || xpos > (state.getWidth() + 1) || ypos < 0 || ypos > (state.getWidth() + 1))
-			return;
-
-	// Detect if square is occupied or owned by player
-	if (square.getOccupyingPlayerId() == player.getId() || square.getOwningPlayerId() == player.getId())
-		return;
-
-	// If not, mark it as flooded
-	square.markAsFlooded();
-
-	// Move on to adjacent squares
-	floodMarkSquares(player, state, xpos + 1, ypos);
-	floodMarkSquares(player, state, xpos - 1, ypos);
-	floodMarkSquares(player, state, xpos, ypos + 1);
-	floodMarkSquares(player, state, xpos, ypos - 1);
-
-	// Pray to heavenly Jesus that this works
 }
 
 void fillInBody(Player player, GameState &state)
@@ -217,7 +230,14 @@ void fillInBody(Player player, GameState &state)
 
 			SquareState square = state.getState(i, j);
 			if (!square.isFlooded())
+			{
 				square.setOwningPlayerId(player.getId());
+
+				if (square.getOwningPlayer())
+					square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
+
+				player.setScore(player.getScore() + 1);
+			}
 
 			square.markAsUnflooded();
 			square.markAsUnchecked();
@@ -231,11 +251,22 @@ void checkForCompletedLoop(Player player, GameState &state)
 	plid_t xpos = player.getX();
 	plid_t ypos = player.getY();
 
+	bool trailExists = false;
+
 	SquareState square = state.getState(xpos, ypos);
 
-	if (square.getOwningPlayerId() == player.getId())
+	for (int i = xpos - 1; i <= xpos + 1; ++i)
 	{
-		floodMarkSquares(player, state, 0, 0);
+		for (int j = ypos - 1; j <= ypos + 1; ++j)
+		{
+			if (square.getTrailPlayer())
+				trailExists = true;
+		}
+	}
+
+	if (square.getOwningPlayerId() == player.getId() && trailExists)
+	{
+		floodMarkSquares(player, state);
 		fillInBody(player, state);
 	}
 
@@ -303,7 +334,6 @@ bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state){
 
 
 
-
 void configureSpawn(Player *pl, GameState &state)
 {
 
@@ -315,6 +345,7 @@ void configureSpawn(Player *pl, GameState &state)
 		for (int j = yPos - 1; j <= yPos + 1; ++j)
 		{
 			state.getState(i, j).setOwningPlayer(pl);
+			pl->setScore(pl->getScore() + 1);
 		}
 	}
 
