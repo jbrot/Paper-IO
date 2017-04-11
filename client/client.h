@@ -7,6 +7,7 @@
 #define CLIENT_H
 
 #include <QNetworkSession>
+#include <QStackedLayout>
 #include <QtSerialPort/QSerialPort>
 #include <QTimer>
 #include <QThread>
@@ -35,11 +36,12 @@ private slots:
 	void displayError2(QNetworkSession::SessionError sessionError);
 	void displayError3(QSerialPort::SerialPortError error, QString msg);
 	void sessionOpened();
-	void disconnected();
 	void connectTimeout();
 	void connectToArduino();
 
 private:
+	QStackedLayout *stack;
+
 	Launcher *launcher;
 
 	ClientGameState cgs;

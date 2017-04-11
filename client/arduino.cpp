@@ -1,4 +1,8 @@
-#include <QtGlobal>
+/*
+ * Provides the details of the Arduino integration.
+ */
+
+#include <QtCore>
 #include <QtSerialPort/QSerialPortInfo>
 
 #include "arduino.h"
@@ -22,7 +26,16 @@ Arduino::Arduino(ClientGameState &gs, QObject *parent)
 #else
 	connect(ctc, &QSerialPort::errorOccurred, this, [this] (QSerialPort::SerialPortError error) {
 #endif
+		if (error == QSerialPort::NoError)
+			return;
+
 		emit errorOccurred(error, this->ctc->errorString());
+
+		if (error == QSerialPort::ResourceError)
+		{
+			ctc->close();
+			emit disconnected();
+		}
 	} );
 }
 
@@ -52,6 +65,7 @@ int Arduino::connectToArduino()
 	if (!found)
 		return -2;
 
+	ctc->setPort(ainf);
 	if (!ctc->open(QIODevice::ReadWrite))
 		return -3;
 	
