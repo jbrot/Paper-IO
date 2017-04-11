@@ -152,17 +152,17 @@ void IOHandler::processLeaderboardUpdate(const PacketLeaderboardUpdate &plu, boo
 	if (cgs.getTick() != plu.getTick())
 		qWarning() << "PLU Packet is on tick" << plu.getTick() << ", but we're on tick" << cgs.getTick() << "!";
 
-	const quint8 *lb = plu.getLeaderboard();
+	const std::pair<plid_t, score_t> *lb = plu.getLeaderboard();
 
-	std::copy(lb, lb + 10, cgs.leaderboard);
+	std::copy(lb, lb + 5, cgs.leaderboard);
 
-	for (int i = 0; i < 10; i += 2)
+	for (int i = 0; i < 5; ++i)
 	{
-		ClientPlayer *cp = cgs.lookupPlayer(lb[i]);
+		ClientPlayer *cp = cgs.lookupPlayer(lb[i].first);
 		if (!cp)
 			continue;
 
-		cp->setScore(lb[i + 1]);
+		cp->setScore(lb[i].second);
 	}
 
 	if (!nested)
@@ -207,6 +207,8 @@ void IOHandler::processJoinGame(const PacketGameJoin &pgj)
 	qDebug() << "Id" << cgs.client;
 	cgs.tick = pgj.getPPU().getTick();
 	qDebug() << "Tick" << cgs.tick;
+	cgs.totalSquares = pgj.getTotalSquares();
+	qDebug() << "Total" << cgs.totalSquares;
 	
 	processPlayersUpdate(pgj.getPPU(), true);
 	processLeaderboardUpdate(pgj.getPLU(), true);
@@ -348,7 +350,11 @@ void IOHandler::newData()
 			processGameTick(*static_cast<PacketGameTick *>(packet));
 			break;
 		case PACKET_GAME_END:
-			emit gameEnded(static_cast<PacketGameEnd *>(packet)->getScore());
+			// N.B. We don't need to lock, because the only time this value
+			// can get changed is on a packet game join, which happens in 
+			// this thread and therefore cannot happen at the same time as this
+			// call.
+			emit gameEnded(static_cast<PacketGameEnd *>(packet)->getScore(), cgs.getTotalSquares());
 			break;
 		default:
 			qDebug() << "Received unknown packet: " << packet;

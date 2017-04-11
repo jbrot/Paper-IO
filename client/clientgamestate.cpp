@@ -11,7 +11,7 @@ ClientGameState::ClientGameState()
 	, tick(0)
 	, client(NULL_ID)
 {
-	std::fill(leaderboard, leaderboard + 10, 0);
+	std::fill(leaderboard, leaderboard + 5, std::make_pair(NULL_ID, 0));
 	std::fill(board[0], board[0] + CLIENT_FRAME * CLIENT_FRAME, 0);
 }
 
@@ -63,6 +63,11 @@ plid_t ClientGameState::getClientId() const
 ClientPlayer *ClientGameState::getClient() const
 {
 	return lookupPlayer(client);
+}
+
+quint16 ClientGameState::getTotalSquares() const
+{
+	return totalSquares;
 }
 
 void ClientGameState::lockState()

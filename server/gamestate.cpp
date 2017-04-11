@@ -17,7 +17,7 @@ GameState::GameState(pos_t w, pos_t h)
 	, scoresChanged(false)
 	, leaderboardChanged(false)
 {
-	std::fill(leaderboard, leaderboard + 10, 0);
+	std::fill(leaderboard, leaderboard + 5, std::make_pair(NULL_ID, 0));
 
 	// The board and diff array start with a CLIENT_FRAME length section
 	// of out of bounds, which clients will link to if an entire row is
@@ -205,28 +205,27 @@ void GameState::recomputeLeaderboard()
 		return a->getScore() > b->getScore();
 	});
 	int i = 0;
-	for (auto iter = pls.cbegin(); iter < pls.cend() && i < 10; iter++, i += 2)
+	for (auto iter = pls.cbegin(); iter < pls.cend() && i < 5; ++iter, ++i)
 	{
 		if (!leaderboardChanged)
 		{
-			if (*iter) leaderboardChanged = !(leaderboard[i] == (*iter)->getId() && leaderboard[i + 1] == (*iter)->getScore());
-			else leaderboardChanged = !(leaderboard[i] == NULL_ID && leaderboard[i + 1] == 0);
+			if (*iter) 
+				leaderboardChanged = !(leaderboard[i].first == (*iter)->getId() && leaderboard[i].second == (*iter)->getScore());
+			else 
+				leaderboardChanged = !(leaderboard[i].first == NULL_ID && leaderboard[i].second == 0);
 		} 
 		if (*iter)
 		{
-			leaderboard[i] = (*iter)->getId();
-			leaderboard[i + 1] = (*iter)->getScore();
+			leaderboard[i].first = (*iter)->getId();
+			leaderboard[i].second = (*iter)->getScore();
 		} else {
-			leaderboard[i] = NULL_ID;
-			leaderboard[i + 1] = 0;
+			leaderboard[i].first = NULL_ID;
+			leaderboard[i + 1].second = 0;
 		}
 	}
 
-	for (; i < 10; i += 2)
-	{
-		leaderboard[i] = NULL_ID;
-		leaderboard[i + 1] = 0;
-	}
+	for (; i < 5; ++i)
+		leaderboard[i] = {NULL_ID, 0};
 }
 
 bool GameState::hasLeaderboardChanged() const

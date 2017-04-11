@@ -15,18 +15,18 @@ PacketGameEnd::PacketGameEnd()
 {
 }
 
-PacketGameEnd::PacketGameEnd(quint8 nm)
+PacketGameEnd::PacketGameEnd(score_t nm)
 	: Packet(PACKET_GAME_END)
 	, score(nm)
 {
 }
 
-quint8 PacketGameEnd::getScore() const
+score_t PacketGameEnd::getScore() const
 {
 	return quint8(score);
 }
 
-void PacketGameEnd::setScore(quint8 str)
+void PacketGameEnd::setScore(score_t str)
 {
 	score = str;
 }

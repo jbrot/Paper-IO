@@ -36,12 +36,11 @@ public:
 	Direction getDirection() const;
 
 	/*
-	 * A player's score is stored as an unsigned 8 bit integer ranging from 
-	 * 0 to 200, where the player's score in percentage of the board controlled
-	 * can be found by dividing this number in two. This is only available
-	 * if the player is in the leaderboard.
+	 * A player's score is stored as an unsigned 16 bit integer ranging from
+	 * 0 to whatever, where the player's score in percentage of the board controlled
+	 * can be found by dividing this number by how many valid squares there are.
 	 */
-	quint8 getScore() const;
+	score_t getScore() const;
 
 private:
 	const ClientGameState &gs;
@@ -50,12 +49,12 @@ private:
 
 	pos_t x;
 	pos_t y;
-	quint8 score;
+	score_t score;
 
 	void setX(pos_t x);
 	void setY(pos_t y);
 
-	void setScore(quint8 score);
+	void setScore(score_t score);
 
 	ClientPlayer(const ClientGameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
 };
@@ -145,16 +144,18 @@ public:
 	plid_t getClientId() const;
 	ClientPlayer *getClient() const;
 
+	quint16 getTotalSquares() const;
+
 private:
 	QMutex lock;
 
 	QHash<plid_t, ClientPlayer *> players;
 	tick_t tick;
 
-	// This can probably be handled better.
-	quint8 leaderboard[10];
+	std::pair<plid_t, score_t> leaderboard[10];
 
 	state_t board[CLIENT_FRAME][CLIENT_FRAME];
+	quint16 totalSquares;
 
 	plid_t client;
 

@@ -10,6 +10,8 @@
 #include <QPushButton>
 #include <QWidget>
 
+#include "types.h"
+
 class GameOver : public QWidget
 {
 	Q_OBJECT
@@ -18,7 +20,7 @@ public:
 	GameOver(QWidget *parent = Q_NULLPTR);
 
 public slots:
-	void setScore(quint8 score);
+	void setScore(score_t score, quint16 total);
 
 signals:
 	void playAgain();

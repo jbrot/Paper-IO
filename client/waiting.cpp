@@ -13,6 +13,7 @@
 Waiting::Waiting(QWidget *parent)
 	: QWidget(parent)
 {
+	// TODO Clean up per launcher
 	QFont font;
 	font.setBold(true);
 	font.setPointSize(64);

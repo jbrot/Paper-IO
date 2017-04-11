@@ -85,8 +85,8 @@ public:
 	 * 0 to whatever, where the player's score in percentage of the board controlled
 	 * can be found by dividing this number by how many valid squares there are.
 	 */
-	quint16 getScore() const;
-	void setScore(quint16 score);
+	score_t getScore() const;
+	void setScore(score_t score);
 
 private:
 	GameState &gs;
@@ -96,7 +96,7 @@ private:
 	pos_t x;
 	pos_t y;
 	Direction newDir;
-	quint16 score;
+	score_t score;
 	bool dead;
 
 	Player(GameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
@@ -236,8 +236,7 @@ private:
 	bool playersChanged;
 	tick_t tick;
 
-	// Since plid_t = quint8 = "score"
-	quint8 leaderboard[10];
+	std::pair<plid_t, score_t> leaderboard[5];
 	bool scoresChanged;
 	bool leaderboardChanged;
 

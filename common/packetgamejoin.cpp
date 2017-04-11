@@ -17,16 +17,18 @@ PacketGameJoin::PacketGameJoin()
 	: Packet(PACKET_GAME_JOIN)
 	, plid(NULL_ID)
 	, score(0)
+	, total(0)
 	, ppu()
 	, plu()
 	, prb()
 {
 }
 
-PacketGameJoin::PacketGameJoin(plid_t id, quint8 sc, const PacketPlayersUpdate &ppuc, const PacketLeaderboardUpdate &pluc, const PacketResendBoard &prbc)
+PacketGameJoin::PacketGameJoin(plid_t id, score_t sc, quint16 ts, const PacketPlayersUpdate &ppuc, const PacketLeaderboardUpdate &pluc, const PacketResendBoard &prbc)
 	: Packet(PACKET_GAME_JOIN)
 	, plid(id)
 	, score(sc)
+	, total(ts)
 	, ppu(ppuc)
 	, plu(pluc)
 	, prb(prbc)
@@ -43,14 +45,24 @@ void PacketGameJoin::setId(plid_t id)
 	plid = id;
 }
 
-quint8 PacketGameJoin::getScore() const
+score_t PacketGameJoin::getScore() const
 {
 	return score;
 }
 
-void PacketGameJoin::setScore(quint8 sc)
+void PacketGameJoin::setScore(score_t sc)
 {
 	score = sc;
+}
+
+quint16 PacketGameJoin::getTotalSquares() const
+{
+	return total;
+}
+
+void PacketGameJoin::setTotalSquares(quint16 ts)
+{
+	total = ts;
 }
 
 const PacketPlayersUpdate &PacketGameJoin::getPPU() const
@@ -85,10 +97,10 @@ void PacketGameJoin::setPRB(const PacketResendBoard &prbc)
 
 void PacketGameJoin::read(QDataStream &str)
 {
-	str >> plid >> score >> ppu >> plu >> prb;
+	str >> plid >> score >> total >> ppu >> plu >> prb;
 }
 
 void PacketGameJoin::write(QDataStream &str) const
 {
-	str << plid << score << ppu << plu << prb;
+	str << plid << score << total << ppu << plu << prb;
 }

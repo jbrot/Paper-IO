@@ -38,7 +38,7 @@ signals:
 
 	void queued();
 	void enteredGame();
-	void gameEnded(quint8 score);
+	void gameEnded(score_t score, quint16 total);
 
 private slots:
 	void ierror(QAbstractSocket::SocketError error);

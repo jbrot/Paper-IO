@@ -34,6 +34,7 @@ GameOver::GameOver(QWidget *parent)
 	, again(new QPushButton(tr("PLAY AGAIN")))
 	, quit(new QPushButton(tr("DISCONNECT")))
 {
+	// TODO Clean up per launcher
 	QFont freshman = getFreshmanFont();
 	freshman.setPointSize(72);
 
@@ -88,9 +89,9 @@ GameOver::GameOver(QWidget *parent)
 	});
 }
 
-void GameOver::setScore(quint8 score)
+void GameOver::setScore(score_t score, quint16 total)
 {
-	msg->setText(tr("Score: %1%").arg(QString::number(score / 2.0, 'f', 1), 4));
+	msg->setText(tr("Score: %1%").arg(QString::number(score / total, 'f', 1), 4));
 	again->setEnabled(true);
 	quit->setEnabled(true);
 }

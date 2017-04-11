@@ -57,7 +57,7 @@ const packet_t PACKET_PLAYERS_UPDATE = 3;
 /*
  * Leaderboard Update packet. Informs the client that the leaderboard has changed.
  * 
- * Spec: <PACKET_LEADERBOARD_UPDATE> <tick_t: current tick> {<quint8: player_id> <quint8: score>}[5 times: leader board in descending order]
+ * Spec: <PACKET_LEADERBOARD_UPDATE> <tick_t: current tick> {<plid_t: player_id> <score_t: score>}[5 times: leader board in descending order]
  * Direction: Server to Client
  */
 const packet_t PACKET_LEADERBOARD_UPDATE = 4;
@@ -74,7 +74,7 @@ const packet_t PACKET_RESEND_BOARD = 5;
  * times, but this isn't a big deal and simplifies the net code. Only
  * the first tick value will actually be used.
  *
- * Spec: <PACKET_GAME_JOIN> <plid_t: id> <quint8: score>
+ * Spec: <PACKET_GAME_JOIN> <plid_t: id> <score_t: score> <quint16: total squares>
  *       <contents of PACKET_PLAYERS_UPDATE>
  *       <contents of PACKET_LEADERBOARD_UPDATE>
  *       <contents of PACKET_RESEND_BOARD>
@@ -84,7 +84,7 @@ const packet_t PACKET_GAME_JOIN = 6;
 /*
  * Game Tick packet. Informs the client of a server tick and change in board state.
  *
- * Spec: <PACKET_GAME_TICK> <tick_t: current tick> <quint8: direction_moved> <quint8: score>
+ * Spec: <PACKET_GAME_TICK> <tick_t: current tick> <quint8: direction_moved> <score_t: score>
  *       {<quint32: board_state>}[CLIENT_FRAME times, the new row visible either L to R or T to B depending on direction]
  *       {<quint8>}[RLE encoded XOR difference of existing board, L to R, T to B]
  *       <quint64: a 64 bit crc of the new board state>
@@ -112,7 +112,7 @@ const packet_t PACKET_REQUEST_RESEND = 9;
  * this does not distinguish between death and victory. The client may either quit or issue a
  * PACKET_REQUEST_JOIN to continue playing.
  *
- * Spec: <PACKET_GAME_END> <quint8: score>
+ * Spec: <PACKET_GAME_END> <score_t: score>
  * Direction: Serber to Client
  */
 const packet_t PACKET_GAME_END = 10;
@@ -243,9 +243,6 @@ private:
 	QHash<plid_t, QString> players;
 };
 
-// The following class relies on this assumption.
-static_assert(std::is_same<plid_t, quint8>::value, "plid_t != quint8");
-
 /*
  * This class stores the leaderboard as a 1d array alternating
  * between player id and score.
@@ -254,13 +251,13 @@ class PacketLeaderboardUpdate : public Packet
 {
 public:
 	PacketLeaderboardUpdate();
-	PacketLeaderboardUpdate(tick_t tick, const quint8 lb[10]);
+	PacketLeaderboardUpdate(tick_t tick, const std::pair<plid_t, score_t> lb[5]);
 
 	tick_t getTick() const;
 	void setTick(tick_t tick);
 
-	const quint8 *getLeaderboard() const;
-	void setLeaderboard(const quint8 lb[10]);
+	const std::pair<plid_t, score_t> *getLeaderboard() const;
+	void setLeaderboard(const std::pair<plid_t, score_t> lb[5]);
 
 protected:
 	void read(QDataStream &str) override;
@@ -268,7 +265,7 @@ protected:
 
 private:
 	tick_t tick;
-	quint8 data[10];
+	std::pair<plid_t, score_t> data[5];
 };
 
 /*
@@ -337,13 +334,16 @@ public:
 	 * should be used for writing.
 	 */
 	PacketGameJoin();
-	PacketGameJoin(plid_t plid, quint8 score, const PacketPlayersUpdate &ppu, const PacketLeaderboardUpdate &plu, const PacketResendBoard &prb);
+	PacketGameJoin(plid_t plid, score_t score, quint16 total, const PacketPlayersUpdate &ppu, const PacketLeaderboardUpdate &plu, const PacketResendBoard &prb);
 
 	plid_t getId() const;
 	void setId(plid_t id);
 
-	quint8 getScore() const;
-	void setScore(quint8 score);
+	score_t getScore() const;
+	void setScore(score_t score);
+
+	quint16 getTotalSquares() const;
+	void setTotalSquares(quint16 ts);
 
 	const PacketPlayersUpdate &getPPU() const;
 	void setPPU(const PacketPlayersUpdate &ppu);
@@ -360,7 +360,8 @@ protected:
 
 private:
 	plid_t plid;
-	quint8 score;
+	score_t score;
+	quint16 total;
 
 	PacketPlayersUpdate ppu;
 	PacketLeaderboardUpdate plu;
@@ -380,7 +381,7 @@ public:
 	/*
 	 * Initializes a new PacketGameTick holding pointers to the diff.
 	 */
-	PacketGameTick(tick_t tick, Direction dir, quint8 score, const state_t news[CLIENT_FRAME], state_t *diff[CLIENT_FRAME], const QByteArray &chksum);
+	PacketGameTick(tick_t tick, Direction dir, score_t score, const state_t news[CLIENT_FRAME], state_t *diff[CLIENT_FRAME], const QByteArray &chksum);
 	/*
 	 * Copy constructor.
 	 */
@@ -395,8 +396,8 @@ public:
 	Direction getDirection() const;
 	void setDirection(Direction dir);
 
-	quint8 getScore() const;
-	void setScore(quint8 sc);
+	score_t getScore() const;
+	void setScore(score_t sc);
 
 	const state_t *getNewSection() const;
 	void setNewSection(const state_t[CLIENT_FRAME]);
@@ -420,7 +421,7 @@ protected:
 private:
 	tick_t tick;
 	quint8 dir;
-	quint8 score;
+	score_t score;
 
 	state_t news[CLIENT_FRAME];
 
@@ -462,17 +463,17 @@ class PacketGameEnd : public Packet
 {
 public:
 	PacketGameEnd();
-	PacketGameEnd(quint8 score);
+	PacketGameEnd(score_t score);
 
-	quint8 getScore() const;
-	void setScore(quint8 score);
+	score_t getScore() const;
+	void setScore(score_t score);
 
 protected:
 	void read(QDataStream &str) override;
 	void write(QDataStream &str) const override;
 
 private:
-	quint8 score;
+	score_t score;
 };
 
 #endif // !PROTOCOL_H

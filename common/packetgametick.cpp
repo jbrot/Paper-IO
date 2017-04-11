@@ -24,7 +24,7 @@ PacketGameTick::PacketGameTick()
 	std::fill(diff[0], diff[0] + CLIENT_FRAME * CLIENT_FRAME, 0);
 }
 
-PacketGameTick::PacketGameTick(tick_t tck, Direction dr, quint8 sc, const state_t ns[CLIENT_FRAME], state_t *brd[CLIENT_FRAME], const QByteArray &chk)
+PacketGameTick::PacketGameTick(tick_t tck, Direction dr, score_t sc, const state_t ns[CLIENT_FRAME], state_t *brd[CLIENT_FRAME], const QByteArray &chk)
 	: Packet(PACKET_GAME_TICK)
 	, tick(tck)
 	, dir(dr)
@@ -120,12 +120,12 @@ void PacketGameTick::setDirection(Direction d)
 	dir = d;
 }
 
-quint8 PacketGameTick::getScore() const
+score_t PacketGameTick::getScore() const
 {
 	return score;
 }
 
-void PacketGameTick::setScore(quint8 sc)
+void PacketGameTick::setScore(score_t sc)
 {
 	score = sc;
 }

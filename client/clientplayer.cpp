@@ -50,12 +50,12 @@ Direction ClientPlayer::getDirection() const
     return ss.getDirection();
 }
 
-quint8 ClientPlayer::getScore() const
+score_t ClientPlayer::getScore() const
 {
 	return score;
 }
 
-void ClientPlayer::setScore(quint8 sc)
+void ClientPlayer::setScore(score_t sc)
 {
 	score = sc;
 }

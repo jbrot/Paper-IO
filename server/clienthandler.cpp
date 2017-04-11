@@ -76,7 +76,7 @@ void ClientHandler::beginGame(plid_t pid, GameState *g)
 	gs = g;
 
 	gs->lockForRead();
-	Packet::writePacket(str, PacketGameJoin(pid, pl->getScore(), makePPU(), makePLU(), makePRB()));
+	Packet::writePacket(str, PacketGameJoin(pid, pl->getScore(), gs->getWidth() * gs->getHeight(), makePPU(), makePLU(), makePRB()));
 	gs->unlock();
 }
 
