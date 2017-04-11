@@ -189,28 +189,31 @@ void floodMarkSquares(Player player, GameState &state)
 		SquareState left = state.getState(last.first - 1, last.second);
 		SquareState right = state.getState(last.first + 1, last.second);
 
+		up.markAsChecked();
 		if (squareChecks(player, up, state))
 		{
 			coordinatesStack.push_back({up.getX(),up.getY()});
-			up.markAsChecked();
 			continue;
 		}
+
+		down.markAsChecked();
 		if (squareChecks(player, down, state))
 		{
 			coordinatesStack.push_back({down.getX(),down.getY()});
-			down.markAsChecked();
 			continue;
 		}
+
+		left.markAsChecked();
 		if (squareChecks(player, left, state))
 		{
 			coordinatesStack.push_back({left.getX(),left.getY()});
-			left.markAsChecked();
 			continue;
 		}
+
+		right.markAsChecked();
 		if (squareChecks(player, right, state))
 		{
 			coordinatesStack.push_back({right.getX(),right.getY()});
-			right.markAsChecked();
 			continue;
 		}
 
@@ -239,23 +242,22 @@ bool squareChecks(Player player, SquareState square, GameState &state)
 void fillInBody(Player player, GameState &state)
 {
 
-	for (int i = 0; i <= (state.getWidth() + 1); ++i)
+	for (int i = -1; i <= (state.getWidth() + 1); ++i)
 	{
-		for (int j = 0; j <= (state.getHeight() + 1); ++i)
+		for (int j = -1; j <= (state.getHeight() + 1); ++j)
 		{
 
 			SquareState square = state.getState(i, j);
-			if (!square.isFlooded())
-			{
-				if (square.getOwningPlayer())
-					square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
+			//if (!square.isFlooded())
+				//if (square.getOwningPlayer())
+					//square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
 
-				square.setOwningPlayerId(player.getId());
+				//square.setOwningPlayerId(player.getId());
 
-				player.setScore(player.getScore() + 1);
-			}
+				//player.setScore(player.getScore() + 1);
+			//}
 
-			square.markAsUnflooded();
+			//square.markAsUnflooded();
 			square.markAsUnchecked();
 
 		}
@@ -275,7 +277,7 @@ void checkForCompletedLoop(Player player, GameState &state)
 	{
 		for (int j = ypos - 1; j <= ypos + 1; ++j)
 		{
-			if (square.getTrailPlayer())
+			if (square.getTrailPlayer() && square.getTrailPlayerId() == player.getId())
 				trailExists = true;
 		}
 	}
