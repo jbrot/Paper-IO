@@ -107,7 +107,7 @@ SquareState GameState::getState(pos_t x, pos_t y) const
 		return SquareState(*this, x, y, board[y][x], diff[y][x], flags[y + 1][x + 1]);
 
 	quint8 *flag = NULL;
-	if (0 <= x + 1 && x + 1 < width + 2 && 0 <= y + 1 && y + 1 <= height + 2)
+	if (0 <= x + 1 && x + 1 < width + 2 && 0 <= y + 1 && y + 1 < height + 2)
 		flag = &flags[y + 1][x + 1];
 	else
 		flag = &flags[height + 1][width + 2];
