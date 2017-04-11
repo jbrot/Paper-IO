@@ -10,18 +10,23 @@ RCC_DIR = $$PWD/../build/client/rcc
 DESTDIR = $$PWD/../bin
 
 # Meta Inputs
-QT += widgets network
+QT += widgets network serialport
 RESOURCES = client.qrc
 
 CXXFLAGS += -g
 
 # Inputs
 INCLUDEPATH += . $$PWD/../common
-HEADERS += client.h \
+HEADERS += adafruit_gfx.h \
+	arduino.h \
+	buffergfx.h \
+	client.h \
 	clientgamestate.h \
 	font.h \
 	gameover.h \
 	gamewidget.h \
+	gfxfont.h \
+	glcdfont.h \
 	iohandler.h \
 	launcher.h \
 	render.h \
@@ -29,6 +34,9 @@ HEADERS += client.h \
 	../common/protocol.h \
 	../common/types.h
 SOURCES += main.cpp \
+	adafruit_gfx.cpp \
+	arduino.cpp \
+	buffergfx.cpp \
 	client.cpp \
 	clientgamestate.cpp \
 	clientplayer.cpp \

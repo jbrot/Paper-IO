@@ -15,3 +15,7 @@ The licensing behind this project is ambiguous at the moment, but it doesn't rea
 As of right now, we are usng the Qt Library for networking and graphics; it is either licensed under GPL or LGPL (to be determined).
 
 I have just added the Freshman.ttf font for the client. It is from http://fontspace.com/william-boyd/freshman and is in the public domain.
+
+I have added the DejaVu fonts. They are under their own free license.
+
+I have added the Adafruit\_GFX library for rendering to the arduino buffer. It is BSD licensed. Furthermore, an excerpt of the RGBMatrixPanel library is used (also BSD Licensed).
