@@ -2,6 +2,8 @@
  * Provides the details of the Arduino integration.
  */
 
+#include <algorithm>
+#include <stdio.h>
 #include <QtCore>
 #include <QtSerialPort/QSerialPortInfo>
 
@@ -68,7 +70,7 @@ int Arduino::connectToArduino()
 	ctc->setPort(ainf);
 	if (!ctc->open(QIODevice::ReadWrite))
 		return -3;
-	
+
 	return 0;
 }
 
@@ -77,7 +79,27 @@ void Arduino::renderLauncher()
 	if (!ctc->isOpen())
 		return;
 
-	// TODO draw something
+	gfx.fillScreen(0);
+
+	const char arduino[] = "ARDUINO-IO";
+	const uint16_t colors[3] = { BufferGFX::Color333(3,0,0)
+	                           , BufferGFX::Color333(0,3,0)
+	                           , BufferGFX::Color333(0,0,3)
+	                           };
+	gfx.setCursor(1,0);
+	for (int i = 0; i < 5; i++)
+	{
+		gfx.setTextColor(colors[i % 3]);
+		gfx.write(arduino[i]);
+	}
+
+	gfx.setCursor(1,9);
+	for (int i = 5; i < 10; i++)
+	{
+		gfx.setTextColor(colors[i % 3]);
+		gfx.write(arduino[i]);
+	}
+
 	sendBuffer();
 }
 
@@ -86,7 +108,18 @@ void Arduino::renderWaiting()
 	if (!ctc->isOpen())
 		return;
 
-	// TODO draw something
+	gfx.fillScreen(0);
+
+	const char ctcng[] = "CONNECTING";
+	gfx.setTextColor(BufferGFX::Color333(2,2,2));
+	gfx.setCursor(1,0);
+	for (int i = 0; i < 5; i++)
+		gfx.write(ctcng[i]);
+
+	gfx.setCursor(1,9);
+	for (int i = 5; i < 10; i++)
+		gfx.write(ctcng[i]);
+
 	sendBuffer();
 }
 
@@ -107,7 +140,32 @@ void Arduino::renderGameOver(score_t score, quint16 total)
 	if (!ctc->isOpen())
 		return;
 
-	// TODO draw something
+	gfx.fillScreen(0);
+
+	double pct = score / (double) total;
+
+	char scr[] = "Score";
+	gfx.setTextColor(BufferGFX::Color333(2,2,2));
+	gfx.setCursor(1,0);
+	for (int i = 0; i < 5; i++)
+		gfx.write(scr[i]);
+
+	if (score == total)
+	{
+		scr[0] = '1';
+		scr[1] = '0';
+		scr[2] = '0';
+		scr[3] = '%';
+		scr[4] = '!';
+	} else {
+		pct = std::min(99.9, pct);
+	}
+	snprintf(scr, sizeof(scr), "%.2f", pct);
+	scr[4] = '%';
+	gfx.setCursor(1,9);
+	for (int i = 0; i < 5; i++)
+		gfx.write(scr[i]);
+
 	sendBuffer();
 }
 

@@ -40,26 +40,24 @@ private slots:
 	void connectToArduino();
 
 private:
+	ClientGameState cgs;
+
 	QStackedLayout *stack;
 
-	Launcher *launcher;
-
-	ClientGameState cgs;
+	QNetworkSession *session;
 
 	QTimer *timeout;
 	IOHandler *ioh;
 	QThread *iothread;
+	bool disconnecting;
 
 	Arduino *arduino;
 
+	Launcher *launcher;
 	Waiting *waiting;
-
-	QTimer *rtimer;
 	GameWidget *render;
-
+	QTimer *rtimer;
 	GameOver *gameover;
-
-	QNetworkSession *session;
 };
 
 #endif // !CLIENT_H
