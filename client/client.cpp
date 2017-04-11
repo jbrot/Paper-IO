@@ -19,6 +19,7 @@ Client::Client(QWidget *parent)
 	, timeout(new QTimer(this))
 	, ioh(new IOHandler(cgs))
 	, iothread(new QThread(this))
+	, arduino(new Arduino(cgs, this))
 	, waiting(new Waiting)
 	, rtimer(new QTimer(this))
 	, render(new GameWidget(cgs))
@@ -54,6 +55,7 @@ Client::Client(QWidget *parent)
 	connect(launcher, &Launcher::connectToServer, this, [this] {
 		this->launcher->setStatus(tr("Connecting..."));
 	} );
+	connect(launcher, &Launcher::connectToArduino, this, &Client::connectToArduino);
 
 	connect(timeout, &QTimer::timeout, this, &Client::connectTimeout);
 	connect(timeout, &QTimer::timeout, ioh, &IOHandler::disconnect);
@@ -68,20 +70,25 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::disconnected, launcher, &Launcher::enable);
 	connect(ioh, &IOHandler::disconnected, rtimer, &QTimer::stop);
 	connect(ioh, &IOHandler::disconnected, render, &QWidget::clearFocus);
+	connect(ioh, &IOHandler::disconnected, arduino, &Arduino::renderLauncher);
 	connect(ioh, &IOHandler::disconnected, stack, [stack] {
 		stack->setCurrentIndex(0);
 	});
 	connect(ioh, &IOHandler::queued, stack, [stack] {
 		stack->setCurrentIndex(1);
 	});
+	connect(ioh, &IOHandler::queued, arduino, &Arduino::renderWaiting);
 	connect(ioh, &IOHandler::enteredGame, rtimer, static_cast<void (QTimer::*)()>(&QTimer::start));
 	connect(ioh, &IOHandler::enteredGame, stack, [stack] {
 		stack->setCurrentIndex(2);
 	});
 	connect(ioh, &IOHandler::enteredGame, render, static_cast<void (QWidget::*)()>(&QWidget::setFocus));
+	connect(ioh, &IOHandler::enteredGame, arduino, &Arduino::renderTick);
+	connect(ioh, &IOHandler::gameTick, arduino, &Arduino::renderTick);
 	connect(ioh, &IOHandler::gameEnded, rtimer, &QTimer::stop);
 	connect(ioh, &IOHandler::gameEnded, render, &QWidget::clearFocus);
 	connect(ioh, &IOHandler::gameEnded, gameover, &GameOver::setScore);
+	connect(ioh, &IOHandler::gameEnded, arduino, &Arduino::renderGameOver);
 	connect(ioh, &IOHandler::gameEnded, stack, [stack] {
 		stack->setCurrentIndex(3);
 	});
@@ -92,6 +99,9 @@ Client::Client(QWidget *parent)
 
 	connect(gameover, &GameOver::playAgain, ioh, &IOHandler::enterQueue);
 	connect(gameover, &GameOver::disconnect, ioh, &IOHandler::disconnect);
+
+	connect(arduino, &Arduino::disconnected, launcher, &Launcher::enableArduino);
+	connect(arduino, &Arduino::errorOccurred, this, &Client::displayError3);
 
 	iothread->start();
 
@@ -187,6 +197,11 @@ void Client::displayError2(QNetworkSession::SessionError sessionError)
 	                         tr("The following error occurred: %1.").arg(session->errorString()));
 }
 
+void Client::displayError3(QSerialPort::SerialPortError error, QString msg)
+{
+	QMessageBox::information(this, tr("Arduino-IO"),
+	                         tr("The following error occurred: %1.").arg(msg));
+}
 
 void Client::disconnected()
 {
@@ -195,10 +210,30 @@ void Client::disconnected()
 	launcher->setStatus(tr("Ready."));
 }
 
-
 void Client::connectTimeout()
 {
 	QMessageBox::information(this, tr("Arduino-IO"),
 	                         tr("Connection timed out!"));
 	launcher->setStatus(tr("Ready."));
+}
+
+void Client::connectToArduino()
+{
+	int res = arduino->connectToArduino();
+	// We'll treat already connected the same as  establishing a successful connection.
+	// It shouldn't happen anyway if we disabvle the buttons correctly.
+	if (res == 0 ||res == -1)
+	{
+		launcher->disableArduino();
+		QMessageBox::information(this, tr("Arduino-IO"),
+	                         tr("Connected to Arduino!"));
+		// TODO This probably won't work at first. We need to wait a bit
+		// before sending the first command.
+		arduino->renderLauncher();
+		return;
+	} else if (res == -2) {
+		QMessageBox::information(this, tr("Arduino-IO"),
+	                         tr("No Arduino could be found! Please make sure that the Arduino is properly connected and turned on."));
+	}
+	// If we have error code -3, we'll assume displayError3 will handle it for us.
 }

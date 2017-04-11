@@ -7,10 +7,12 @@
 #define CLIENT_H
 
 #include <QNetworkSession>
+#include <QtSerialPort/QSerialPort>
 #include <QTimer>
 #include <QThread>
 #include <QWidget>
 
+#include "arduino.h"
 #include "clientgamestate.h"
 #include "gamewidget.h"
 #include "gameover.h"
@@ -31,9 +33,11 @@ public:
 private slots:
 	void displayError(QAbstractSocket::SocketError socketError, QString msg);
 	void displayError2(QNetworkSession::SessionError sessionError);
+	void displayError3(QSerialPort::SerialPortError error, QString msg);
 	void sessionOpened();
 	void disconnected();
 	void connectTimeout();
+	void connectToArduino();
 
 private:
 	Launcher *launcher;
@@ -43,6 +47,8 @@ private:
 	QTimer *timeout;
 	IOHandler *ioh;
 	QThread *iothread;
+
+	Arduino *arduino;
 
 	Waiting *waiting;
 

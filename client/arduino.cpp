@@ -2,10 +2,13 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 #include "arduino.h"
+#include "render.h"
 
-Arduino::Arduino(QObject *parent)
+Arduino::Arduino(ClientGameState &gs, QObject *parent)
 	: QObject(parent)
 	, ctc(new QSerialPort(this))
+	, gfx()
+	, cgs(gs)
 {
 	ctc->setBaudRate(115200);
 	ctc->setParity(QSerialPort::NoParity);
@@ -17,7 +20,7 @@ Arduino::Arduino(QObject *parent)
 #if QT_VERSION < QT_VERSION_CHECK(5, 8, 0)
 	connect(ctc, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error), this, [this] (QSerialPort::SerialPortError error) {
 #else
-	connect(ctc, &QSerialPort::errorOccurred, this, [ctc] (QSerialPort::SerialPortError error) {
+	connect(ctc, &QSerialPort::errorOccurred, this, [this] (QSerialPort::SerialPortError error) {
 #endif
 		emit errorOccurred(error, this->ctc->errorString());
 	} );
@@ -55,6 +58,45 @@ int Arduino::connectToArduino()
 	return 0;
 }
 
+void Arduino::renderLauncher()
+{
+	if (!ctc->isOpen())
+		return;
+
+	// TODO draw something
+	sendBuffer();
+}
+
+void Arduino::renderWaiting()
+{
+	if (!ctc->isOpen())
+		return;
+
+	// TODO draw something
+	sendBuffer();
+}
+
+void Arduino::renderTick()
+{
+	if (!ctc->isOpen())
+		return;
+
+	cgs.lockState();
+	renderGameArduino(cgs, gfx);
+	cgs.unlock();
+
+	sendBuffer();
+}
+
+void Arduino::renderGameOver(score_t score, quint16 total)
+{
+	if (!ctc->isOpen())
+		return;
+
+	// TODO draw something
+	sendBuffer();
+}
+
 void Arduino::readData()
 {
 	char data = 0;
@@ -62,4 +104,14 @@ void Arduino::readData()
 	{
 		// TODO process input
 	}
+}
+
+void Arduino::sendBuffer()
+{
+	ctc->putChar(0xFF);
+
+	uint8_t (*buf)[ARDUINO_WIDTH] = gfx.getBuffer();
+	for (int y = 0; y < ARDUINO_HEIGHT; y++)
+		for (int x = 0; x < ARDUINO_WIDTH; x++)
+			ctc->putChar(buf[y][x]);
 }

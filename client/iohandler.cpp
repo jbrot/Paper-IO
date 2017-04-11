@@ -305,6 +305,8 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	}
 
 	cgs.unlock();
+
+	emit gameTick();
 }
 
 void IOHandler::newData()

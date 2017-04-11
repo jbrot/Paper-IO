@@ -9,6 +9,7 @@
 
 #include "protocol.h"
 
+class Arduino;
 class Client;
 class ClientGameState;
 class GameWidget;
@@ -119,6 +120,7 @@ private:
 
 class ClientGameState
 {
+friend class Arduino;
 friend class Client;
 friend class GameWidget;
 friend class IOHandler;

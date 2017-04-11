@@ -13,3 +13,8 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
 	qDebug() << "Tick!";
 	painter->fillRect(event->rect(), background);
 }
+
+void renderGameArduino(ClientGameState &cgs, BufferGFX &gfx)
+{
+	qDebug() << "Arduino Tick!";
+}

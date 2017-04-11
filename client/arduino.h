@@ -7,12 +7,16 @@
 
 #include <QtSerialPort/QSerialPort>
 
+#include "buffergfx.h"
+#include "clientgamestate.h"
+#include "types.h"
+
 class Arduino : public QObject
 {
 	Q_OBJECT
 
 public:
-	Arduino(QObject *parent = Q_NULLPTR);
+	Arduino(ClientGameState &cgs, QObject *parent = Q_NULLPTR);
 
 	/*
 	 * Tries to connect to the arduino. Returns -1 if already connected,
@@ -22,16 +26,26 @@ public:
 	 */
 	int connectToArduino();
 
+public slots:
+	void renderLauncher();
+	void renderWaiting();
+	void renderTick();
+	void renderGameOver(score_t score, quint16 total);
+
 signals:
 	void errorOccurred(QSerialPort::SerialPortError error, QString msg);
+	void disconnected();
 
 private slots:
 	void readData();
 
 private:
-	quint8 screen[16][32];
-
 	QSerialPort *ctc;
+
+	BufferGFX gfx;
+	ClientGameState &cgs;
+
+	void sendBuffer();
 };
 
 #endif // !ARDUINO_H
