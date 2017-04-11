@@ -98,13 +98,16 @@ void leaveTrail(Player &player, GameState &state)
 
 	SquareState square = state.getState(xpos, ypos);
 
+	if (square.getOwningPlayerId() == player.getId())
+		return;
+
 	square.setTrailPlayer(&player);
 
 	if (old == newD)
 	{
-		if (newD == 1 || newD == 3)
+		if (newD == UP || newD == DOWN)
 			square.setTrailType(NORTHTOSOUTH);
-		else if (newD == 2 || newD == 4)
+		else if (newD == LEFT || newD == RIGHT)
 			square.setTrailType(EASTTOWEST);
 	}
 	else
@@ -242,22 +245,22 @@ bool squareChecks(Player player, SquareState square, GameState &state)
 void fillInBody(Player player, GameState &state)
 {
 
-	for (int i = -1; i <= (state.getWidth() + 1); ++i)
+	for (int i = -1; i <= state.getWidth(); ++i)
 	{
-		for (int j = -1; j <= (state.getHeight() + 1); ++j)
+		for (int j = -1; j <= state.getHeight(); ++j)
 		{
 
 			SquareState square = state.getState(i, j);
-			//if (!square.isFlooded())
-				//if (square.getOwningPlayer())
-					//square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
+			if (!square.isFlooded())
+			{
+				if (square.getOwningPlayer())
+					square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
 
-				//square.setOwningPlayerId(player.getId());
+				square.setOwningPlayerId(player.getId());
 
-				//player.setScore(player.getScore() + 1);
-			//}
-
-			//square.markAsUnflooded();
+				player.setScore(player.getScore() + 1);
+			}
+			square.markAsUnflooded();
 			square.markAsUnchecked();
 
 		}
@@ -277,8 +280,11 @@ void checkForCompletedLoop(Player player, GameState &state)
 	{
 		for (int j = ypos - 1; j <= ypos + 1; ++j)
 		{
-			if (square.getTrailPlayer() && square.getTrailPlayerId() == player.getId())
+			if (square.getTrailPlayerId() == player.getId())
+			{
 				trailExists = true;
+				break;
+			}
 		}
 	}
 
