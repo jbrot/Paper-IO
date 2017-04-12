@@ -120,6 +120,10 @@ void ClientHandler::sendTick()
 	pos_t mx = gs->getWidth();
 	state_t news[CLIENT_FRAME];
 
+	qDebug() << "Client" << player << "xy" << pl->getX() << pl->getY() << px << py;
+	qDebug() << gs->board[pl->getX()][pl->getY()];
+
+
 	// Compute the new row.
 	switch (pl->getActualDirection())
 	{

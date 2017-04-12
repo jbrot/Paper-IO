@@ -38,7 +38,7 @@ pos_t Player::getX() const
 
 bool Player::setX(pos_t newX)
 {
-	return setLocation(y, newX);
+	return setLocation(newX, y);
 }
 
 pos_t Player::getY() const
@@ -48,12 +48,13 @@ pos_t Player::getY() const
 
 bool Player::setY(pos_t newY)
 {
-	return setLocation(newY, x);
+	return setLocation(x, newY);
 }
 
 bool Player::setLocation(pos_t newX, pos_t newY)
 {
-	SquareState ns = gs.getState(x, y);
+	qDebug() << "Player" << id << "Set:" << newX << newY;
+	SquareState ns = gs.getState(newX, newY);
 	if (ns.isOccupied())
 		return false;
 
@@ -74,13 +75,15 @@ bool Player::setLocation(pos_t newX, pos_t newY)
 
 Direction Player::getNewDirection() const
 {
-    return newDir;
+	return UP;
+	//return Direction(gs.getTick() % 5);
+    //return newDir;
 }
 
 Direction Player::getActualDirection() const
 {
 	SquareState ss = gs.getState(x, y);
-    return ss.getDirection();
+	return ss.getDirection();
 }
 
 void Player::setActualDirection(Direction nd)

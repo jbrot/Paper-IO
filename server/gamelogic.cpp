@@ -31,30 +31,30 @@ void updateGame(GameState &state)
 {
 
 	// Create vector of all Players
-	std::vector<Player> allPlayers = state.getPlayers();
+	std::vector<Player *> allPlayers = state.getPlayers();
 
 	// Loop over all Players
 	for (int i = 0; i < allPlayers.size(); ++i)
 	{
 
 		// Leave trail under player
-		leaveTrail(allPlayers[i], state);
+		leaveTrail(*allPlayers[i], state);
 
 		// Update position of player
-		updatePosition(allPlayers[i]);
+		updatePosition(*allPlayers[i]);
 
 		// Check if player hit a trail
-		checkForTrail(allPlayers[i], state);
+		checkForTrail(*allPlayers[i], state);
 
 		// Check if player hit a boundary
-		checkForBoundary(allPlayers[i], state);
+		checkForBoundary(*allPlayers[i], state);
 
 		// Check if player completed a loop
-		checkForCompletedLoop(allPlayers[i], state);
+		checkForCompletedLoop(*allPlayers[i], state);
 
 		// Check for winner
-		if (detectWin(allPlayers[i], state))
-			allPlayers[i].kill();
+		if (detectWin(*allPlayers[i], state))
+			allPlayers[i]->kill();
 
 	}
 	

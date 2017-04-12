@@ -247,11 +247,15 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	// But I don't think it matters right now.
 	const state_t *news = pgt.getNewSection();
 	const state_t *const *diff = pgt.getDiff();
+	qDebug() << "dir" << pgt.getDirection();
 	switch(pgt.getDirection())
 	{
 	case UP:
-		std::copy_backward(cgs.board[0], cgs.board[CLIENT_FRAME- 1], cgs.board[1]);
-		std::copy(news, news + CLIENT_FRAME, cgs.board[0]);
+		//std::copy_backward(&cgs.board[0][0], &cgs.board[CLIENT_FRAME - 1][0], &cgs.board[1][0]);
+		for (int i = 0; i < CLIENT_FRAME - 1; i++)
+			for (int j = 0; j < CLIENT_FRAME; j++)
+				cgs.board[i + 1][j] = cgs.board[i][j];
+		std::copy(news, news + CLIENT_FRAME, &cgs.board[0][0]);
 		for (int i = 1; i < CLIENT_FRAME; i++)
 			for (int j = 0; j < CLIENT_FRAME; j++)
 				cgs.board[i][j] ^= diff[i][j];

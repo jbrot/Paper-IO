@@ -47,11 +47,12 @@ GameOver::GameOver(QWidget *parent)
 	title->setTextInteractionFlags(Qt::NoTextInteraction);
 	title->setAlignment(Qt::AlignCenter);
 	title->setFont(freshman);
+	title->setStyleSheet("QLabel { font-size: 72px; }");
 
 	msg->setTextInteractionFlags(Qt::NoTextInteraction);
 	msg->setAlignment(Qt::AlignCenter);
 	msg->setFont(font);
-	msg->setStyleSheet("QLabel { background-color: #333; color: #FFF; }");
+	msg->setStyleSheet("QLabel { background-color: #333; color: #FFF; font-size: 54;}");
 	msg->setFrameStyle(QFrame::Plain | QFrame::NoFrame);
 
 	QPushButton *again = new QPushButton(tr("PLAY AGAIN"));

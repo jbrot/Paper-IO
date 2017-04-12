@@ -122,13 +122,13 @@ Player *GameState::lookupPlayer(plid_t id) const
 	return players.value(id);
 }
 
-std::vector<Player> GameState::getPlayers() const
+std::vector<Player *> GameState::getPlayers() const
 {
-	std::vector<Player> pls;
+	std::vector<Player *> pls;
 	foreach (Player *pl, players)
 	{
 		if (pl)
-			pls.push_back(*pl);
+			pls.push_back(pl);
 	}
 
 	return pls;

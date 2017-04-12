@@ -219,11 +219,7 @@ public:
 
 	Player *lookupPlayer(plid_t id) const;
 
-	/*
-	 * WARNING: This function is relatively inneficient and should
-	 * be used sparingly.
-	 */
-	std::vector<Player> getPlayers() const;
+	std::vector<Player *> getPlayers() const;
 
 
 private:

@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 
 	// We need to do this so we can communicate errors across threads.
 	qRegisterMetaType<QAbstractSocket::SocketError>();
+	qRegisterMetaType<score_t>("score_t");
 
 	registerPackets();
 
