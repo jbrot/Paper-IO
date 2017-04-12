@@ -184,21 +184,20 @@ void PacketGameTick::read(QDataStream &str)
 {
 	str >> tick >> dir >> score;
 
-	for (int i = 0; i < CLIENT_FRAME; i++)
+	for (int i = 0; i < CLIENT_FRAME; ++i)
 		str >> news[i];
 
 	quint8 count = 0;
 	state_t cv = 0;
-	for (int i = 0; i < CLIENT_FRAME; i++)
+	for (int i = 0; i < CLIENT_FRAME; ++i)
 	{
-		for (int j = 0; j < CLIENT_FRAME; j++)
+		for (int j = 0; j < CLIENT_FRAME; ++j)
 		{
-			/*if (count == 0)
+			if (count == 0)
 				str >> count >> cv;
 
 			diff[i][j] = cv;
-			count--;*/
-			str >> diff[i][j];
+			count--;
 		}
 	}
 
@@ -208,30 +207,28 @@ void PacketGameTick::read(QDataStream &str)
 void PacketGameTick::write(QDataStream &str) const
 {
 	str << tick << dir << score;
-	for (int i = 0; i < CLIENT_FRAME; i++)
+	for (int i = 0; i < CLIENT_FRAME; ++i)
 		str << news[i];
 
 	quint8 count = 0;
 	state_t cv = diff[0][0];
-	for (int i = 0; i < CLIENT_FRAME; i++)
+	for (int i = 0; i < CLIENT_FRAME; ++i)
 	{
-		for (int j = 0; j < CLIENT_FRAME; j++)
+		for (int j = 0; j < CLIENT_FRAME; ++j)
 		{
-			/*if (diff[i][j] == cv)
+			if (diff[i][j] != cv || count >= static_cast<quint8>(count + 1))
 			{
-				count++;
-				// Overflow check. The cast is very important!
-				if (count < static_cast<quint8>(count + 1))
-					continue;
+				str << count << cv;
+
+				count = 0;
+				cv = diff[i][j];
 			}
 
-			str << count << cv;
-			count = 1;
-			cv = diff[i][j];*/
-			str << diff[i][j];
+			++count;
 		}
 	}
-	//str << count << cv;
+	qDebug() << count << cv;
+	str << count << cv;
 
 	str << chksum;
 }
