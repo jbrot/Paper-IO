@@ -43,13 +43,13 @@ ClientPlayer *ClientGameState::lookupPlayer(plid_t id) const
 	return players.value(id);
 }
 
-QList<ClientPlayer> ClientGameState::getPlayers() const
+QList<ClientPlayer *> ClientGameState::getPlayers() const
 {
-    QList<ClientPlayer> pls;
+    QList<ClientPlayer *> pls;
 	foreach (ClientPlayer *pl, players)
 	{
 		if (pl)
-			pls.push_back(*pl);
+			pls.push_back(pl);
 	}
 
 	return pls;

@@ -141,7 +141,7 @@ public:
 
 	ClientPlayer *lookupPlayer(plid_t id) const;
 
-    QList<ClientPlayer> getPlayers() const;
+    QList<ClientPlayer *> getPlayers() const;
 
     plid_t getClientId() const;
 	ClientPlayer *getClient() const;

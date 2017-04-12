@@ -26,14 +26,14 @@ const int NUM_COLORS = sizeof(playerColors);
 
 QHash<plid_t, int> colorMap;
 
-void updateColorMap(QList<ClientPlayer> &players)
+void updateColorMap(QList<ClientPlayer *> players)
 {
 
     for (auto iter = colorMap.begin(); iter != colorMap.end(); )
     {
         for (auto pter = players.begin(); pter < players.end(); ++pter)
         {
-            if (iter.key() == pter->getId())
+            if (iter.key() == (*pter)->getId())
             {
                 //players.erase(pter);
                 ++iter;
@@ -59,7 +59,7 @@ void updateColorMap(QList<ClientPlayer> &players)
                goto second_loop_continue;
         }
 
-        colorMap.insert(pter->getId(), i);
+        colorMap.insert((*pter)->getId(), i);
 
         if (++pter >= players.cend())
             return;
