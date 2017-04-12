@@ -106,14 +106,14 @@ Launcher::Launcher(QWidget *parent)
 	layout->setVerticalSpacing(20);
 
 	// Spacing around outside
-	layout->setRowMinimumHeight(0,20);
-	layout->setRowStretch(0,1);
-	layout->setRowMinimumHeight(5,20);
-	layout->setRowStretch(5,1);
-	layout->setColumnMinimumWidth(0,20);
-	layout->setColumnStretch(0,1);
-	layout->setColumnMinimumWidth(4,20);
-	layout->setColumnStretch(4,1);
+	layout->setRowMinimumHeight(0, 20);
+	layout->setRowStretch(0, 1);
+	layout->setRowMinimumHeight(5, 20);
+	layout->setRowStretch(5, 1);
+	layout->setColumnMinimumWidth(0, 20);
+	layout->setColumnStretch(0, 1);
+	layout->setColumnMinimumWidth(4, 20);
+	layout->setColumnStretch(4, 1);
 
 	// Center content
 	layout->addWidget(title, 1, 1, 1, 3);
