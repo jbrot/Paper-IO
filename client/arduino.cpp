@@ -49,16 +49,29 @@ int Arduino::connectToArduino()
 	const auto infos = QSerialPortInfo::availablePorts();
 	QSerialPortInfo ainf;
 	bool found = false;
-	for (const QSerialPortInfo &info : infos) {
-		if (!info.manufacturer().startsWith("Arduino"))
-			continue;
+	qDebug() << "Searching for Arduino...";
+	for (const QSerialPortInfo &info : infos)
+	{
+		QString s = QObject::tr("Port: ") + info.portName() + "\n"
+						   + QObject::tr("Location: ") + info.systemLocation() + "\n"
+						   + QObject::tr("Description: ") + info.description() + "\n"
+						   + QObject::tr("Manufacturer: ") + info.manufacturer() + "\n"
+						   + QObject::tr("Serial number: ") + info.serialNumber() + "\n"
+						   + QObject::tr("Vendor Identifier: ") + (info.hasVendorIdentifier() ? QString::number(info.vendorIdentifier(), 16) : QString()) + "\n"
+						   + QObject::tr("Product Identifier: ") + (info.hasProductIdentifier() ? QString::number(info.productIdentifier(), 16) : QString()) + "\n"
+						   + QObject::tr("Busy: ") + (info.isBusy() ? QObject::tr("Yes") : QObject::tr("No")) + "\n";
+		qDebug() << qPrintable(s);
+
+		if (info.vendorIdentifier() != 0x2341 || info.productIdentifier() != 0x43)
+			 continue;
 
 		// Linux and OS X have two devices. We want the cu one.
-#ifndef _WIND32
+#ifndef _WIN32
 		if (!info.portName().startsWith("cu."))
 			continue;
 #endif
 
+		qDebug() << "Arduino found!";
 		ainf = info;
 		found = true;
 		break;
