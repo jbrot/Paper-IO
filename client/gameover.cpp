@@ -82,7 +82,7 @@ void GameOver::setScore(score_t score, quint16 total)
 {
 	double pct = score == total ? 100 : 100 * score / (double) total;
 	qDebug() << "Game Over! Score:" << score << "/" << total << ":" << pct << "%";
-	msg->setText(tr("Score: %1%").arg(QString::number(pct, 'f', (score >= 10 ? 1 : 2)), 4));
+	msg->setText(tr("Score: %1%").arg(QString::number(pct, 'f', (pct >= 10 ? 1 : 2)), 4));
 	again->setEnabled(true);
 	quit->setEnabled(true);
 }
