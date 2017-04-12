@@ -23,7 +23,7 @@ PacketGameEnd::PacketGameEnd(score_t nm)
 
 score_t PacketGameEnd::getScore() const
 {
-	return quint8(score);
+	return score;
 }
 
 void PacketGameEnd::setScore(score_t str)
