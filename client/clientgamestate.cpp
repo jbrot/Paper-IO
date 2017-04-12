@@ -43,9 +43,9 @@ ClientPlayer *ClientGameState::lookupPlayer(plid_t id) const
 	return players.value(id);
 }
 
-std::vector<ClientPlayer> ClientGameState::getPlayers() const
+QList<ClientPlayer> ClientGameState::getPlayers() const
 {
-	std::vector<ClientPlayer> pls;
+    QList<ClientPlayer> pls;
 	foreach (ClientPlayer *pl, players)
 	{
 		if (pl)

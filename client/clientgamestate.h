@@ -141,9 +141,9 @@ public:
 
 	ClientPlayer *lookupPlayer(plid_t id) const;
 
-	std::vector<ClientPlayer> getPlayers() const;
+    QList<ClientPlayer> getPlayers() const;
 
-	plid_t getClientId() const;
+    plid_t getClientId() const;
 	ClientPlayer *getClient() const;
 
 	quint16 getTotalSquares() const;
