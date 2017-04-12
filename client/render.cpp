@@ -35,7 +35,7 @@ void updateColorMap(QList<ClientPlayer *> players)
         {
             if (iter.key() == (*pter)->getId())
             {
-                //players.erase(pter);
+                players.erase(pter);
                 ++iter;
                 goto first_loop_continue;
             }
@@ -99,6 +99,13 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
     {
         for (int y = -15; y <= 15; ++y)
         {
+			if (x % 2 == y % 2)
+                painter->fillRect(CTOP_X + x * SQUARE_SIZE,
+                                  CTOP_Y + y * SQUARE_SIZE,
+                                  SQUARE_SIZE,
+                                  SQUARE_SIZE,
+                                  playerColors[0]);
+
             ClientSquareState state = cgs.getState(x, y);
             if(state.isOwned())
             {
