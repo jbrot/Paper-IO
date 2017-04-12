@@ -136,18 +136,18 @@ void ClientHandler::sendTick()
 			std::copy(gs->board[py + CLIENT_FRAME - 1] + px, gs->board[py + CLIENT_FRAME - 1] + px + CLIENT_FRAME, news);
 		break;
 	case LEFT:
-		if (mx < 0)
+		if (px < 0)
 			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
 		else
 			for (pos_t y = 0; y < CLIENT_FRAME; y++)
-				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][mx] : OUT_OF_BOUNDS_STATE;
+				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][px] : OUT_OF_BOUNDS_STATE;
 		break;
 	case RIGHT:
-		if (mx + CLIENT_FRAME > mx)
+		if (px + CLIENT_FRAME > mx)
 			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
 		else
 			for (pos_t y = 0; y < CLIENT_FRAME; y++)
-				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][mx + CLIENT_FRAME - 1] : OUT_OF_BOUNDS_STATE;
+				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][px + CLIENT_FRAME - 1] : OUT_OF_BOUNDS_STATE;
 		break;
 	// When we don't move, the new data is ignored.
 	case NONE:
