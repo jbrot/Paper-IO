@@ -80,7 +80,7 @@ void ClientHandler::beginGame(plid_t pid, GameState *g)
 	gs->unlock();
 }
 
-void ClientHandler::endGame(quint8 score)
+void ClientHandler::endGame(score_t score)
 {
 	if (state != INGAME)
 	{

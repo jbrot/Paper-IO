@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<QAbstractSocket::SocketError>();
 	qRegisterMetaType<GameState *>();
 	qRegisterMetaType<plid_t>("plid_t");
+	qRegisterMetaType<score_t>("score_t");
 	qRegisterMetaType<Direction>("Direction");
 
 	// Make sure the protocol is set up

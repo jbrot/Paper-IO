@@ -221,7 +221,7 @@ void GameHandler::removePlayers()
 			} else {
 				disconnect(this, 0, ch, 0);
 				disconnect(ch, 0, this, 0);
-				QMetaObject::invokeMethod(ch, "endGame", Q_ARG(quint8, pl->getScore()));
+				QMetaObject::invokeMethod(ch, "endGame", Q_ARG(score_t, pl->getScore()));
 			}
 		} else {
 			qWarning() << "Game" << id << ": Player" << iter.key() << "is neither an AI nor a Player!";

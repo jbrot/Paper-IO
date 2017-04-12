@@ -15,7 +15,6 @@ void updatePosition(Player& player);
 void leaveTrail(Player &player, GameState &state);
 void killPlayers(GameState &state);
 void checkForTrail(Player &player, GameState &state);
-void checkForBoundary(Player &player, GameState &state);
 void floodMarkSquares(Player &player, GameState &state);
 void fillInBody(Player &player, GameState &state);
 void checkForCompletedLoop(Player &player, GameState &state);
@@ -46,9 +45,6 @@ void updateGame(GameState &state)
 		// Check if player hit a trail
 		checkForTrail(*allPlayers[i], state);
 
-		// Check if player hit a boundary
-		checkForBoundary(*allPlayers[i], state);
-
 		// Check if player completed a loop
 		checkForCompletedLoop(*allPlayers[i], state);
 
@@ -66,23 +62,32 @@ void updateGame(GameState &state)
 void updatePosition(Player &player)
 {
 	Direction newD = player.getNewDirection();
+	Direction old = player.getActualDirection();
 
+	if (abs(newD - old) == 2)
+		newD = old;
+
+	bool res = true;
 	switch (newD){
 	case UP:
-		player.setY(player.getY() - 1);
+		res = player.setY(player.getY() - 1);
 		break;
 	case RIGHT:
-		player.setX(player.getX() + 1);
+		res = player.setX(player.getX() + 1);
 		break;
 	case DOWN:
-		player.setY(player.getY() + 1);
+		res = player.setY(player.getY() + 1);
 		break;
 	case LEFT:
-		player.setX(player.getX() - 1);
+		res = player.setX(player.getX() - 1);
 		break;
 	case NONE:
 		break;
 	}
+
+	// res is false if there is a boundary or a player collision
+	if (!res)
+		player.kill();
 
 	player.setActualDirection(newD);
 
@@ -95,6 +100,9 @@ void leaveTrail(Player &player, GameState &state)
 
 	Direction old = player.getActualDirection();
 	Direction newD = player.getNewDirection();
+
+	if (abs(newD - old) == 2)
+		newD = old;
 
 	SquareState square = state.getState(xpos, ypos);
 
@@ -163,17 +171,6 @@ void checkForTrail(Player &player, GameState &state)
 	if (square.hasTrail()){
 		square.getTrailPlayer()->kill();
 	}
-}
-
-void checkForBoundary(Player &player, GameState &state)
-{
-	pos_t xpos = player.getX();
-	pos_t ypos = player.getY();
-
-	if (xpos < 0 || xpos > state.getWidth() - 1)
-		player.kill();
-	if (ypos < 0 || ypos > state.getHeight() - 1)
-		player.kill();
 }
 
 void floodMarkSquares(Player &player, GameState &state)

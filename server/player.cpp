@@ -107,8 +107,8 @@ void Player::kill()
 
 	// We don't move to -1,-1 because that square
 	// may be used during territory checking.
-	x = -2;
-	y = -2;
+	x = -5;
+	y = -5;
 }
 
 score_t Player::getScore() const

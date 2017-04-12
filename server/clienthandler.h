@@ -47,7 +47,7 @@ public:
 public slots:
 	void enqueue();
 	void beginGame(plid_t id, GameState *gs);
-	void endGame(quint8 score);
+	void endGame(score_t score);
 	void establishConnection(int socketDescriptor);
 	void sendTick();
 	void abort();
