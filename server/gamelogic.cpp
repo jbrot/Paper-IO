@@ -14,13 +14,13 @@
 void updatePosition(Player& player);
 void leaveTrail(Player &player, GameState &state);
 void killPlayers(GameState &state);
-void checkForTrail(Player player, GameState &state);
-void checkForBoundary(Player player, GameState &state);
-void floodMarkSquares(Player player, GameState &state);
-void fillInBody(Player player, GameState &state);
-void checkForCompletedLoop(Player player, GameState &state);
-bool detectWin(Player player, GameState &state);
-bool squareChecks(Player player, SquareState square, GameState &state);
+void checkForTrail(Player &player, GameState &state);
+void checkForBoundary(Player &player, GameState &state);
+void floodMarkSquares(Player &player, GameState &state);
+void fillInBody(Player &player, GameState &state);
+void checkForCompletedLoop(Player &player, GameState &state);
+bool detectWin(Player &player, GameState &state);
+bool squareChecks(Player &player, SquareState square, GameState &state);
 
 std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state);
 bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state);
@@ -63,7 +63,7 @@ void updateGame(GameState &state)
 
 }
 
-void updatePosition(Player& player)
+void updatePosition(Player &player)
 {
 	Direction newD = player.getNewDirection();
 
@@ -153,7 +153,7 @@ void killPlayers(GameState &state)
 	}
 }
 
-void checkForTrail(Player player, GameState &state)
+void checkForTrail(Player &player, GameState &state)
 {
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
@@ -165,7 +165,7 @@ void checkForTrail(Player player, GameState &state)
 	}
 }
 
-void checkForBoundary(Player player, GameState &state)
+void checkForBoundary(Player &player, GameState &state)
 {
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
@@ -176,7 +176,7 @@ void checkForBoundary(Player player, GameState &state)
 		player.kill();
 }
 
-void floodMarkSquares(Player player, GameState &state)
+void floodMarkSquares(Player &player, GameState &state)
 {
 	std::vector<std::pair<pos_t, pos_t>> coordinatesStack;
 	coordinatesStack.push_back({-1,-1});
@@ -230,7 +230,7 @@ void floodMarkSquares(Player player, GameState &state)
 
 }
 
-bool squareChecks(Player player, SquareState square, GameState &state)
+bool squareChecks(Player &player, SquareState square, GameState &state)
 {
 	if (square.getX() < -1 || square.getY() < -1 ||
 		square.getX() > state.getWidth() || square.getY() > state.getHeight())
@@ -246,7 +246,7 @@ bool squareChecks(Player player, SquareState square, GameState &state)
 
 }
 
-void fillInBody(Player player, GameState &state)
+void fillInBody(Player &player, GameState &state)
 {
 
 	for (int i = -1; i <= state.getWidth(); ++i)
@@ -277,7 +277,7 @@ void fillInBody(Player player, GameState &state)
 	}
 }
 
-void checkForCompletedLoop(Player player, GameState &state)
+void checkForCompletedLoop(Player &player, GameState &state)
 {
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
@@ -307,7 +307,7 @@ void checkForCompletedLoop(Player player, GameState &state)
 
 }
 
-bool detectWin(Player player, GameState &state){
+bool detectWin(Player &player, GameState &state){
 
 	for (int i = 0; i <= state.getWidth() -1 ; ++i)
 	{
