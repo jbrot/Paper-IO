@@ -100,6 +100,7 @@ private:
 	bool dead;
 
 	Player(GameState &gs, const plid_t id, const QString &name, pos_t x, pos_t y);
+	Player(const Player &other) = delete;
 };
 
 class SquareState 
