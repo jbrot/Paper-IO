@@ -257,18 +257,20 @@ void fillInBody(Player &player, GameState &state)
 			SquareState square = state.getState(i, j);
 			if (!square.isFlooded())
 			{
-				if (square.getOwningPlayer())
-					square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
-
-				square.setOwningPlayerId(player.getId());
-
 				if (square.getTrailPlayerId() == player.getId())
 				{
 					square.setTrailType(TrailType::NOTRAIL);
 					square.setTrailPlayerId(UNOCCUPIED);
 				}
 
-				player.setScore(player.getScore() + 1);
+				if (square.getOwningPlayerId() != player.getId())
+				{
+					if (square.isOwned())
+						square.getOwningPlayer()->setScore(square.getOwningPlayer()->getScore() - 1);
+
+					square.setOwningPlayerId(player.getId());
+					player.setScore(player.getScore() + 1);
+				}
 			}
 			square.markAsUnflooded();
 			square.markAsUnchecked();
