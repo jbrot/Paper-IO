@@ -140,6 +140,9 @@ void GameHandler::spawnPlayers()
 		connect(ch, &ClientHandler::disconnected, this, [this, pid] {
 			playerDisconnected(pid);
 		});
+		connect(ch, &ClientHandler::changeDirection, this, [this, pid] (Direction dir) {
+			playerMoved(pid, dir);
+		});
 
 		players.insert(currentId, ch);
 		configureSpawn(gs.lookupPlayer(currentId), gs);

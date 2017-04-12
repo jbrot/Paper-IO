@@ -34,7 +34,22 @@ void GameWidget::paintEvent(QPaintEvent *event)
 
 void GameWidget::keyPressEvent(QKeyEvent *event)
 {
-	qDebug() << "Key press:" << event->text();
+	if (event->key() == Qt::Key_Up)
+		emit changeDirection(UP);
+	else if (event->key() == Qt::Key_Left)
+		emit changeDirection(LEFT);
+	else if (event->key() == Qt::Key_Down)
+		emit changeDirection(DOWN);
+	else if (event->key() == Qt::Key_Right)
+		emit changeDirection(RIGHT);
+	else if (event->key() == Qt::Key_W)
+		emit changeDirection(UP);
+	else if (event->key() == Qt::Key_A)
+		emit changeDirection(LEFT);
+	else if (event->key() == Qt::Key_S)
+		emit changeDirection(DOWN);
+	else if (event->key() == Qt::Key_D)
+		emit changeDirection(RIGHT);
 
 	QOpenGLWidget::keyPressEvent(event);
 }

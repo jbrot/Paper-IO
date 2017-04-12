@@ -17,6 +17,9 @@ class GameWidget : public QOpenGLWidget
 public:
 	GameWidget(ClientGameState &cgs, QWidget *parent = Q_NULLPTR);
 
+signals:
+	void changeDirection(Direction dir);
+
 public slots:
 	void animate();
 

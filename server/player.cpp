@@ -74,9 +74,10 @@ bool Player::setLocation(pos_t newX, pos_t newY)
 
 Direction Player::getNewDirection() const
 {
-	return RIGHT;
-	//return Direction(gs.getTick() % 5);
-    //return newDir;
+	if (newDir == NONE)
+		return Direction((gs.getTick() / 4) % 4 + 1);
+    else 
+		return newDir;
 }
 
 Direction Player::getActualDirection() const
