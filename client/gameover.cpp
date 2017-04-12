@@ -80,8 +80,9 @@ GameOver::GameOver(QWidget *parent)
 
 void GameOver::setScore(score_t score, quint16 total)
 {
-	qDebug() << "Set score!";
-	msg->setText(tr("Score: %1%").arg(QString::number(score / (double) total, 'f', 1), 4));
+	double pct = score == total ? 100 : 100 * score / (double) total;
+	qDebug() << "Game Over! Score:" << score << "/" << total << ":" << pct << "%";
+	msg->setText(tr("Score: %1%").arg(QString::number(pct, 'f', (score >= 10 ? 1 : 2)), 4));
 	again->setEnabled(true);
 	quit->setEnabled(true);
 }
