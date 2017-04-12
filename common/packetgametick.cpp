@@ -183,6 +183,7 @@ QByteArray PacketGameTick::getChecksum() const
 void PacketGameTick::read(QDataStream &str)
 {
 	str >> tick >> dir >> score;
+
 	for (int i = 0; i < CLIENT_FRAME; i++)
 		str >> news[i];
 
@@ -192,11 +193,12 @@ void PacketGameTick::read(QDataStream &str)
 	{
 		for (int j = 0; j < CLIENT_FRAME; j++)
 		{
-			if (count == 0)
+			/*if (count == 0)
 				str >> count >> cv;
 
 			diff[i][j] = cv;
-			count--;
+			count--;*/
+			str >> diff[i][j];
 		}
 	}
 
@@ -215,7 +217,7 @@ void PacketGameTick::write(QDataStream &str) const
 	{
 		for (int j = 0; j < CLIENT_FRAME; j++)
 		{
-			if (diff[i][j] == cv)
+			/*if (diff[i][j] == cv)
 			{
 				count++;
 				// Overflow check. The cast is very important!
@@ -225,10 +227,11 @@ void PacketGameTick::write(QDataStream &str) const
 
 			str << count << cv;
 			count = 1;
-			cv = diff[i][j];
+			cv = diff[i][j];*/
+			str << diff[i][j];
 		}
 	}
-	str << count << cv;
+	//str << count << cv;
 
 	str << chksum;
 }

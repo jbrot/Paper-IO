@@ -190,6 +190,8 @@ void IOHandler::processFullBoard(const PacketResendBoard &prb, bool nested)
 	{
 		qWarning() << "PRB Checksum:" << prb.getChecksum() << "disagrees with computed:" << chksum << "! Requesting resend...";
 		requestResend();
+	} else {
+		qDebug() << "PRB Processed Successfully.";
 	}
 
 	if (!nested)
@@ -247,14 +249,13 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	// But I don't think it matters right now.
 	const state_t *news = pgt.getNewSection();
 	const state_t *const *diff = pgt.getDiff();
-	qDebug() << "dir" << pgt.getDirection();
 	switch(pgt.getDirection())
 	{
 	case UP:
-		//std::copy_backward(&cgs.board[0][0], &cgs.board[CLIENT_FRAME - 1][0], &cgs.board[1][0]);
-		for (int i = 0; i < CLIENT_FRAME - 1; i++)
-			for (int j = 0; j < CLIENT_FRAME; j++)
-				cgs.board[i + 1][j] = cgs.board[i][j];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+		std::copy_backward(cgs.board[0], cgs.board[CLIENT_FRAME - 1], cgs.board[CLIENT_FRAME]);
+#pragma GCC diagnostic pop
 		std::copy(news, news + CLIENT_FRAME, &cgs.board[0][0]);
 		for (int i = 1; i < CLIENT_FRAME; i++)
 			for (int j = 0; j < CLIENT_FRAME; j++)
@@ -273,7 +274,7 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	case LEFT:
 		for (int i = 0; i < CLIENT_FRAME; i++)
 		{
-			std::copy_backward(&cgs.board[i][0], &cgs.board[i][CLIENT_FRAME - 1], &cgs.board[i][1]); 
+			std::copy_backward(cgs.board[i], &cgs.board[i][CLIENT_FRAME - 1], cgs.board[i + 1]); 
 			cgs.board[i][0] = news[i];
 			for (int j = 1; j < CLIENT_FRAME; j++)
 				cgs.board[i][j] ^= diff[i][j];
@@ -282,7 +283,7 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	case RIGHT:
 		for (int i = 0; i < CLIENT_FRAME; i++)
 		{
-			std::copy(&cgs.board[i][1], &cgs.board[i][CLIENT_FRAME], &cgs.board[i][0]); 
+			std::copy(&cgs.board[i][1], cgs.board[i + 1], cgs.board[i]); 
 			cgs.board[i][CLIENT_FRAME - 1] = news[i];
 			for (int j = 0; j < CLIENT_FRAME - 1; j++)
 				cgs.board[i][j] ^= diff[i][j];

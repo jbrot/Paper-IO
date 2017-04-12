@@ -120,10 +120,6 @@ void ClientHandler::sendTick()
 	pos_t mx = gs->getWidth();
 	state_t news[CLIENT_FRAME];
 
-	qDebug() << "Client" << player << "xy" << pl->getX() << pl->getY() << px << py;
-	qDebug() << gs->board[pl->getX()][pl->getY()];
-
-
 	// Compute the new row.
 	switch (pl->getActualDirection())
 	{
@@ -167,8 +163,8 @@ void ClientHandler::sendTick()
 			dptrs[y] = gs->diffStart;
 			bptrs[y] = gs->boardStart;
 		} else {
-			dptrs[y] = gs->diff[y] + px;
-			bptrs[y] = gs->board[y] + px;
+			dptrs[y] = gs->diff[py + y] + px;
+			bptrs[y] = gs->board[py + y] + px;
 		}
 	}
 
@@ -346,7 +342,7 @@ PacketResendBoard ClientHandler::makePRB()
 		if (py + y < 0 || py + y >= my)
 			ptrs[y] = gs->boardStart;
 		else
-			ptrs[y] = gs->board[y] + px;
+			ptrs[y] = gs->board[py + y] + px;
 			
 	}
 

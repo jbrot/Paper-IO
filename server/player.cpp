@@ -53,7 +53,6 @@ bool Player::setY(pos_t newY)
 
 bool Player::setLocation(pos_t newX, pos_t newY)
 {
-	qDebug() << "Player" << id << "Set:" << newX << newY;
 	SquareState ns = gs.getState(newX, newY);
 	if (ns.isOccupied())
 		return false;
@@ -75,7 +74,7 @@ bool Player::setLocation(pos_t newX, pos_t newY)
 
 Direction Player::getNewDirection() const
 {
-	return UP;
+	return RIGHT;
 	//return Direction(gs.getTick() % 5);
     //return newDir;
 }

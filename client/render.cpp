@@ -77,7 +77,7 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
     const int CENTER_X = rect.x() + rect.width()/2;
     const int CENTER_Y = rect.y() + rect.height()/2;
 
-    const int SQUARE_SIZE = std::max(std::max(rect.height()/31, rect.width()/31), 60);
+    const int SQUARE_SIZE = std::max(std::max(rect.height()/CLIENT_FRAME, rect.width()/CLIENT_FRAME), 50);
     const int OUTLINE_SIZE = 7;
 
     const int CTOP_X = CENTER_X - 0.5 * SQUARE_SIZE;
@@ -95,17 +95,10 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
     CenterPt.setY(CENTER_Y);
 
     //rendering square by square
-    for (int x = -15; x <= 15; ++x)
+    for (int x = -(CLIENT_FRAME / 2); x <= (CLIENT_FRAME / 2); ++x)
     {
-        for (int y = -15; y <= 15; ++y)
+        for (int y = -(CLIENT_FRAME / 2); y <= (CLIENT_FRAME / 2); ++y)
         {
-			if (x % 2 == y % 2)
-                painter->fillRect(CTOP_X + x * SQUARE_SIZE,
-                                  CTOP_Y + y * SQUARE_SIZE,
-                                  SQUARE_SIZE,
-                                  SQUARE_SIZE,
-                                  playerColors[0]);
-
             ClientSquareState state = cgs.getState(x, y);
             if(state.isOwned())
             {
@@ -133,8 +126,6 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
                                   SQUARE_SIZE,
                                   playerColors[colorMap.value(state.getOccupyingPlayerId())]);
             }
-
-
         }
     }
 
