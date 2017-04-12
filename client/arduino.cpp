@@ -155,7 +155,7 @@ void Arduino::renderGameOver(score_t score, quint16 total)
 
 	gfx.fillScreen(0);
 
-	double pct = score / (double) total;
+	double pct = 100 * score / (double) total;
 
 	char scr[] = "Score";
 	gfx.setTextColor(BufferGFX::Color333(2,2,2));
