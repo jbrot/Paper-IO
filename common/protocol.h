@@ -74,7 +74,7 @@ const packet_t PACKET_RESEND_BOARD = 5;
  * times, but this isn't a big deal and simplifies the net code. Only
  * the first tick value will actually be used.
  *
- * Spec: <PACKET_GAME_JOIN> <plid_t: id> <score_t: score> <quint16: total squares>
+ * Spec: <PACKET_GAME_JOIN> <plid_t: id> <score_t: score> <quint16: total squares> <quint16: tickRate>
  *       <contents of PACKET_PLAYERS_UPDATE>
  *       <contents of PACKET_LEADERBOARD_UPDATE>
  *       <contents of PACKET_RESEND_BOARD>
@@ -334,7 +334,7 @@ public:
 	 * should be used for writing.
 	 */
 	PacketGameJoin();
-	PacketGameJoin(plid_t plid, score_t score, quint16 total, const PacketPlayersUpdate &ppu, const PacketLeaderboardUpdate &plu, const PacketResendBoard &prb);
+	PacketGameJoin(plid_t plid, score_t score, quint16 total, quint16 tickRate, const PacketPlayersUpdate &ppu, const PacketLeaderboardUpdate &plu, const PacketResendBoard &prb);
 
 	plid_t getId() const;
 	void setId(plid_t id);
@@ -344,6 +344,9 @@ public:
 
 	quint16 getTotalSquares() const;
 	void setTotalSquares(quint16 ts);
+
+	quint16 getTickRate() const;
+	void setTickRate(quint16 tr);
 
 	const PacketPlayersUpdate &getPPU() const;
 	void setPPU(const PacketPlayersUpdate &ppu);
@@ -362,6 +365,7 @@ private:
 	plid_t plid;
 	score_t score;
 	quint16 total;
+	quint16 tickRate;
 
 	PacketPlayersUpdate ppu;
 	PacketLeaderboardUpdate plu;

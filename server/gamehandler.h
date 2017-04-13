@@ -35,7 +35,7 @@ public:
 	 * unpredictable (especially with respect to findNextId()).
 	 */
 	GameHandler(PaperServer &server, pos_t width = 80, pos_t height = 80,
-	            int tickInterval = 250, plid_t playerCount = 10, QObject *parent = Q_NULLPTR);
+	            quint16 tickInterval = 250, plid_t playerCount = 10, QObject *parent = Q_NULLPTR);
 	~GameHandler();
 
 	gid_t getId() const; 

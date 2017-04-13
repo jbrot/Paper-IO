@@ -8,7 +8,7 @@
 
 gid_t GameHandler::idCount = 0;
 
-GameHandler::GameHandler(PaperServer &pss, pos_t w, pos_t h, int ti, plid_t mp, QObject *parent)
+GameHandler::GameHandler(PaperServer &pss, pos_t w, pos_t h, quint16 ti, plid_t mp, QObject *parent)
 	: QObject(parent)
 	, id(idCount)
 	, width(w)
@@ -20,7 +20,7 @@ GameHandler::GameHandler(PaperServer &pss, pos_t w, pos_t h, int ti, plid_t mp, 
 	, players()
 	, ais()
 	, currentId(1)
-	, gs(w, h)
+	, gs(w, h, ti)
 {
 	GameHandler::idCount++;
 

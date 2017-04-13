@@ -225,10 +225,12 @@ public:
 
 	std::vector<Player *> getPlayers() const;
 
+	quint16 getTickRate() const;
 
 private:
 	const pos_t width;
 	const pos_t height;
+	const quint16 tickRate;
 
 	QReadWriteLock lock;
 
@@ -253,7 +255,7 @@ private:
 	 * However, the board should never be anywhere close to that large
 	 * for memory reasons.
 	 */
-	GameState(pos_t width, pos_t height);
+	GameState(pos_t width, pos_t height, quint16 tickRate);
 	~GameState();
 
 	void nextTick();

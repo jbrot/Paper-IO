@@ -7,9 +7,10 @@
 
 const int EXTRA_BUFFER = CLIENT_FRAME / 2;
 
-GameState::GameState(pos_t w, pos_t h)
+GameState::GameState(pos_t w, pos_t h, quint16 tr)
 	: width(w)
 	, height(h)
+	, tickRate(tr)
 	, lock()
 	, players()
 	, playersChanged(false)
@@ -132,6 +133,11 @@ std::vector<Player *> GameState::getPlayers() const
 	}
 
 	return pls;
+}
+
+quint16 GameState::getTickRate() const
+{
+	return tickRate;
 }
 
 bool GameState::addPlayer(plid_t id, const QString &name, pos_t x, pos_t y)

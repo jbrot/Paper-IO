@@ -211,6 +211,8 @@ void IOHandler::processJoinGame(const PacketGameJoin &pgj)
 	qDebug() << "Tick" << cgs.tick;
 	cgs.totalSquares = pgj.getTotalSquares();
 	qDebug() << "Total" << cgs.totalSquares;
+	cgs.tickRate = pgj.getTickRate();
+	qDebug() << "Tick Rate" << cgs.tickRate;
 	
 	processPlayersUpdate(pgj.getPPU(), true);
 	processLeaderboardUpdate(pgj.getPLU(), true);
