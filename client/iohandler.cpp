@@ -239,6 +239,7 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 
 	cgs.tick = pgt.getTick();
 	qDebug() << "Tick:" << cgs.getTick();
+	qDebug() << "Score:" << pgt.getScore();
 
 	if (!cgs.getClient())
 		qWarning() << "PGT: No client player set up!";
@@ -262,10 +263,9 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 				cgs.board[i][j] ^= diff[i][j];
 		break;
 	case DOWN:
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
-		std::copy(cgs.board[1], cgs.board[CLIENT_FRAME], cgs.board[0]);
-#pragma GCC diagnostic pop
+		// For some reason copy doesn't work with overlapping ranges. *shrug*
+		for (int i = 1; i < CLIENT_FRAME; ++i)
+			std::copy(cgs.board[i], cgs.board[i + 1], cgs.board[i - 1]);
 		std::copy(news, news + CLIENT_FRAME, cgs.board[CLIENT_FRAME - 1]);
 		for (int i = 0; i < CLIENT_FRAME - 1; i++)
 			for (int j = 0; j < CLIENT_FRAME; j++)

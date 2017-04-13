@@ -11,7 +11,7 @@
 
 #include "gamelogic.h"
 
-void updatePosition(Player& player);
+void updatePosition(Player& player, GameState &state);
 void leaveTrail(Player &player, GameState &state);
 void killPlayers(GameState &state);
 void checkForTrail(Player &player, GameState &state);
@@ -20,6 +20,7 @@ void fillInBody(Player &player, GameState &state);
 void checkForCompletedLoop(Player &player, GameState &state);
 bool detectWin(Player &player, GameState &state);
 bool squareChecks(Player &player, SquareState square, GameState &state);
+Direction calculateDirection(Player &player, GameState &state);
 
 std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state);
 bool checkIfSpawnable(pos_t xPos, pos_t yPos, GameState &state);
@@ -40,7 +41,7 @@ void updateGame(GameState &state)
 		leaveTrail(*allPlayers[i], state);
 
 		// Update position of player
-		updatePosition(*allPlayers[i]);
+		updatePosition(*allPlayers[i], state);
 
 		// Check if player hit a trail
 		checkForTrail(*allPlayers[i], state);
@@ -59,13 +60,9 @@ void updateGame(GameState &state)
 
 }
 
-void updatePosition(Player &player)
+void updatePosition(Player &player, GameState &state)
 {
-	Direction newD = player.getNewDirection();
-	Direction old = player.getActualDirection();
-
-	if (abs(newD - old) == 2)
-		newD = old;
+	Direction newD = calculateDirection(player, state);
 
 	bool res = true;
 	switch (newD){
@@ -98,11 +95,8 @@ void leaveTrail(Player &player, GameState &state)
 	pos_t xpos = player.getX();
 	pos_t ypos = player.getY();
 
+	Direction newD = calculateDirection(player, state);
 	Direction old = player.getActualDirection();
-	Direction newD = player.getNewDirection();
-
-	if (abs(newD - old) == 2)
-		newD = old;
 
 	SquareState square = state.getState(xpos, ypos);
 
@@ -138,6 +132,27 @@ void leaveTrail(Player &player, GameState &state)
 			square.setTrailType(NORTHTOEAST);
 	}
 
+}
+
+Direction calculateDirection(Player &player, GameState &state)
+{
+	Direction newD = player.getNewDirection();
+	Direction old = player.getActualDirection();
+
+	if (abs(newD - old) == 2 && old != NONE)
+		newD = old;
+
+	if (state.getTick() - player.getSpawnTick() <= 4)
+		newD = NONE;
+	else if (newD == NONE)
+	{
+		if (old != NONE)
+			newD = old;
+		else
+			newD = Direction((rand() % 4) + 1);
+	}
+
+	return newD;
 }
 
 void killPlayers(GameState &state)
@@ -328,19 +343,16 @@ std::vector<std::pair<pos_t, pos_t> > findSpawns(int num, GameState &state)
 	std::vector<std::pair<pos_t, pos_t>> availableSpawns;
 	std::vector<std::pair<pos_t, pos_t>> randomSpawns;
 
-	for (int i = 2; i <= state.getWidth() - 3; i = i + 3)
+	for (int i = 2; i <= state.getWidth() - 3; i = i + 5)
 	{
-		for (int j = 2; j <= state.getHeight() - 3; j = j + 3)
+		for (int j = 2; j <= state.getHeight() - 3; j = j + 5)
 		{
 			if (checkIfSpawnable(i, j, state))
 				availableSpawns.push_back({i,j});
 		}
 	}
 
-	for (int k = 0; k < availableSpawns.size() && k < num; ++k)
-	{
-		std::swap(availableSpawns[k], availableSpawns[k + (rand() % (availableSpawns.size() - k))]);
-	}
+	std::random_shuffle(availableSpawns.begin(), availableSpawns.end());
 
 	for (int m = 0; m < availableSpawns.size() && m < num; ++m)
 	{
