@@ -69,11 +69,11 @@ GameOver::GameOver(QWidget *parent)
 	setLayout(layout);
 
 	connect(again, &QAbstractButton::clicked, this, &GameOver::playAgain);
-	connect(again, &QAbstractButton::clicked, this, [this] {
+	connect(this, &GameOver::playAgain, this, [this] {
 		this->again->setEnabled(false);
 	});
 	connect(quit, &QAbstractButton::clicked, this, &GameOver::disconnect);
-	connect(quit, &QAbstractButton::clicked, this, [this] {
+	connect(this, &GameOver::disconnect, this, [this] {
 		this->quit->setEnabled(false);
 	});
 }

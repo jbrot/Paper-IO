@@ -120,6 +120,50 @@ Client::Client(QWidget *parent)
 
 	connect(arduino, &Arduino::disconnected, launcher, &Launcher::enableArduino);
 	connect(arduino, &Arduino::errorOccurred, this, &Client::displayError3);
+	connect(arduino, &Arduino::buttonA, this, [this] {
+		switch (this->stack->currentIndex())
+		{
+		case 0:
+			emit this->launcher->doConnect();
+			break;
+		case 2:
+		{
+			cgs.lockState();
+			Direction dir = Direction((cgs.getClient()->getDirection() % 4) + 1);
+			cgs.unlock();
+
+			QMetaObject::invokeMethod(ioh, "changeDirection", Q_ARG(Direction, dir));
+			break;
+		}
+		case 3:
+			emit this->gameover->playAgain();
+			break;
+		default:
+			break;
+		}
+	});
+	connect(arduino, &Arduino::buttonB, this, [this] {
+		switch (this->stack->currentIndex())
+		{
+		case 1:
+			emit this->waiting->cancel();
+			break;
+		case 2:
+		{
+			cgs.lockState();
+			Direction dir = Direction(((cgs.getClient()->getDirection() + 2) % 4) + 1);
+			cgs.unlock();
+
+			QMetaObject::invokeMethod(ioh, "changeDirection", Q_ARG(Direction, dir));
+			break;
+		}
+		case 3:
+			emit this->gameover->disconnect();
+			break;
+		default:
+			break;
+		}
+	});
 
 	iothread->start();
 

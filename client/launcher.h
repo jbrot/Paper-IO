@@ -30,8 +30,12 @@ public slots:
 
 	void setStatus(const QString &msg);
 
-private slots:
+	/*
+	 * This can be used to simulate a connect press.
+	 */
 	void doConnect();
+
+private slots:
 	void toggleConnect();
 
 signals:

@@ -36,11 +36,17 @@ signals:
 	void errorOccurred(QSerialPort::SerialPortError error, QString msg);
 	void disconnected();
 
+	void buttonA();
+	void buttonB();
+
 private slots:
 	void readData();
 
 private:
 	QSerialPort *ctc;
+	bool started;
+	bool ba;
+	bool bb;
 
 	BufferGFX gfx;
 	ClientGameState &cgs;

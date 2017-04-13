@@ -13,6 +13,9 @@
 Arduino::Arduino(ClientGameState &gs, QObject *parent)
 	: QObject(parent)
 	, ctc(new QSerialPort(this))
+	, started(false)
+	, ba(false)
+	, bb(false)
 	, gfx()
 	, cgs(gs)
 {
@@ -187,12 +190,36 @@ void Arduino::readData()
 	char data = 0;
 	while (ctc->getChar(&data))
 	{
-		// TODO process input
+		if (data & 0x01)
+		{
+			if (!ba)
+			{
+				ba = true;
+				if (started)
+					emit buttonA();
+			}
+		} else {
+			ba = false;
+		}
+
+		if (data & 0x02)
+		{
+			if (!bb)
+			{
+				bb = true;
+				if (started)
+					emit buttonB();
+			}
+		} else {
+			bb = false;
+		}
 	}
 }
 
 void Arduino::sendBuffer()
 {
+	started = true;
+
 	ctc->putChar(0xFF);
 
 	uint8_t (*buf)[ARDUINO_WIDTH] = gfx.getBuffer();
