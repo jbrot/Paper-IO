@@ -92,7 +92,9 @@ Client::Client(QWidget *parent)
 	connect(ioh, &IOHandler::enteredGame, render, static_cast<void (QWidget::*)()>(&QWidget::setFocus));
 	connect(ioh, &IOHandler::enteredGame, arduino, &Arduino::renderTick);
 
-	connect(ioh, &IOHandler::gameTick, arduino, &Arduino::renderTick);
+	connect(ioh, &IOHandler::gameTick, arduino, [this] {
+		QTimer::singleShot(50, this->arduino, &Arduino::renderTick);
+	} );
 
 	connect(ioh, &IOHandler::gameEnded, rtimer, &QTimer::stop);
 	connect(ioh, &IOHandler::gameEnded, render, &QWidget::clearFocus);

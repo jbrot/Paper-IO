@@ -10,6 +10,7 @@ ClientGameState::ClientGameState()
 	, players()
 	, tick(0)
 	, tickRate(0)
+	, lastTick()
 	, client(NULL_ID)
 {
 	std::fill(leaderboard, leaderboard + 5, std::make_pair(NULL_ID, 0));
@@ -30,6 +31,11 @@ tick_t ClientGameState::getTick() const
 quint16 ClientGameState::getTickRate() const
 {
 	return tickRate;
+}
+
+QDateTime ClientGameState::getLastTick() const
+{
+	return lastTick;
 }
 
 ClientSquareState ClientGameState::getState(pos_t x, pos_t y) const

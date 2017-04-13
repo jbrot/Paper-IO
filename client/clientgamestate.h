@@ -5,6 +5,7 @@
 #ifndef CLIENTGAMESTATE_H
 #define CLIENTGAMESTATE_H
 
+#include <QDateTime>
 #include <QMutex>
 
 #include "protocol.h"
@@ -127,6 +128,7 @@ friend class IOHandler;
 public:
 	tick_t getTick() const;
 	quint16 getTickRate() const;
+	QDateTime getLastTick() const;
 
 	/*
 	 * WARNING: If the coordinates passed to getState() are out of bounds, getState()
@@ -155,6 +157,7 @@ private:
 	QHash<plid_t, ClientPlayer *> players;
 	tick_t tick;
 	quint16 tickRate;
+	QDateTime lastTick;
 
 	std::pair<plid_t, score_t> leaderboard[10];
 

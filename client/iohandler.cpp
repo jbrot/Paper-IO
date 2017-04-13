@@ -213,6 +213,7 @@ void IOHandler::processJoinGame(const PacketGameJoin &pgj)
 	qDebug() << "Total" << cgs.totalSquares;
 	cgs.tickRate = pgj.getTickRate();
 	qDebug() << "Tick Rate" << cgs.tickRate;
+	cgs.lastTick = QDateTime::currentDateTime();
 	
 	processPlayersUpdate(pgj.getPPU(), true);
 	processLeaderboardUpdate(pgj.getPLU(), true);
@@ -240,6 +241,7 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	}
 
 	cgs.tick = pgt.getTick();
+	cgs.lastTick = QDateTime::currentDateTime();
 	qDebug() << "Tick:" << cgs.getTick();
 	qDebug() << "Score:" << pgt.getScore();
 

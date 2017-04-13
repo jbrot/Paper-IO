@@ -142,7 +142,89 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
 
 }
 
+int getXOff(Direction dir)
+{
+	switch (dir)
+	{
+	case LEFT:
+		return -1;
+	case RIGHT:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
+int getYOff(Direction dir)
+{
+	switch (dir)
+	{
+	case UP:
+		return -1;
+	case DOWN:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
 void renderGameArduino(ClientGameState &cgs, BufferGFX &gfx)
 {
-	qDebug() << "Arduino Tick!";
+	updateColorMap(cgs.getPlayers());
+
+	gfx.fillScreen(0);
+
+	// The offset is -1 for the first half of the tick and 0 for the second half.
+	int offset = (3 * cgs.getLastTick().msecsTo(QDateTime::currentDateTime())) / cgs.getTickRate();
+	offset = std::min(offset - 1, 0);
+
+	ClientPlayer *client = cgs.getClient();
+	int xoff = -1 * offset * getXOff(client->getDirection());
+	int yoff = -1 * offset * getYOff(client->getDirection());
+
+	for (int x = -9; x <= 9; ++x)
+	{
+		for (int y = -5; y<= 5; ++y)
+		{
+			ClientSquareState ss = cgs.getState(x, y);
+			if (ss.getOwningPlayerId() == OUT_OF_BOUNDS)
+			{
+				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2,
+				             BufferGFX::Color333(2,2,2));
+				continue;
+			}
+             
+			if(ss.isOwned())
+			{
+				QColor cl = playerColors[colorMap.value(ss.getOwningPlayerId())];
+				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2,
+				             BufferGFX::Color888(cl.red(), cl.green(), cl.blue()));
+			}
+
+			if(ss.hasTrail())
+			{
+				QColor cl = playerColors[colorMap.value(ss.getTrailPlayerId())].lighter(175);
+				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2,
+				             BufferGFX::Color888(cl.red(), cl.green(), cl.blue()));
+			}
+		}
+	}
+
+	// We have two loops so that the players show on top.
+	for (int x = -9; x <= 9; ++x)
+	{
+		for (int y = -5; y<= 5; ++y)
+		{
+			ClientSquareState ss = cgs.getState(x, y);
+			if (ss.isOccupied() && ss.getOccupyingPlayer())
+			{
+				ClientPlayer *lpl = ss.getOccupyingPlayer();
+				int lxo = offset * getXOff(lpl->getDirection());
+				int lyo = offset * getYOff(lpl->getDirection());
+				QColor cl = playerColors[colorMap.value(lpl->getId())].lighter();
+				gfx.fillRect(x * 2 + 15 + xoff + lxo, y * 2 + 7 + yoff + lyo, 2, 2,
+				             BufferGFX::Color888(cl.red(), cl.green(), cl.blue()));
+			}
+		}
+	}
 }
