@@ -88,10 +88,13 @@ public:
 	score_t getScore() const;
 	void setScore(score_t score);
 
+	tick_t getSpawnTick() const;
+
 private:
 	GameState &gs;
 	const plid_t id;
 	const QString name;
+	const tick_t spawn;
 
 	pos_t x;
 	pos_t y;

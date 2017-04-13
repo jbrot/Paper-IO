@@ -13,6 +13,7 @@ Player::Player(GameState &ngs, const plid_t pid, const QString &nm, pos_t cx, po
 	: gs(ngs)
 	, id(pid)
 	, name(nm)
+	, spawn(ngs.getTick())
 	, x(cx)
 	, y(cy)
 	, newDir(Direction::NONE)
@@ -123,4 +124,9 @@ void Player::setScore(score_t sc)
 
 	score = sc;
 	gs.markScoresChanged();
+}
+
+tick_t Player::getSpawnTick() const
+{
+	return spawn;
 }
