@@ -149,7 +149,7 @@ void PaperServer::queueConnection(thid_t id, const QString &name)
 	ThreadClient tc = connections.value(id);
 	if (!name.isEmpty())
 		tc.name = name;
-	QMetaObject::invokeMethod( tc.client, "enqueue");
+	QMetaObject::invokeMethod(tc.client, "enqueue");
 
 	ctclock.unlock();
 

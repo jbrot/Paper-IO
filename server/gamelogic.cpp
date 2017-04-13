@@ -36,6 +36,11 @@ void updateGame(GameState &state)
 	// Loop over all Players
 	for (int i = 0; i < allPlayers.size(); ++i)
 	{
+		if (!allPlayers[i])
+		{
+			qWarning() << "Null player at" << i << "!";
+			continue;
+		}
 
 		// Leave trail under player
 		leaveTrail(*allPlayers[i], state);

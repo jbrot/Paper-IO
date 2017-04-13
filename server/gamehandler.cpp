@@ -74,6 +74,8 @@ void GameHandler::tick()
 		return;
 	}
 
+	// TODO Work out leaderboard.
+
 	gs.unlock();
 
 	emit tickComplete();
@@ -180,9 +182,8 @@ void GameHandler::spawnPlayers()
 
 void GameHandler::findNextId()
 {
-	while (players.contains(currentId) || ais.contains(currentId) 
-	                                   || currentId == UNOCCUPIED 
-	                                   || currentId == OUT_OF_BOUNDS)
+	while (gs.players.contains(currentId) || currentId == UNOCCUPIED 
+	                                      || currentId == OUT_OF_BOUNDS)
 		currentId++;
 }
 

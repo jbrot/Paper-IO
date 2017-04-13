@@ -43,7 +43,7 @@ GameState::GameState(pos_t w, pos_t h, quint16 tr)
 
 	// Create the diff array
 	diffStart = new state_t[CLIENT_FRAME + (width + EXTRA_BUFFER) * height];
-	std::fill(diffStart, diffStart + (width + EXTRA_BUFFER) * height, 0);
+	std::fill(diffStart, diffStart + CLIENT_FRAME + (width + EXTRA_BUFFER) * height, 0);
 
 	diff = new state_t *[height];
 	diff[0] = diffStart + CLIENT_FRAME;
@@ -125,14 +125,7 @@ Player *GameState::lookupPlayer(plid_t id) const
 
 std::vector<Player *> GameState::getPlayers() const
 {
-	std::vector<Player *> pls;
-	foreach (Player *pl, players)
-	{
-		if (pl)
-			pls.push_back(pl);
-	}
-
-	return pls;
+	return players.values().toVector().toStdVector();
 }
 
 quint16 GameState::getTickRate() const
