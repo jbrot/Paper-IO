@@ -227,7 +227,6 @@ void PacketGameTick::write(QDataStream &str) const
 			++count;
 		}
 	}
-	qDebug() << count << cv;
 	str << count << cv;
 
 	str << chksum;
