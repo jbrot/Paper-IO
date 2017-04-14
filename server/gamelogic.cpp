@@ -171,6 +171,7 @@ void killPlayers(GameState &state)
 			// Check if square is has a trail and kill accordingly
 			if (square.getTrailPlayer() && square.getTrailPlayer()->isDead()){
 				square.setTrailType(NOTRAIL);
+				square.setTrailPlayerId(UNOCCUPIED);
 			}
 
 			// Check if square is owned and kill accordingly
