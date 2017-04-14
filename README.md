@@ -12,7 +12,7 @@ There should now be a binary in your directory which you can either double click
 
 The licensing behind this project is ambiguous at the moment, but it doesn't really matter as this project will not be used for widespread release and we are willing to disclose source code with any distribution.
 
-As of right now, we are usng the Qt Library for networking and graphics; it is either licensed under GPL or LGPL (to be determined).
+As of right now, we are using the Qt Library for networking and graphics; it is either licensed under GPL or LGPL (to be determined).
 
 I have just added the Freshman.ttf font for the client. It is from http://fontspace.com/william-boyd/freshman and is in the public domain.
 
