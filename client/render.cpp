@@ -106,7 +106,7 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
                                   CTOP_Y + y * SQUARE_SIZE,
                                   SQUARE_SIZE,
                                   SQUARE_SIZE,
-                                  playerColors[colorMap.value(state.getOwningPlayerId())]);
+                                  playerColors[colorMap.value(state.getOwningPlayerId())].darker());
             }
 
             if(state.hasTrail())
@@ -115,7 +115,7 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
                                   CTOP_Y + y * SQUARE_SIZE,
                                   SQUARE_SIZE,
                                   SQUARE_SIZE,
-                                  playerColors[colorMap.value(state.getTrailPlayerId())]);
+                                  playerColors[colorMap.value(state.getTrailPlayerId())].lighter());
             }
 
             if(state.isOccupied())

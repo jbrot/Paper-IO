@@ -14,6 +14,27 @@ void registerPackets();
 
 int main(int argc, char *argv[])
 {
+	qInstallMessageHandler([] (QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+	QByteArray localMsg = msg.toLocal8Bit();
+	switch(type)
+	{
+	case QtDebugMsg:
+		fprintf(stdout, "(%s:%u) Debug: %s\n", context.file, context.line, localMsg.constData());
+		break;
+	case QtInfoMsg:
+		fprintf(stdout, "(%s:%u) \e[1mInfo\e[0m: %s\n", context.file, context.line, localMsg.constData());
+		break;
+	case QtWarningMsg:
+		fprintf(stderr, "(%s:%u) \e[93;1mWarning\e[0m: %s\n", context.file, context.line, localMsg.constData());
+		break;
+	case QtCriticalMsg:
+		fprintf(stderr, "(%s:%u) \e[91;1mCritical\e[0m: %s\n", context.file, context.line, localMsg.constData());
+		break;
+	case QtFatalMsg:
+		fprintf(stderr, "(%s:%u) \e[91;1mFatal\e[0m: %s\n", context.file, context.line, localMsg.constData());
+		break;
+	}
+	} );
 	QApplication app(argc, argv);
 
 	// Queued Connection type registrations
