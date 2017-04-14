@@ -64,9 +64,11 @@ void ClientHandler::beginGame(plid_t pid, GameState *g)
 		return;
 	}
 
+	g->lockForRead();
 	Player *pl = g->lookupPlayer(pid);
 	if (!pl)
 	{
+		g->unlock();
 		qCritical() << "Connection" << id << ": beginGame() passed player id which maps to NULL!";
 		return;
 	}
@@ -75,7 +77,6 @@ void ClientHandler::beginGame(plid_t pid, GameState *g)
 	player = pid;
 	gs = g;
 
-	gs->lockForRead();
 	Packet::writePacket(str, PacketGameJoin(pid, pl->getScore(), gs->getWidth() * gs->getHeight(), gs->getTickRate(), makePPU(), makePLU(), makePRB()));
 	gs->unlock();
 }
@@ -139,14 +140,14 @@ void ClientHandler::sendTick()
 		if (px < 0)
 			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
 		else
-			for (pos_t y = 0; y < CLIENT_FRAME; y++)
+			for (pos_t y = 0; y < CLIENT_FRAME; ++y)
 				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][px] : OUT_OF_BOUNDS_STATE;
 		break;
 	case RIGHT:
 		if (px + CLIENT_FRAME > mx)
 			std::copy(gs->boardStart, gs->boardStart + CLIENT_FRAME, news);
 		else
-			for (pos_t y = 0; y < CLIENT_FRAME; y++)
+			for (pos_t y = 0; y < CLIENT_FRAME; ++y)
 				news[y] = (0 <= py + y && py + y < my) ? gs->board[py + y][px + CLIENT_FRAME - 1] : OUT_OF_BOUNDS_STATE;
 		break;
 	// When we don't move, the new data is ignored.
@@ -156,7 +157,7 @@ void ClientHandler::sendTick()
 
 	state_t *dptrs[CLIENT_FRAME];
 	state_t *bptrs[CLIENT_FRAME];
-	for (int y = 0; y < CLIENT_FRAME; y++)
+	for (int y = 0; y < CLIENT_FRAME; ++y)
 	{
 		if (py + y < 0 || py + y >= my)
 		{
@@ -219,8 +220,8 @@ void ClientHandler::kaTimeout()
 		qDebug() << "Connection " << id << ": Haven't received keep alive packet, timing out client.";
 		disconnect();
 		return;
-
 	}
+
 	Packet::writePacket(str, PacketKeepAlive());
 	qDebug() << "Connection " << id << ": Keep alive sent!";
 }
@@ -277,7 +278,19 @@ void ClientHandler::newData()
 			}
 
 			gs->lockForRead();
-			Packet::writePacket(str, makePRB());
+			PacketResendBoard prb = makePRB();
+
+			qDebug() << "Tick" << gs->getTick() << "Board sent:";
+			QString msg;
+			for (int i = 0; i < CLIENT_FRAME; ++i)
+			{
+				for (int j = 0; j < CLIENT_FRAME; ++j)
+					msg += QString::number(prb.getBoard()[i][j], 16) + " ";
+				msg += "\n";
+			}
+			qDebug() << qPrintable(msg);
+
+			Packet::writePacket(str, prb);
 			gs->unlock();
 			break;
 		}

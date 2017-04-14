@@ -184,6 +184,9 @@ Direction SquareState::getDirection() const
 
 void SquareState::setDirection(Direction d)
 {
+	if (getOwningPlayerId() == OUT_OF_BOUNDS)
+		return;
+
 	state_t change = (state & 0x38) ^ (static_cast<state_t>(d) << 3);
 	state ^= change;
 	diff ^= change;

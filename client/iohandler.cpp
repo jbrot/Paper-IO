@@ -311,6 +311,15 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	{
 		qWarning() << "PGT Checksum:" << pgt.getChecksum() << "disagrees with computed:" << chksum << "! Requesting resend...";
 		requestResend();
+		qDebug() << "Tick" << cgs.getTick() << "Board Received:";
+		QString msg;
+		for (int i = 0; i < CLIENT_FRAME; ++i)
+		{
+			for (int j = 0; j < CLIENT_FRAME; ++j)
+				msg += QString::number(cgs.board[i][j], 16) + " ";
+			msg += "\n";
+		}
+		qDebug() << qPrintable(msg);
 	}
 
 	cgs.unlock();
