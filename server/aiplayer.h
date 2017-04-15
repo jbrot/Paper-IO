@@ -23,16 +23,19 @@ public:
 	 */
 	prob_t getHeadChance(plid_t exclude) const;
 	prob_t getTrailChance(plid_t exclude) const;
-	prob_t getOwnedChance(plid_t exclude) const;
+	// I have no idea how to calculate this one.
+	//prob_t getOwnedChance(plid_t exclude) const;
 
 	PredictedSquareState(const SquareState &ss, const PredictedGameState *parent = nullptr);
 
 private:
 	const SquareState ss;
 	const PredictedGameState *parent;
-	QHash<plid_t, QPair<Direction, prob_t> > head;
+	QHash<QPair<plid_t, Direction>, prob_t> head;
 	QHash<plid_t, prob_t> trail;
-	QHash<plid_t, prob_t> owned;
+	//QHash<plid_t, prob_t> owned;
+
+	void processHead(const PredictedSquareState &ps, Direction d);
 };
 
 class PredictedGameState
