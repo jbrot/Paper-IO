@@ -6,10 +6,12 @@ CONFIG += c++11 debug
 # Build/Install Directories
 MOC_DIR = $$PWD/../build/server/moc
 OBJECTS_DIR = $$PWD/../build/server/obj
+RCC_DIR = $$PWD/../build/server/rcc
 DESTDIR = $$PWD/../bin
 
 # Meta Inputs
 QT += widgets network
+RESOURCES = server.qrc
 
 CXXFLAGS += -g
 
@@ -20,6 +22,7 @@ HEADERS += aiplayer.h \
 	gamehandler.h \
 	gamelogic.h \
 	gamestate.h \
+	nicks.h \
 	paperserver.h \
 	../common/protocol.h \
 	../common/types.h
@@ -27,8 +30,9 @@ SOURCES += main.cpp \
 	aiplayer.cpp \
 	clienthandler.cpp \
 	gamehandler.cpp \
-        gamelogic.cpp \
+	gamelogic.cpp \
 	gamestate.cpp \
+	nicks.cpp \
 	paperserver.cpp \
 	player.cpp \
 	predictedgamestate.cpp \

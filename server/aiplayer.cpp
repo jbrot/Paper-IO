@@ -97,7 +97,7 @@ double AIPlayer::assessDirection(PredictedGameState &pgs, Direction d, pos_t x, 
 		// Double our aggressiveness twoards players in our territory.
 		ret *= 2;
 
-		if (tl> 0)
+		if (tl > 0)
 		{
 			const int FALLOFF = 15;
 			double coef = tl > FALLOFF ? tl - FALLOFF : 4 * (tl - FALLOFF);
@@ -121,11 +121,11 @@ double AIPlayer::assessDirection(PredictedGameState &pgs, Direction d, pos_t x, 
 		ret += 0.2 * assessDirection(pgs, d, x + getXOff(d), y + getYOff(d), tl, recurse - 1);
 		// Check left.
 		Direction nd = Direction ((d % 4) + 1);
-		ret += 0.25 * assessDirection(pgs, nd, x + getXOff(nd), y + getYOff(nd), tl, recurse - 1);
+		ret += 0.15 * assessDirection(pgs, nd, x + getXOff(nd), y + getYOff(nd), tl, recurse - 1);
 
 		// Check right.
 		nd = Direction (((d + 3) % 4) + 1);
-		ret += 0.25 * assessDirection(pgs, nd, x + getXOff(nd), y + getYOff(nd), tl, recurse - 1);
+		ret += 0.15 * assessDirection(pgs, nd, x + getXOff(nd), y + getYOff(nd), tl, recurse - 1);
 	}
 
 	// TODO Add a heuristic which keeps us from straying too far from our territory.

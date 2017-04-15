@@ -122,6 +122,10 @@ void IOHandler::processPlayersUpdate(const PacketPlayersUpdate &ppu, bool nested
 
 	QHash<plid_t, QString> players = ppu.getPlayers();
 
+	qDebug() << "Players:";
+	for (auto iter = players.cbegin(); iter != players.cend(); ++iter)
+		qDebug() << iter.key() << iter.value();
+
 	for (auto iter = cgs.players.begin(); iter != cgs.players.end(); )
 	{
 		if (!players.contains(iter.key()) || (iter.value() && iter.value()->getName() != players.value(iter.key())))
@@ -156,13 +160,18 @@ void IOHandler::processLeaderboardUpdate(const PacketLeaderboardUpdate &plu, boo
 
 	std::copy(lb, lb + 5, cgs.leaderboard);
 
+	qDebug() << "Leaderboard:";
 	for (int i = 0; i < 5; ++i)
 	{
 		ClientPlayer *cp = cgs.lookupPlayer(lb[i].first);
 		if (!cp)
+		{
+			qDebug() << i + 1 << lb[i].first << lb[i].second;
 			continue;
+		}
 
 		cp->setScore(lb[i].second);
+		qDebug() << i + 1 << cp->getName() << lb[i].second;
 	}
 
 	if (!nested)

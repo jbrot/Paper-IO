@@ -3,6 +3,7 @@
  * to a game.
  */
 
+#include "nicks.h"
 #include "paperserver.h"
 
 struct PaperServer::ThreadClient
@@ -148,7 +149,13 @@ void PaperServer::queueConnection(thid_t id, const QString &name)
 	waiting.enqueue(id);
 	ThreadClient tc = connections.value(id);
 	if (!name.isEmpty())
+	{
 		tc.name = name;
+		connections.insert(id, tc);
+	} else if (tc.name.isEmpty()) {
+		tc.name = getRandomNick();
+		connections.insert(id, tc);
+	}
 	QMetaObject::invokeMethod(tc.client, "enqueue");
 
 	ctclock.unlock();

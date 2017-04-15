@@ -242,7 +242,7 @@ void GameState::recomputeLeaderboard()
 			leaderboard[i].second = (*iter)->getScore();
 		} else {
 			leaderboard[i].first = NULL_ID;
-			leaderboard[i + 1].second = 0;
+			leaderboard[i].second = 0;
 		}
 	}
 

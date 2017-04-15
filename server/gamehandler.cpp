@@ -4,6 +4,7 @@
 
 #include "gamehandler.h"
 #include "gamelogic.h"
+#include "nicks.h"
 #include "paperserver.h"
 
 gid_t GameHandler::idCount = 0;
@@ -79,7 +80,8 @@ void GameHandler::tick()
 		return;
 	}
 
-	// TODO Work out leaderboard.
+	if (gs.haveScoresChanged())
+		gs.recomputeLeaderboard();
 
 	gs.unlock();
 
@@ -157,8 +159,7 @@ void GameHandler::spawnPlayers()
 	}
 	for (; siter < spawns.end(); siter++)
 	{
-		// TODO Add name
-		if (!gs.addPlayer(currentId, QLatin1String("AI"), siter->first, siter->second))
+		if (!gs.addPlayer(currentId, getRandomNick(), siter->first, siter->second))
 			continue;
 
 		AIPlayer *ai = new AIPlayer(currentId);
