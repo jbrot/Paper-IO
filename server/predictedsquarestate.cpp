@@ -68,8 +68,11 @@ PredictedSquareState::PredictedSquareState(const SquareState &s, const Predicted
 	// The three and four case will basically never happen and if they do, I guess
 	// we'll have slightly off probabilities. Probably not that big of a deal.
 	
-	// Calculate the trail probabilities from the previous iteration's head probabilities.
+	// Trail probabilities are kind of complicated, so we'll just fuge it and
+	// get (sometimes significantly) over 100%.
 	const PredictedSquareState &pt = p->getPrediction(getX(), getY());
+	for (auto iter = pt.trail.begin(); iter != pt.trail.end(); ++iter)
+		trail[iter.key()] = *iter;
 	for (auto iter = pt.head.begin(); iter != pt.head.end(); ++iter)
 		trail[iter.key().first] += *iter;
 }

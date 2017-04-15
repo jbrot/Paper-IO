@@ -63,9 +63,14 @@ private:
 class AIPlayer
 {
 public:
-	AIPlayer();
+	AIPlayer(plid_t player);
 
-	Direction tick(const GameState &gs);
+	Direction tick(PredictedGameState &gs);
+private:
+	const plid_t id;
+	int traillen;
+
+	double assessDirection(PredictedGameState &pgs, Direction d, pos_t x, pos_t y, int traillen, int recurse = 5);
 };
 
 #endif // !AIPLAYER_H

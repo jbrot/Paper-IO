@@ -77,7 +77,7 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
     const int CENTER_X = rect.x() + rect.width()/2;
     const int CENTER_Y = rect.y() + rect.height()/2;
 
-    const int SQUARE_SIZE = std::max(std::max(rect.height()/CLIENT_FRAME, rect.width()/CLIENT_FRAME), 50);
+    const int SQUARE_SIZE = std::max(std::max(rect.height()/CLIENT_FRAME, rect.width()/CLIENT_FRAME), 25);
     const int OUTLINE_SIZE = 7;
 
     const int CTOP_X = CENTER_X - 0.5 * SQUARE_SIZE;

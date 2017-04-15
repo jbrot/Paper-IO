@@ -49,6 +49,11 @@ void GameHandler::tick()
 	// Now we are ready to begin the tick.
 	gs.lockForWrite();
 
+	static QDateTime cdt = QDateTime::currentDateTime();
+	QDateTime dt = QDateTime::currentDateTime();
+	qDebug() << "Delay:" << cdt.msecsTo(dt);
+	cdt = dt;
+
 	gs.nextTick();
 
 	qDebug() << "Game" << id << ": Player number" << gs.players.size();
@@ -84,6 +89,7 @@ void GameHandler::tick()
 void GameHandler::tickAIs()
 {
 	gs.lockForRead();
+	PredictedGameState pgs(gs);
 	auto iter = ais.begin();
 	while(iter != ais.end())
 	{
@@ -98,7 +104,7 @@ void GameHandler::tickAIs()
 			continue;
 		}
 
-		pl->newDir = iter.value()->tick(gs);
+		pl->newDir = iter.value()->tick(pgs);
 
 		iter++;
 	}
@@ -155,7 +161,7 @@ void GameHandler::spawnPlayers()
 		if (!gs.addPlayer(currentId, QLatin1String("AI"), siter->first, siter->second))
 			continue;
 
-		AIPlayer *ai = new AIPlayer();
+		AIPlayer *ai = new AIPlayer(currentId);
 		ais.insert(currentId, ai);
 		configureSpawn(gs.lookupPlayer(currentId), gs);
 

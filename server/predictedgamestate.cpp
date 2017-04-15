@@ -8,6 +8,7 @@
 PredictedGameState::PredictedGameState(const GameState &g, const PredictedGameState *p)
 	: gs(g)
 	, parent(p)
+	, child(nullptr)
 {
 	// Dynamic memory, woo!!!
 	board = new PredictedSquareState **[gs.getHeight()];
@@ -38,7 +39,7 @@ const GameState &PredictedGameState::getGS() const
 const PredictedSquareState &PredictedGameState::getPrediction(pos_t x, pos_t y) const
 {
 	PredictedSquareState *ss;
-	if (0 <= x < gs.getWidth() && 0 <= y < gs.getHeight())
+	if (0 <= x && x < gs.getWidth() && 0 <= y && y < gs.getHeight())
 		ss = board[y][x];
 	else
 		ss = board[gs.getHeight() - 1][gs.getWidth()];

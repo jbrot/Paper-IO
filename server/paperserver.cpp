@@ -185,7 +185,7 @@ void PaperServer::launchGame()
 
 	QThread *gthrd = new QThread(this);
 	// Note we can customize game properties here.
-	GameHandler *ghand = new GameHandler(*this);
+	GameHandler *ghand = new GameHandler(*this, 80, 80, 200, 10);
 	gid_t id = ghand->getId();
 	ghand->moveToThread(gthrd);
 
