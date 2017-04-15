@@ -31,7 +31,8 @@ SOURCES += main.cpp \
 	gamestate.cpp \
 	paperserver.cpp \
 	player.cpp \
-	rogamestate.cpp \
+	predictedgamestate.cpp \
+	predictedsquarestate.cpp \
 	squarestate.cpp \
 # Common files
 	../common/packetgameend.cpp \

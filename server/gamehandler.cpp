@@ -98,7 +98,6 @@ void GameHandler::tickAIs()
 			continue;
 		}
 
-		pos_t x = pl->getX(), y = pl->getY();
 		pl->newDir = iter.value()->tick(gs);
 
 		iter++;
