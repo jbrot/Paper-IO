@@ -10,7 +10,7 @@ AIPlayer::AIPlayer()
 	// Nothing to do yet
 }
 
-Direction AIPlayer::tick(const ROGameState &gs)
+Direction AIPlayer::tick(const GameState &gs)
 {
 	return Direction::NONE;
 }

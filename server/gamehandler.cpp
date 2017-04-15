@@ -99,8 +99,7 @@ void GameHandler::tickAIs()
 		}
 
 		pos_t x = pl->getX(), y = pl->getY();
-		ROGameState rgs(x, y, gs);
-		pl->newDir = iter.value()->tick(rgs);
+		pl->newDir = iter.value()->tick(gs);
 
 		iter++;
 	}
