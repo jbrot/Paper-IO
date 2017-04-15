@@ -51,6 +51,9 @@ public:
 
 	bool setLocation(pos_t x, pos_t y);
 
+	SquareState getState();
+	const SquareState getState() const;
+
 	/*
 	 * The new direction is the direction the client has
 	 * requested to move in this tick.
@@ -114,7 +117,6 @@ public:
 	pos_t getX() const;
 	pos_t getY() const;
 
-
 	/*
 	 * A square has a trail if a player has gone through it after
 	 * leaving their territory but has not yet returned to their territory/
@@ -133,7 +135,8 @@ public:
 	void setTrailType(TrailType trail);
 	plid_t getTrailPlayerId() const;
 	void setTrailPlayerId(plid_t id);
-	Player *getTrailPlayer() const;
+	Player *getTrailPlayer();
+	const Player *getTrailPlayer() const;
 	void setTrailPlayer(Player *player);
 
     /*
@@ -147,7 +150,8 @@ public:
      */
 	bool isOccupied() const;
 	plid_t getOccupyingPlayerId() const;
-	Player *getOccupyingPlayer() const;
+	Player *getOccupyingPlayer();
+	const Player *getOccupyingPlayer() const;
 
 	/*
 	 * A square is owned if it is in a player's "body"---that is, the square is
@@ -165,7 +169,8 @@ public:
 	bool isOwned() const;
 	plid_t getOwningPlayerId() const;
 	void setOwningPlayerId(plid_t player);
-	Player *getOwningPlayer() const;
+	Player *getOwningPlayer();
+	const Player *getOwningPlayer() const;
 	void setOwningPlayer(Player *player);
 
 	bool isOutOfBounds() const;
@@ -181,9 +186,9 @@ public:
 	void markAsUnchecked();
 
 private:
-	const GameState &gs;
-	const pos_t x;
-	const pos_t y;
+	GameState &gs;
+	pos_t x;
+	pos_t y;
 	state_t &state;
 	state_t &diff;
 	quint8 &flags;
@@ -194,7 +199,7 @@ private:
 	void setOccupyingPlayerId(plid_t player);
 	void setOccupyingPlayer(Player *player);
 
-	SquareState(const GameState &gs, pos_t x, pos_t y, state_t &state, state_t &diff, quint8 &flags);
+	SquareState(GameState &gs, pos_t x, pos_t y, state_t &state, state_t &diff, quint8 &flags);
 };
 
 class GameState 
@@ -208,6 +213,7 @@ public:
 	pos_t getHeight() const;
 
 	tick_t getTick() const;
+	quint16 getTickRate() const;
 
 	/*
 	 * WARNING: If the coordinates passed to getState() are out of bounds, getState()
@@ -219,13 +225,14 @@ public:
 	 * If an out of bounds SquareState is not adjacent to an in bounds SquareState,
 	 * then the behavior of its flags is undefined.
 	 */
-	SquareState getState(pos_t x, pos_t y) const;
+	SquareState getState(pos_t x, pos_t y);
+	const SquareState getState(pos_t x, pos_t y) const;
 
-	Player *lookupPlayer(plid_t id) const;
+	Player *lookupPlayer(plid_t id);
+	const Player *lookupPlayer(plid_t id) const;
 
-	std::vector<Player *> getPlayers() const;
-
-	quint16 getTickRate() const;
+	std::vector<Player *> getPlayers();
+	std::vector<const Player *> getPlayers() const;
 
 private:
 	const pos_t width;

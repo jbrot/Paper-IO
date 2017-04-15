@@ -5,7 +5,7 @@
 
 #include "gamestate.h"
 
-SquareState::SquareState(const GameState &gst, pos_t px, pos_t py, state_t &st, state_t &df, quint8 &fl)
+SquareState::SquareState(GameState &gst, pos_t px, pos_t py, state_t &st, state_t &df, quint8 &fl)
 	: gs(gst)
 	, x(px)
 	, y(py)
@@ -60,7 +60,12 @@ void SquareState::setTrailPlayerId(plid_t id)
 	diff ^= change;
 }
 
-Player *SquareState::getTrailPlayer() const
+Player *SquareState::getTrailPlayer()
+{
+	return gs.lookupPlayer(getTrailPlayerId());
+}
+
+const Player *SquareState::getTrailPlayer() const
 {
 	return gs.lookupPlayer(getTrailPlayerId());
 }
@@ -94,7 +99,12 @@ void SquareState::setOccupyingPlayerId(plid_t id)
 	diff ^= change;
 }
 
-Player *SquareState::getOccupyingPlayer() const
+Player *SquareState::getOccupyingPlayer()
+{
+	return gs.lookupPlayer(getOccupyingPlayerId());
+}
+
+const Player *SquareState::getOccupyingPlayer() const
 {
 	return gs.lookupPlayer(getOccupyingPlayerId());
 }
@@ -128,7 +138,12 @@ void SquareState::setOwningPlayerId(plid_t id)
 	diff ^= change;
 }
 
-Player *SquareState::getOwningPlayer() const
+Player *SquareState::getOwningPlayer()
+{
+	return gs.lookupPlayer(getOwningPlayerId());
+}
+
+const Player *SquareState::getOwningPlayer() const
 {
 	return gs.lookupPlayer(getOwningPlayerId());
 }

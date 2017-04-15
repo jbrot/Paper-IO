@@ -102,7 +102,12 @@ void GameState::nextTick()
 	leaderboardChanged = false;
 }
 
-SquareState GameState::getState(pos_t x, pos_t y) const
+const SquareState GameState::getState(pos_t x, pos_t y) const
+{
+	return const_cast<GameState *>(this)->getState(x, y);
+}
+
+SquareState GameState::getState(pos_t x, pos_t y)
 {
 	if (0 <= x && x < width && 0 <= y && y < height)
 		return SquareState(*this, x, y, board[y][x], diff[y][x], flags[y + 1][x + 1]);
@@ -116,16 +121,34 @@ SquareState GameState::getState(pos_t x, pos_t y) const
 	return SquareState(*this, x, y, *boardStart, *diffStart, *flag);
 }
 
-Player *GameState::lookupPlayer(plid_t id) const
+const Player *GameState::lookupPlayer(plid_t id) const
+{
+	return const_cast<GameState *>(this)->lookupPlayer(id);
+}
+
+Player *GameState::lookupPlayer(plid_t id)
 {
 	if (!players.contains(id))
 		return NULL;
 	return players.value(id);
 }
 
-std::vector<Player *> GameState::getPlayers() const
+std::vector<const Player *> GameState::getPlayers() const
 {
-	return players.values().toVector().toStdVector();
+	std::vector<const Player *> rv;
+	rv.reserve(players.size());
+	foreach (const Player * pl, players)
+		rv.push_back(pl);
+	return rv;
+}
+
+std::vector<Player *> GameState::getPlayers()
+{
+	std::vector<Player *> rv;
+	rv.reserve(players.size());
+	foreach (Player * pl, players)
+		rv.push_back(pl);
+	return rv;
 }
 
 quint16 GameState::getTickRate() const

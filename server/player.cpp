@@ -73,6 +73,16 @@ bool Player::setLocation(pos_t newX, pos_t newY)
 	return true;
 }
 
+SquareState Player::getState()
+{
+	return gs.getState(x, y);
+}
+
+const SquareState Player::getState() const
+{
+	return static_cast<const GameState &>(gs).getState(x, y);
+}
+
 Direction Player::getNewDirection() const
 {
 	return newDir;
