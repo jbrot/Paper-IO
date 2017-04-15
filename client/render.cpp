@@ -6,6 +6,32 @@
 
 #include "render.h"
 
+static int getXOff(Direction dir)
+{
+    switch (dir)
+    {
+    case LEFT:
+        return -1;
+    case RIGHT:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+static int getYOff(Direction dir)
+{
+    switch (dir)
+    {
+    case UP:
+        return -1;
+    case DOWN:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
 //background color
 static QBrush background = QBrush(QColor(200, 200, 200));
 
@@ -77,11 +103,16 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
     const int CENTER_X = rect.x() + rect.width()/2;
     const int CENTER_Y = rect.y() + rect.height()/2;
 
-    const int SQUARE_SIZE = std::max(std::max(ceil(rect.height()/static_cast<double>(CLIENT_FRAME)), ceil(rect.width()/static_cast<double>(CLIENT_FRAME))), 25.0);
+    const int SQUARE_SIZE = std::max(std::max(ceil(rect.height()/static_cast<double>(CLIENT_FRAME - 2)),
+                                              ceil(rect.width()/static_cast<double>(CLIENT_FRAME - 2))), 25.0);
     const int OUTLINE_SIZE = 7;
 
-    const int CTOP_X = CENTER_X - 0.5 * SQUARE_SIZE;
-    const int CTOP_Y = CENTER_Y - 0.5 * SQUARE_SIZE;
+    int offset = SQUARE_SIZE * ((cgs.getLastTick().msecsTo(QDateTime::currentDateTime()))
+                / static_cast<double>(cgs.getTickRate()));
+    offset = std::min(offset - SQUARE_SIZE, 0);
+
+    const int CTOP_X = CENTER_X - 0.5 * SQUARE_SIZE - offset * getXOff(cgs.getClient()->getDirection());
+    const int CTOP_Y = CENTER_Y - 0.5 * SQUARE_SIZE - offset * getYOff(cgs.getClient()->getDirection());
 
 
     updateColorMap(cgs.getPlayers());
@@ -117,11 +148,21 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
                                   SQUARE_SIZE,
                                   playerColors[colorMap.value(state.getTrailPlayerId())].lighter());
             }
+        }
+    }
+    for (int x = -(CLIENT_FRAME / 2); x <= (CLIENT_FRAME / 2); ++x)
+    {
+        for (int y = -(CLIENT_FRAME / 2); y <= (CLIENT_FRAME / 2); ++y)
+        {
+            ClientSquareState state = cgs.getState(x, y);
 
-            if(state.isOccupied())
+            if(state.isOccupied() && state.getOccupyingPlayer())
             {
-                painter->fillRect(CTOP_X + x * SQUARE_SIZE,
-                                  CTOP_Y + y * SQUARE_SIZE,
+                Direction squarePlayer = state.getOccupyingPlayer()->getDirection();
+                qDebug() << state.getOccupyingPlayerId() << squarePlayer;
+
+                painter->fillRect(CTOP_X + x * SQUARE_SIZE + offset * getXOff(squarePlayer),
+                                  CTOP_Y + y * SQUARE_SIZE + offset * getYOff(squarePlayer),
                                   SQUARE_SIZE,
                                   SQUARE_SIZE,
                                   playerColors[colorMap.value(state.getOccupyingPlayerId())]);
@@ -129,44 +170,10 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
         }
     }
 
-    //test!!!
-    /*
-       QBrush centerBrush(Qt::red, Qt::DiagCrossPattern);
-       QRect testRec(10,10,100,100);
-       painter->drawRect(testRec);
-       painter->fillRect(testRec,centerBrush
-    */
-
-
-
 
 }
 
-int getXOff(Direction dir)
-{
-	switch (dir)
-	{
-	case LEFT:
-		return -1;
-	case RIGHT:
-		return 1;
-	default:
-		return 0;
-	}
-}
 
-int getYOff(Direction dir)
-{
-	switch (dir)
-	{
-	case UP:
-		return -1;
-	case DOWN:
-		return 1;
-	default:
-		return 0;
-	}
-}
 
 void renderGameArduino(ClientGameState &cgs, BufferGFX &gfx)
 {
