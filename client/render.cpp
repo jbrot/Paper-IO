@@ -68,7 +68,7 @@ const int NUM_COLORS = sizeof(playerColors);
 
 QHash<plid_t, int> colorMap;
 
-void updateColorMap(QList<ClientPlayer *> players)
+static void updateColorMap(QList<const ClientPlayer *> players)
 {
 
     for (auto iter = colorMap.begin(); iter != colorMap.end(); )
@@ -113,7 +113,7 @@ void updateColorMap(QList<ClientPlayer *> players)
 
 }
 
-void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
+void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
 {
     QRect rect = event->rect();
     const int CENTER_X = rect.x() + rect.width()/2;
@@ -249,7 +249,7 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
 
 
 
-void renderGameArduino(ClientGameState &cgs, BufferGFX &gfx)
+void renderGameArduino(const ClientGameState &cgs, BufferGFX &gfx)
 {
 	updateColorMap(cgs.getPlayers());
 
@@ -259,7 +259,7 @@ void renderGameArduino(ClientGameState &cgs, BufferGFX &gfx)
 	int offset = (3 * cgs.getLastTick().msecsTo(QDateTime::currentDateTime())) / cgs.getTickRate();
 	offset = std::min(offset - 1, 0);
 
-	ClientPlayer *client = cgs.getClient();
+	const ClientPlayer *client = cgs.getClient();
 	int xoff = -1 * offset * getXOff(client->getDirection());
 	int yoff = -1 * offset * getYOff(client->getDirection());
 
@@ -299,7 +299,7 @@ void renderGameArduino(ClientGameState &cgs, BufferGFX &gfx)
 			ClientSquareState ss = cgs.getState(x, y);
 			if (ss.isOccupied() && ss.getOccupyingPlayer())
 			{
-				ClientPlayer *lpl = ss.getOccupyingPlayer();
+				const ClientPlayer *lpl = ss.getOccupyingPlayer();
 				int lxo = offset * getXOff(lpl->getDirection());
 				int lyo = offset * getYOff(lpl->getDirection());
 				QColor cl = playerColors[colorMap.value(lpl->getId())].lighter();

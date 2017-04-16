@@ -16,9 +16,11 @@ class GameWidget : public QOpenGLWidget
 
 public:
 	GameWidget(ClientGameState &cgs, QWidget *parent = Q_NULLPTR);
+	bool isKiosk();
 
 signals:
 	void changeDirection(Direction dir);
+	void changeKiosk(bool kiosk);
 
 public slots:
 	void animate();
@@ -29,6 +31,9 @@ protected:
 
 private:
 	ClientGameState &cgs;
+
+	bool kiosk;
+	int ks;
 };
 
 #endif // !GAMEWIDGET_H

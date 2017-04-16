@@ -13,6 +13,7 @@
 class Arduino;
 class Client;
 class ClientGameState;
+class ClientSquareState;
 class GameWidget;
 class IOHandler;
 
@@ -31,6 +32,8 @@ public:
 	pos_t getX() const;
 	pos_t getY() const;
 	bool isVisible() const;
+
+	ClientSquareState getState() const;
 
 	/*
 	 * If the player is out of view this returns Direction::NONE.
@@ -80,7 +83,7 @@ public:
 	bool hasTrail() const;
 	TrailType getTrailType() const;
 	plid_t getTrailPlayerId() const;
-	ClientPlayer *getTrailPlayer() const;
+	const ClientPlayer *getTrailPlayer() const;
 
     /*
      * A square is occupied if the specified player's current position
@@ -93,7 +96,7 @@ public:
      */
 	bool isOccupied() const;
 	plid_t getOccupyingPlayerId() const;
-	ClientPlayer *getOccupyingPlayer() const;
+	const ClientPlayer *getOccupyingPlayer() const;
 
 	/*
 	 * A square is owned if it is in a player's "body"---that is, the square is
@@ -107,7 +110,9 @@ public:
 	 */
 	bool isOwned() const;
 	plid_t getOwningPlayerId() const;
-	ClientPlayer *getOwningPlayer() const;
+	const ClientPlayer *getOwningPlayer() const;
+
+	bool isOutOfBounds() const;
 private:
 	const ClientGameState &gs;
 	const pos_t x;
@@ -142,12 +147,12 @@ public:
 	 */
 	ClientSquareState getState(pos_t x, pos_t y) const;
 
-	ClientPlayer *lookupPlayer(plid_t id) const;
+	const ClientPlayer *lookupPlayer(plid_t id) const;
 
-    QList<ClientPlayer *> getPlayers() const;
+	QList<const ClientPlayer *> getPlayers() const;
 
-    plid_t getClientId() const;
-	ClientPlayer *getClient() const;
+	plid_t getClientId() const;
+	const ClientPlayer *getClient() const;
 
 	quint16 getTotalSquares() const;
 
@@ -165,6 +170,9 @@ private:
 	quint16 totalSquares;
 
 	plid_t client;
+
+	ClientPlayer *getClient();
+	ClientPlayer *lookupPlayer(plid_t id);
 
 	void lockState();
 	void unlock();

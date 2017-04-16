@@ -16,6 +16,8 @@ IOHandler::IOHandler(ClientGameState &cg, QObject *parent)
 	, keepAlive(new QTimer(this))
 	, name(QLatin1String(""))
 	, cgs(cg)
+	, kiosk(false)
+	, ka()
 {
 	str.setDevice(socket);
 	str.setVersion(QDataStream::Qt_5_0);
@@ -76,6 +78,11 @@ void IOHandler::requestResend()
 	Packet::writePacket(str, PacketRequestResend());
 }
 
+void IOHandler::changeKiosk(bool k)
+{
+	kiosk = k;
+}
+
 void IOHandler::kaTimeout()
 {
 	if (lastka.secsTo(QDateTime::currentDateTime()) > TIMEOUT_LEN)
@@ -102,7 +109,7 @@ void IOHandler::updatePlayerPositions()
 	{
 		for (pos_t x = -(CLIENT_FRAME / 2); x < CLIENT_FRAME / 2; x++)
 		{
-			ClientPlayer *cp = cgs.getState(x,y).getOccupyingPlayer();
+			ClientPlayer *cp = cgs.lookupPlayer(cgs.getState(x,y).getOccupyingPlayerId());
 			if (!cp)
 				continue;
 
@@ -336,6 +343,11 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 	cgs.unlock();
 
 	emit gameTick();
+
+	if (kiosk)
+		QTimer::singleShot(10, this, [this] {
+			changeDirection(ka.tick(cgs));
+		} );
 }
 
 void IOHandler::newData()
@@ -381,11 +393,14 @@ void IOHandler::newData()
 			processGameTick(*static_cast<PacketGameTick *>(packet));
 			break;
 		case PACKET_GAME_END:
-			// N.B. We don't need to lock, because the only time this value
-			// can get changed is on a packet game join, which happens in 
-			// this thread and therefore cannot happen at the same time as this
-			// call.
-			emit gameEnded(static_cast<PacketGameEnd *>(packet)->getScore(), cgs.getTotalSquares());
+			if (kiosk)
+				enterQueue();
+			else
+				// N.B. We don't need to lock, because the only time this value
+				// can get changed is on a packet game join, which happens in 
+				// this thread and therefore cannot happen at the same time as this
+				// call.
+				emit gameEnded(static_cast<PacketGameEnd *>(packet)->getScore(), cgs.getTotalSquares());
 			break;
 		default:
 			qDebug() << "Received unknown packet: " << packet;

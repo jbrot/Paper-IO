@@ -44,6 +44,11 @@ void ClientPlayer::setY(pos_t newY)
 	y = newY;
 }
 
+ClientSquareState ClientPlayer::getState() const
+{
+	return gs.getState(x, y);
+}
+
 Direction ClientPlayer::getDirection() const
 {
 	ClientSquareState ss = gs.getState(x, y);

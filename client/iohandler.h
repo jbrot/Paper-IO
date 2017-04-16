@@ -13,6 +13,7 @@
 #include <QTimer>
 
 #include "clientgamestate.h"
+#include "kioskai.h"
 #include "types.h"
 
 class IOHandler : public QObject
@@ -30,6 +31,8 @@ public slots:
 	void enterQueue();
 	void changeDirection(Direction dir);
 	void requestResend();
+
+	void changeKiosk(bool kiosk);
 
 signals:
 	void connected();
@@ -55,6 +58,9 @@ private:
 
 	QString name;
 	ClientGameState &cgs;
+
+	bool kiosk;
+	KioskAI ka;
 
 	/*
 	 * WARNING: This function must be called within a lock.

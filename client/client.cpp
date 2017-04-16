@@ -110,7 +110,8 @@ Client::Client(QWidget *parent)
 	connect(waiting, &Waiting::cancel, ioh, &IOHandler::disconnect);
 
 	connect(rtimer, &QTimer::timeout, render, &GameWidget::animate);
-	connect(render, &GameWidget::changeDirection, ioh, &IOHandler::changeDirection, Qt::QueuedConnection);
+	connect(render, &GameWidget::changeDirection, ioh, &IOHandler::changeDirection);
+	connect(render, &GameWidget::changeKiosk, ioh, &IOHandler::changeKiosk);
 
 	connect(gameover, &GameOver::playAgain, ioh, &IOHandler::enterQueue);
 	connect(gameover, &GameOver::disconnect, this, [this] {

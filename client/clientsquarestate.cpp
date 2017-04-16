@@ -38,7 +38,7 @@ plid_t ClientSquareState::getTrailPlayerId() const
 	return static_cast<plid_t>((state & 0xFF00) >> 8);
 }
 
-ClientPlayer *ClientSquareState::getTrailPlayer() const
+const ClientPlayer *ClientSquareState::getTrailPlayer() const
 {
 	return gs.lookupPlayer(getTrailPlayerId());
 }
@@ -54,7 +54,7 @@ plid_t ClientSquareState::getOccupyingPlayerId() const
 	return static_cast<plid_t>((state & 0xFF0000) >> 16);
 }
 
-ClientPlayer *ClientSquareState::getOccupyingPlayer() const
+const ClientPlayer *ClientSquareState::getOccupyingPlayer() const
 {
 	return gs.lookupPlayer(getOccupyingPlayerId());
 }
@@ -70,7 +70,7 @@ plid_t ClientSquareState::getOwningPlayerId() const
 	return static_cast<plid_t>((state & 0xFF000000) >> 24);
 }
 
-ClientPlayer *ClientSquareState::getOwningPlayer() const
+const ClientPlayer *ClientSquareState::getOwningPlayer() const
 {
 	return gs.lookupPlayer(getOwningPlayerId());
 }
@@ -78,4 +78,9 @@ ClientPlayer *ClientSquareState::getOwningPlayer() const
 Direction ClientSquareState::getDirection() const
 {
 	return Direction((state & 0x38) >> 3);
+}
+
+bool ClientSquareState::isOutOfBounds() const
+{
+	return getOwningPlayerId() == OUT_OF_BOUNDS;
 }

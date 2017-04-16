@@ -28,6 +28,7 @@ HEADERS += adafruit_gfx.h \
 	gfxfont.h \
 	glcdfont.h \
 	iohandler.h \
+	kioskai.h \
 	launcher.h \
 	render.h \
 	waiting.h \
@@ -45,6 +46,7 @@ SOURCES += main.cpp \
 	gameover.cpp \
 	gamewidget.cpp \
 	iohandler.cpp \
+	kioskai.cpp \
 	launcher.cpp \
 	render.cpp \
 	waiting.cpp \

@@ -48,21 +48,24 @@ ClientSquareState ClientGameState::getState(pos_t x, pos_t y) const
 	return ClientSquareState(*this, OUT_OF_BOUNDS, OUT_OF_BOUNDS, OUT_OF_BOUNDS_STATE);
 }
 
-ClientPlayer *ClientGameState::lookupPlayer(plid_t id) const
+const ClientPlayer *ClientGameState::lookupPlayer(plid_t id) const
+{
+	return const_cast<ClientGameState *>(this)->lookupPlayer(id);
+}
+
+ClientPlayer *ClientGameState::lookupPlayer(plid_t id)
 {
 	if (!players.contains(id))
 		return NULL;
 	return players.value(id);
 }
 
-QList<ClientPlayer *> ClientGameState::getPlayers() const
+QList<const ClientPlayer *> ClientGameState::getPlayers() const
 {
-    QList<ClientPlayer *> pls;
+    QList<const ClientPlayer *> pls;
 	foreach (ClientPlayer *pl, players)
-	{
 		if (pl)
 			pls.push_back(pl);
-	}
 
 	return pls;
 }
@@ -72,7 +75,12 @@ plid_t ClientGameState::getClientId() const
 	return client;
 }
 
-ClientPlayer *ClientGameState::getClient() const
+const ClientPlayer *ClientGameState::getClient() const
+{
+	return lookupPlayer(client);
+}
+
+ClientPlayer *ClientGameState::getClient()
 {
 	return lookupPlayer(client);
 }

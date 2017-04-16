@@ -11,8 +11,8 @@
 #include "buffergfx.h"
 #include "clientgamestate.h"
 
-void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event);
+void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *event);
 
-void renderGameArduino(ClientGameState &cgs, BufferGFX &gfx);
+void renderGameArduino(const ClientGameState &cgs, BufferGFX &gfx);
 
 #endif // !RENDER_H
