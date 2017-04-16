@@ -44,24 +44,24 @@ static QBrush background = QBrush(QColor(200, 200, 200));
  * Green
  * Blue
  * Orange
- * Yellow
  * Purple
  * Brown
  * Metallic Seaweed
  * Eucalyptus
  * Cyan
+ * Yellow
  */
 static QColor playerColors[] ={QColor(244, 154, 194),
                                  QColor(255, 0, 0),
                                  QColor(0, 255, 0),
                                  QColor(0, 0, 255),
                                  QColor(255, 179, 71),
-                                 QColor(253, 253, 150),
                                  QColor(100, 20, 100),
                                  QColor(75, 54, 33),
                                  QColor(8, 126, 140),
                                  QColor(68, 215, 168),
-                                 QColor(0, 255, 255)};
+                                 QColor(0, 255, 255),
+                                 QColor(253, 253, 150)};
 
 static QColor outOfBoundsColor = QColor(100,100,100);
 const int NUM_COLORS = sizeof(playerColors);
@@ -124,7 +124,7 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
     const int OUTLINE_SIZE = 7;
 
     int offset = SQUARE_SIZE * ((cgs.getLastTick().msecsTo(QDateTime::currentDateTime()))
-                / static_cast<double>(cgs.getTickRate()));
+                / static_cast<double>(cgs.getTickRate() + 10));
     offset = std::min(offset - SQUARE_SIZE, 0);
 
     const int CTOP_X = CENTER_X - 0.5 * SQUARE_SIZE - offset * getXOff(cgs.getClient()->getDirection());
@@ -171,11 +171,57 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
                 QColor trailColor = playerColors[colorMap.value(state.getTrailPlayerId())];
                 trailColor.setAlpha(TRAIL_ALPHA);
 
-                painter->fillRect(CTOP_X + x * SQUARE_SIZE,
-                                  CTOP_Y + y * SQUARE_SIZE,
-                                  SQUARE_SIZE,
-                                  SQUARE_SIZE,
-                                  trailColor);
+                QPainterPath triangle;
+                int triX = CTOP_X + x * SQUARE_SIZE;
+                int triY = CTOP_Y + y * SQUARE_SIZE;
+
+                switch (state.getTrailType())
+                {
+                case EASTTOWEST:
+                case NORTHTOSOUTH:
+                    painter->fillRect(CTOP_X + x * SQUARE_SIZE,
+                                    CTOP_Y + y * SQUARE_SIZE,
+                                    SQUARE_SIZE,
+                                    SQUARE_SIZE,
+                                    trailColor.lighter(125));
+                    break;
+
+                case NORTHTOEAST:
+                    triangle.moveTo(triX, triY + SQUARE_SIZE);
+                    triangle.lineTo(triX + SQUARE_SIZE, triY);
+                    triangle.lineTo(triX + SQUARE_SIZE, triY + SQUARE_SIZE);
+                    triangle.lineTo(triX, triY + SQUARE_SIZE);
+                    painter->fillPath(triangle, trailColor);
+                    break;
+
+                case NORTHTOWEST:
+                    triangle.moveTo(triX, triY + SQUARE_SIZE);
+                    triangle.lineTo(triX, triY);
+                    triangle.lineTo(triX + SQUARE_SIZE, triY + SQUARE_SIZE);
+                    triangle.lineTo(triX, triY + SQUARE_SIZE);
+                    painter->fillPath(triangle, trailColor);
+                    break;
+
+                case SOUTHTOEAST:
+                    triangle.moveTo(triX + SQUARE_SIZE, triY + SQUARE_SIZE);
+                    triangle.lineTo(triX + SQUARE_SIZE, triY);
+                    triangle.lineTo(triX, triY);
+                    triangle.lineTo(triX + SQUARE_SIZE, triY + SQUARE_SIZE);
+                    painter->fillPath(triangle, trailColor);
+                    break;
+
+                case SOUTHTOWEST:
+                    triangle.moveTo(triX, triY + SQUARE_SIZE);
+                    triangle.lineTo(triX, triY);
+                    triangle.lineTo(triX + SQUARE_SIZE, triY);
+                    triangle.lineTo(triX, triY + SQUARE_SIZE);
+                    painter->fillPath(triangle, trailColor);
+                    break;
+
+                default:
+                    break;
+
+                }
             }
         }
     }
