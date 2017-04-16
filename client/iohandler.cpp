@@ -329,6 +329,8 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 			msg += "\n";
 		}
 		qDebug() << qPrintable(msg);
+	} else {
+		updatePlayerPositions();
 	}
 
 	cgs.unlock();
