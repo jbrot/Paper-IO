@@ -48,6 +48,8 @@ static QColor playerColors[] ={QColor(220, 60, 60),
                                  QColor(156, 102, 31),
                                  QColor(255, 153, 18),
                                  QColor(105, 105, 105)};
+
+static QColor outOfBoundsColor = QColor(100,100,100);
 const int NUM_COLORS = sizeof(playerColors);
 
 QHash<plid_t, int> colorMap;
@@ -131,6 +133,15 @@ void renderGame(ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
         for (int y = -(CLIENT_FRAME / 2); y <= (CLIENT_FRAME / 2); ++y)
         {
             ClientSquareState state = cgs.getState(x, y);
+            if (state.getOwningPlayerId() == OUT_OF_BOUNDS)
+            {
+                painter->fillRect(CTOP_X + x * SQUARE_SIZE,
+                                  CTOP_Y + y * SQUARE_SIZE,
+                                  SQUARE_SIZE,
+                                  SQUARE_SIZE,
+                                  outOfBoundsColor);
+                continue;
+            }
             if(state.isOwned())
             {
                 painter->fillRect(CTOP_X + x * SQUARE_SIZE,
