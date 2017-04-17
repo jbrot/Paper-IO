@@ -86,7 +86,8 @@ void updatePosition(Player &player, GameState &state)
 		newX -= 1;
 		break;
 	case NONE:
-		break;
+		player.setActualDirection(NONE);
+		return;
 	}
 
 	res = player.setLocation(newX, newY);
@@ -105,7 +106,6 @@ void updatePosition(Player &player, GameState &state)
 	}
 
 	player.setActualDirection(newD);
-
 }
 
 void leaveTrail(Player &player, GameState &state)
