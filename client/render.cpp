@@ -3,6 +3,7 @@
  */
 
 #include <QtCore>
+#include <QFont>
 
 #include "render.h"
 
@@ -60,7 +61,7 @@ static QColor playerColors[] ={QColor(244, 154, 194),
                                  QColor(75, 54, 33),
                                  QColor(8, 126, 140),
                                  QColor(68, 215, 168),
-                                 QColor(0, 255, 255),
+                                 QColor(0, 150, 150),
                                  QColor(253, 253, 150)};
 
 static QColor outOfBoundsColor = QColor(100,100,100);
@@ -114,6 +115,7 @@ static void updateColorMap(QList<const ClientPlayer *> players)
 
 void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
 {
+
     QRect rect = event->rect();
     const int CENTER_X = rect.x() + rect.width()/2;
     const int CENTER_Y = rect.y() + rect.height()/2;
@@ -130,7 +132,10 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
     const int CTOP_Y = CENTER_Y - 0.5 * SQUARE_SIZE - offset * getYOff(cgs.getClient()->getDirection());
     const int TRAIL_ALPHA = 128;
 
-
+    QFont font;
+    font.setPixelSize(SQUARE_SIZE / 3);
+    QFontMetrics fm(font);
+    painter->setFont(font);
     updateColorMap(cgs.getPlayers());
 
     //printing background
@@ -233,17 +238,28 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
             if(state.isOccupied() && state.getOccupyingPlayer())
             {
                 Direction squarePlayer = state.getOccupyingPlayer()->getDirection();
+                int playerX = CTOP_X + x * SQUARE_SIZE + offset * getXOff(squarePlayer);
+                int playerY = CTOP_Y + y * SQUARE_SIZE + offset * getYOff(squarePlayer);
 
-                painter->fillRect(CTOP_X + x * SQUARE_SIZE + offset * getXOff(squarePlayer),
-                                  CTOP_Y + y * SQUARE_SIZE + offset * getYOff(squarePlayer),
+                int textX = playerX + SQUARE_SIZE / 2 - fm.width(state.getOccupyingPlayer()->getName()) / 2;
+                QColor playerColor = playerColors[colorMap.value(state.getOccupyingPlayerId())];
+
+                painter->fillRect(playerX,
+                                  playerY,
                                   SQUARE_SIZE,
                                   SQUARE_SIZE,
-                                  playerColors[colorMap.value(state.getOccupyingPlayerId())]);
+                                  playerColor);
+
+                playerColor.setAlpha(128);
+                painter->setPen(QPen(playerColor.darker(250)));
+                painter->drawText(textX + 2, playerY - 9, state.getOccupyingPlayer()->getName());
+
+                playerColor.setAlpha(255);
+                painter->setPen(QPen(playerColor.darker(120)));
+                painter->drawText(textX, playerY - 10, state.getOccupyingPlayer()->getName());
             }
         }
     }
-
-
 }
 
 
@@ -289,7 +305,7 @@ void renderGameArduino(const ClientGameState &cgs, BufferGFX &gfx)
 			{
 				uint16_t cl = ARDUINO_COLORS[colorMap.value(ss.getOwningPlayerId())][2];
 				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2, cl);
-			}
+            }
 
 			if(ss.hasTrail())
 			{
