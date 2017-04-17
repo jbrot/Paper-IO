@@ -70,26 +70,39 @@ void updatePosition(Player &player, GameState &state)
 	Direction newD = calculateDirection(player, state);
 
 	bool res = true;
+	pos_t newX = player.getX();
+	pos_t newY = player.getY();
 	switch (newD){
 	case UP:
-		res = player.setY(player.getY() - 1);
+		newY -= 1;
 		break;
 	case RIGHT:
-		res = player.setX(player.getX() + 1);
+		newX += 1;
 		break;
 	case DOWN:
-		res = player.setY(player.getY() + 1);
+		newY += 1;
 		break;
 	case LEFT:
-		res = player.setX(player.getX() - 1);
+		newX -= 1;
 		break;
 	case NONE:
 		break;
 	}
 
+	res = player.setLocation(newX, newY);
+
 	// res is false if there is a boundary or a player collision
 	if (!res)
-		player.kill();
+	{
+		SquareState ss = state.getState(newX, newY);
+		if (ss.getOccupyingPlayer() && ss.getOwningPlayerId() == player.getId())
+		{
+			ss.getOccupyingPlayer()->kill();
+			player.setLocation(newX, newY);
+		} else {
+			player.kill();
+		}
+	}
 
 	player.setActualDirection(newD);
 
