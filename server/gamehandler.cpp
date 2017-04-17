@@ -91,7 +91,6 @@ void GameHandler::tick()
 void GameHandler::tickAIs()
 {
 	gs.lockForRead();
-	PredictedGameState pgs(gs);
 	auto iter = ais.begin();
 	while(iter != ais.end())
 	{
@@ -106,7 +105,7 @@ void GameHandler::tickAIs()
 			continue;
 		}
 
-		pl->newDir = iter.value()->tick(pgs);
+		pl->newDir = iter.value()->tick(gs);
 
 		iter++;
 	}
