@@ -14,8 +14,8 @@ Arduino::Arduino(ClientGameState &gs, QObject *parent)
 	: QObject(parent)
 	, ctc(new QSerialPort(this))
 	, started(false)
-	, ba(false)
-	, bb(false)
+	, ba(1)
+	, bb(1)
 	, gfx()
 	, cgs(gs)
 {
@@ -72,7 +72,7 @@ int Arduino::connectToArduino()
 #ifndef _WIN32
 		if (!info.portName().startsWith("cu."))
 			continue;
-#endif
+#endif // !_WIN32
 
 		qDebug() << "Arduino found!";
 		ainf = info;
@@ -210,26 +210,37 @@ void Arduino::readData()
 	{
 		if (data & 0x01)
 		{
-			if (!ba)
+			// We've had issues with Button A flickering between
+			// 0 and 1 for a bit before stabilizing. None of the
+			// intervals were over 100. Furthermore, none of the actual
+			// intervals were ever under 500 as our buad rate is 115200
+			// which puts 500 at just under a twentieth of a second.
+			//
+			// N.B. ba and bb will overflow at around 10 hours. However,
+			// since they're unsigned, an overflow will simply prevent
+			// the button for being registered for one tenth of a second
+			// which isn't an issue at all (especially since it hasn't been
+			// pressed in over 10 hours at this point)
+			if (ba > 500)
 			{
-				ba = true;
+				ba = 0;
 				if (started)
 					emit buttonA();
 			}
 		} else {
-			ba = false;
+			++ba;
 		}
 
 		if (data & 0x02)
 		{
-			if (!bb)
+			if (bb > 500)
 			{
-				bb = true;
+				bb = 0;
 				if (started)
 					emit buttonB();
 			}
 		} else {
-			bb = false;
+			++bb;
 		}
 	}
 }

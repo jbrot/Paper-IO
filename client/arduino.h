@@ -45,8 +45,8 @@ private slots:
 private:
 	QSerialPort *ctc;
 	bool started;
-	bool ba;
-	bool bb;
+	quint32 ba;
+	quint32 bb;
 
 	BufferGFX gfx;
 	ClientGameState &cgs;
