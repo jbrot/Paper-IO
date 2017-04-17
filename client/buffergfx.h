@@ -28,11 +28,6 @@ public:
 	// to the first element in buffer.
 	uint8_t (*getBuffer())[ARDUINO_WIDTH];
 
-	static uint16_t Color333(uint8_t r, uint8_t g, uint8_t b);
-	static uint16_t Color444(uint8_t r, uint8_t g, uint8_t b);
-	static uint16_t Color888(uint8_t r, uint8_t g, uint8_t b);
-	static uint16_t ColorHSV(long hue, uint8_t sat, uint8_t val);
-
 private:
 	uint8_t buffer[ARDUINO_HEIGHT][ARDUINO_WIDTH];
 

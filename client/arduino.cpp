@@ -98,10 +98,7 @@ void Arduino::renderLauncher()
 	gfx.fillScreen(0);
 
 	const char arduino[] = "ARDUINO-IO";
-	const uint16_t colors[3] = { BufferGFX::Color333(3,0,0)
-	                           , BufferGFX::Color333(0,3,0)
-	                           , BufferGFX::Color333(0,0,3)
-	                           };
+	const uint16_t colors[3] = {1, 2, 4};
 	gfx.setCursor(1,0);
 	for (int i = 0; i < 5; i++)
 	{
@@ -116,6 +113,27 @@ void Arduino::renderLauncher()
 		gfx.write(arduino[i]);
 	}
 
+/*
+	// This code draws a color table. It is useful for picking colors
+	// on the Arduino.
+	int x, y;
+	for (int c = 0; c < 255; c++)
+	{
+		if (c < 16)
+		{
+			x = c;
+			y = 0;
+		} else if (16 <= c && c < 232) {
+			x = 7 * (((c - 16) / 36) % 3) + (c - 16) % 6;
+			y = 7 * ((c - 16) / 108) + ((c - 16) % 36) / 6 + 2;
+		} else {
+			x = (c - 232) % 8 + 22;
+			y = 3 + (c - 232) / 8;
+		}
+		gfx.drawPixel(x, y, c);
+	}
+*/
+
 	sendBuffer();
 }
 
@@ -127,7 +145,7 @@ void Arduino::renderWaiting()
 	gfx.fillScreen(0);
 
 	const char ctcng[] = "CONNECTING";
-	gfx.setTextColor(BufferGFX::Color333(2,2,2));
+	gfx.setTextColor(240);
 	gfx.setCursor(1,0);
 	for (int i = 0; i < 5; i++)
 		gfx.write(ctcng[i]);
@@ -161,7 +179,7 @@ void Arduino::renderGameOver(score_t score, quint16 total)
 	double pct = 100 * score / (double) total;
 
 	char scr[] = "Score";
-	gfx.setTextColor(BufferGFX::Color333(2,2,2));
+	gfx.setTextColor(240);
 	gfx.setCursor(1,0);
 	for (int i = 0; i < 5; i++)
 		gfx.write(scr[i]);

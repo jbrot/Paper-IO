@@ -70,7 +70,6 @@ QHash<plid_t, int> colorMap;
 
 static void updateColorMap(QList<const ClientPlayer *> players)
 {
-
     for (auto iter = colorMap.begin(); iter != colorMap.end(); )
     {
         for (auto pter = players.begin(); pter < players.end(); ++pter)
@@ -248,6 +247,18 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
 }
 
 
+const uint8_t ARDUINO_COLORS[10][3] = { {207, 175,  90}, // Magenta
+                                        {196, 174,  52}, // Red
+                                        { 46, 120,  22}, // Green
+                                        { 21,  68,  17}, // Blue
+                                        {214, 173,  94}, // Orange
+                                        { 99, 141,  54}, // Purple
+                                        {149, 107,  64}, // Eucalyptus
+                                        { 87, 116,  23}, // Cyan
+                                        { 11, 186, 100}, // Yellow
+                                        {217, 138, 131} };// Salmon
+
+const uint16_t ARDUINO_OOB = 242;
 
 void renderGameArduino(const ClientGameState &cgs, BufferGFX &gfx)
 {
@@ -270,23 +281,20 @@ void renderGameArduino(const ClientGameState &cgs, BufferGFX &gfx)
 			ClientSquareState ss = cgs.getState(x, y);
 			if (ss.getOwningPlayerId() == OUT_OF_BOUNDS)
 			{
-				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2,
-				             BufferGFX::Color333(2,2,2));
+				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2, ARDUINO_OOB);
 				continue;
 			}
              
 			if(ss.isOwned())
 			{
-				QColor cl = playerColors[colorMap.value(ss.getOwningPlayerId())];
-				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2,
-				             BufferGFX::Color888(cl.red(), cl.green(), cl.blue()));
+				uint16_t cl = ARDUINO_COLORS[colorMap.value(ss.getOwningPlayerId())][2];
+				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2, cl);
 			}
 
 			if(ss.hasTrail())
 			{
-				QColor cl = playerColors[colorMap.value(ss.getTrailPlayerId())].lighter(175);
-				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2,
-				             BufferGFX::Color888(cl.red(), cl.green(), cl.blue()));
+				uint16_t cl = ARDUINO_COLORS[colorMap.value(ss.getTrailPlayerId())][1];
+				gfx.fillRect(x * 2 + 15 + xoff, y * 2 + 7 + yoff, 2, 2, cl);
 			}
 		}
 	}
@@ -302,9 +310,8 @@ void renderGameArduino(const ClientGameState &cgs, BufferGFX &gfx)
 				const ClientPlayer *lpl = ss.getOccupyingPlayer();
 				int lxo = offset * getXOff(lpl->getDirection());
 				int lyo = offset * getYOff(lpl->getDirection());
-				QColor cl = playerColors[colorMap.value(lpl->getId())].lighter();
-				gfx.fillRect(x * 2 + 15 + xoff + lxo, y * 2 + 7 + yoff + lyo, 2, 2,
-				             BufferGFX::Color888(cl.red(), cl.green(), cl.blue()));
+				uint16_t cl = ARDUINO_COLORS[colorMap.value(lpl->getId())][0];
+				gfx.fillRect(x * 2 + 15 + xoff + lxo, y * 2 + 7 + yoff + lyo, 2, 2, cl);
 			}
 		}
 	}
