@@ -118,7 +118,7 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
     const int TRAIL_ALPHA = 128;
 
     QFont font;
-    font.setPixelSize(SQUARE_SIZE / 3);
+    font.setPixelSize(SQUARE_SIZE / 2);
     QFontMetrics fm(font);
     painter->setFont(font);
     updateColorMap(cgs.getPlayers());
@@ -235,12 +235,7 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
                                   SQUARE_SIZE,
                                   playerColor);
 
-                playerColor.setAlpha(128);
-                painter->setPen(QPen(playerColor.darker(250)));
-                painter->drawText(textX + 2, playerY - 9, state.getOccupyingPlayer()->getName());
-
-                playerColor.setAlpha(255);
-                painter->setPen(QPen(playerColor.darker(120)));
+                painter->setPen(QPen(playerColor));
                 painter->drawText(textX, playerY - 10, state.getOccupyingPlayer()->getName());
             }
         }
