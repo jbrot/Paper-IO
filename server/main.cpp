@@ -14,6 +14,9 @@ void registerPackets();
 
 int main(int argc, char *argv[])
 {
+	// Install a color-coded logger if we're not on Windows (it doesn't work on
+	// Windows for some reason)
+#ifndef _WIN32
 	qInstallMessageHandler([] (QtMsgType type, const QMessageLogContext &context, const QString &msg) {
 	QByteArray localMsg = msg.toLocal8Bit();
 	switch(type)
@@ -35,6 +38,8 @@ int main(int argc, char *argv[])
 		break;
 	}
 	} );
+#endif // !_WIN32
+
 	QApplication app(argc, argv);
 
 	// Queued Connection type registrations
