@@ -33,36 +33,21 @@ static int getYOff(Direction dir)
     }
 }
 
-//background color
+// Background color
 static QBrush background = QBrush(QColor(200, 200, 200));
 
-//player colors
+// Player colors
 
-/*
- * Colors:
- * Magenta
- * Red
- * Green
- * Blue
- * Orange
- * Purple
- * Brown
- * Metallic Seaweed
- * Eucalyptus
- * Cyan
- * Yellow
- */
-static QColor playerColors[] ={QColor(244, 154, 194),
-                                 QColor(255, 0, 0),
-                                 QColor(0, 255, 0),
-                                 QColor(0, 0, 255),
-                                 QColor(255, 179, 71),
-                                 QColor(100, 20, 100),
-                                 QColor(75, 54, 33),
-                                 QColor(8, 126, 140),
-                                 QColor(68, 215, 168),
-                                 QColor(0, 150, 150),
-                                 QColor(253, 253, 150)};
+static QColor playerColors[11][2] = { {QColor(0xFF99CC), QColor(0xE481C3)},  // Magenta
+                                      {QColor(0xFF0033), QColor(0xCC3333)},  // Red
+                                      {QColor(0x33CC33), QColor(0x009933)},  // Green
+                                      {QColor(0x3333FF), QColor(0x002DB3)},  // Blue
+                                      {QColor(0xFF9933), QColor(0xEC6A13)},  // Orange
+                                      {QColor(0xB366FF), QColor(0x8A00E6)},  // Purple
+                                      {QColor(0x00FF99), QColor(0x00CC99)},  // Eucalyptus
+                                      {QColor(0x33CCFF), QColor(0x00B8E6)},  // Cyan
+                                      {QColor(0xFFFF80), QColor(0xF2F20D)},  // Yellow
+                                      {QColor(0xFF9999), QColor(0xFF6666)}}; // Salmon
 
 static QColor outOfBoundsColor = QColor(100,100,100);
 const int NUM_COLORS = sizeof(playerColors);
@@ -139,7 +124,7 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
     updateColorMap(cgs.getPlayers());
 
     //printing background
-	painter->fillRect(event->rect(), background);
+    painter->fillRect(event->rect(), background);
 
     //define center point (player is always centered, so this will always execute with fixed points)
     QPoint CenterPt;
@@ -167,12 +152,12 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
                                   CTOP_Y + y * SQUARE_SIZE,
                                   SQUARE_SIZE,
                                   SQUARE_SIZE,
-                                  playerColors[colorMap.value(state.getOwningPlayerId())].darker());
+                                  playerColors[colorMap.value(state.getOwningPlayerId())][1]);
             }
 
             if(state.hasTrail())
             {
-                QColor trailColor = playerColors[colorMap.value(state.getTrailPlayerId())];
+                QColor trailColor = playerColors[colorMap.value(state.getTrailPlayerId())][0];
                 trailColor.setAlpha(TRAIL_ALPHA);
 
                 QPainterPath triangle;
@@ -242,7 +227,7 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
                 int playerY = CTOP_Y + y * SQUARE_SIZE + offset * getYOff(squarePlayer);
 
                 int textX = playerX + SQUARE_SIZE / 2 - fm.width(state.getOccupyingPlayer()->getName()) / 2;
-                QColor playerColor = playerColors[colorMap.value(state.getOccupyingPlayerId())];
+                QColor playerColor = playerColors[colorMap.value(state.getOccupyingPlayerId())][0];
 
                 painter->fillRect(playerX,
                                   playerY,
@@ -263,16 +248,16 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
 }
 
 
-const uint8_t ARDUINO_COLORS[10][3] = { {207, 175,  90}, // Magenta
-                                        {196, 174,  52}, // Red
-                                        { 46, 120,  22}, // Green
-                                        { 21,  68,  17}, // Blue
-                                        {214, 173,  94}, // Orange
-                                        { 99, 141,  54}, // Purple
-                                        {149, 107,  64}, // Eucalyptus
-                                        { 87, 116,  23}, // Cyan
-                                        { 11, 186, 100}, // Yellow
-                                        {217, 138, 131} };// Salmon
+const uint8_t ARDUINO_COLORS[10][3] = { {207, 175,  90},   // Magenta
+                                        {196, 174,  52},   // Red
+                                        { 46, 120,  22},   // Green
+                                        { 21,  68,  17},   // Blue
+                                        {214, 173,  94},   // Orange
+                                        { 99, 141,  54},   // Purple
+                                        {149, 107,  64},   // Eucalyptus
+                                        { 87, 116,  23},   // Cyan
+                                        { 11, 186, 100},   // Yellow
+                                        {217, 138, 131} }; // Salmon
 
 const uint16_t ARDUINO_OOB = 242;
 
