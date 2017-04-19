@@ -19,9 +19,9 @@ The building process of Arduino-IO is automated via [qmake](http://doc.qt.io/qt-
 
 ### 1. Install Qt 5.8 Open Source
 
-To compile our project, you need to ahve Qt installed. The Qt 5.8 Open Source installer can be found at https://www.qt.io/download-open-source/.
+To compile our project, you need to have Qt installed. The Qt 5.8 Open Source installer can be found at https://www.qt.io/download-open-source/.
 Other versions may work, but this is the installer we recommend.
-Download the installe appropriate for your computer and use it to install the API. Note that the installer by default installs a lot of extra components which you don't necessarily need; use your best judgement as I have not completed the installation enough to know exactly which components are needed.
+Download the installer appropriate for your computer and use it to install the API. Note that the installer by default installs a lot of extra components which you don't necessarily need; use your best judgement as I have not completed the installation enough to know exactly which components are needed.
 
 ### 2a. Build from the Command Line
 
