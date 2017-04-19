@@ -334,7 +334,7 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 		updatePlayerPositions();
 	}
 
-	if (cgs.isKiosk())
+	if (cgs.kioskMode())
 		QTimer::singleShot(10, this, [this] {
 			changeDirection(ka.tick(cgs));
 		} );
@@ -390,7 +390,7 @@ void IOHandler::newData()
 		case PACKET_GAME_END:
 		{
 			cgs.lockState();
-			bool kiosk = cgs.isKiosk();
+			int kiosk = cgs.kioskMode();
 			cgs.unlock();
 
 			if (kiosk)

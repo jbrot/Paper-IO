@@ -323,8 +323,8 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
                       rect.y() + 0.75 * LEADERBOARD_HEIGHT,
                       tscore);
 
-	// Kiosk mode watermark
-	if (!cgs.isKiosk())
+	// Kiosk mode 2 watermark
+	if (cgs.kioskMode() != 2)
 		return;
 
 	painter->fillRect(rect, QColor(0, 0, 0, 100));

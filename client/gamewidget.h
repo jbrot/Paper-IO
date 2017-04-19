@@ -20,7 +20,7 @@ public:
 
 signals:
 	void changeDirection(Direction dir);
-	void changeKiosk(bool kiosk);
+	void changeKiosk();
 
 public slots:
 	void animate();
@@ -32,7 +32,6 @@ protected:
 private:
 	ClientGameState &cgs;
 
-	bool kiosk;
 	int ks;
 };
 

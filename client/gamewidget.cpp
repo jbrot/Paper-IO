@@ -12,20 +12,15 @@
 const int KSTR[] = { Qt::Key_E, Qt::Key_T, Qt::Key_A, Qt::Key_O, 
                      Qt::Key_I, Qt::Key_N, Qt::Key_S, Qt::Key_H,
                      Qt::Key_R, Qt::Key_D, Qt::Key_L, Qt::Key_U };
+const int KSTRLEN = 12;
 
 GameWidget::GameWidget(ClientGameState &gs, QWidget *parent)
 	: QOpenGLWidget(parent)
 	, cgs(gs)
-	, kiosk(false)
 	, ks(0)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setAttribute(Qt::WA_MacShowFocusRect, 0);
-}
-
-bool GameWidget::isKiosk()
-{
-	return kiosk;
 }
 
 void GameWidget::animate()
@@ -50,15 +45,18 @@ void GameWidget::keyPressEvent(QKeyEvent *event)
 	{
 		ks++;
 		qWarning() << "ADVANCE" << ks;
-		if (ks == 12)
+		if (ks == KSTRLEN)
 		{
-			kiosk = !kiosk;
 			ks = 0;
-			emit changeKiosk(kiosk);
+			emit changeKiosk();
 		}
 	} else {
 		ks = 0;
 	}
+
+	cgs.lockState();
+	int kiosk = cgs.kioskMode();
+	cgs.unlock();
 
 	if (!kiosk)
 	{

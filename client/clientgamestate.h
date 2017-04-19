@@ -158,7 +158,7 @@ public:
 
 	const std::pair<plid_t, score_t> *getLeaderboard() const;
 
-	bool isKiosk() const;
+	int kioskMode() const;
 
 private:
 	QMutex lock;
@@ -174,7 +174,7 @@ private:
 	quint16 totalSquares;
 
 	plid_t client;
-	bool kiosk;
+	int kiosk;
 
 	ClientPlayer *getClient();
 	ClientPlayer *lookupPlayer(plid_t id);
