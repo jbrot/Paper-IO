@@ -156,6 +156,8 @@ public:
 
 	quint16 getTotalSquares() const;
 
+    const std::pair<plid_t, score_t> *getLeaderboard() const;
+
 private:
 	QMutex lock;
 
@@ -164,7 +166,7 @@ private:
 	quint16 tickRate;
 	QDateTime lastTick;
 
-	std::pair<plid_t, score_t> leaderboard[10];
+    std::pair<plid_t, score_t> leaderboard[5];
 
 	state_t board[CLIENT_FRAME][CLIENT_FRAME];
 	quint16 totalSquares;

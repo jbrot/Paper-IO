@@ -38,16 +38,16 @@ static QBrush background = QBrush(QColor(200, 200, 200));
 
 // Player colors
 
-static QColor playerColors[11][2] = { {QColor(0xFF99CC), QColor(0xE481C3)},  // Magenta
-                                      {QColor(0xFF0033), QColor(0xCC3333)},  // Red
-                                      {QColor(0x33CC33), QColor(0x009933)},  // Green
-                                      {QColor(0x3333FF), QColor(0x002DB3)},  // Blue
-                                      {QColor(0xFF9933), QColor(0xEC6A13)},  // Orange
-                                      {QColor(0xB366FF), QColor(0x8A00E6)},  // Purple
-                                      {QColor(0x00FF99), QColor(0x00CC99)},  // Eucalyptus
-                                      {QColor(0x33CCFF), QColor(0x00B8E6)},  // Cyan
-                                      {QColor(0xFFFF80), QColor(0xF2F20D)},  // Yellow
-                                      {QColor(0xFF9999), QColor(0xFF6666)}}; // Salmon
+static QColor playerColors[10][3] = { {QColor(0xFF99CC), QColor(0xE481C3), QColor(0xffcce6)},  // Magenta
+                                      {QColor(0xFF0033), QColor(0xCC3333), QColor(0xFFB3B3)},  // Red
+                                      {QColor(0x33CC33), QColor(0x009933), QColor(0x9AE59A)},  // Green
+                                      {QColor(0x3333FF), QColor(0x002DB3), QColor(0xCCCCFF)},  // Blue
+                                      {QColor(0xFF9933), QColor(0xEC6A13), QColor(0xFFCC99)},  // Orange
+                                      {QColor(0xB366FF), QColor(0x8A00E6), QColor(0xD9B3FF)},  // Purple
+                                      {QColor(0x00FF99), QColor(0x00CC99), QColor(0xB3FFE0)},  // Eucalyptus
+                                      {QColor(0x33CCFF), QColor(0x00B8E6), QColor(0xb8e9f9)},  // Cyan
+                                      {QColor(0xFFFF80), QColor(0xF2F20D), QColor(0x999900)},  // Yellow
+                                      {QColor(0xFF9999), QColor(0xFF6666), QColor(0xFFCCCC)}}; // Salmon
 
 static QColor outOfBoundsColor = QColor(100,100,100);
 const int NUM_COLORS = sizeof(playerColors);
@@ -56,6 +56,7 @@ QHash<plid_t, int> colorMap;
 
 static void updateColorMap(QList<const ClientPlayer *> players)
 {
+    //return;
     for (auto iter = colorMap.begin(); iter != colorMap.end(); )
     {
         for (auto pter = players.begin(); pter < players.end(); ++pter)
@@ -107,7 +108,6 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
 
     const int SQUARE_SIZE = std::max(std::max(ceil(rect.height()/static_cast<double>(CLIENT_FRAME - 2)),
                                               ceil(rect.width()/static_cast<double>(CLIENT_FRAME - 2))), 25.0);
-    const int OUTLINE_SIZE = 7;
 
     int offset = SQUARE_SIZE * ((cgs.getLastTick().msecsTo(QDateTime::currentDateTime()))
                 / static_cast<double>(cgs.getTickRate() + 10));
@@ -227,18 +227,43 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
                 int playerY = CTOP_Y + y * SQUARE_SIZE + offset * getYOff(squarePlayer);
 
                 int textX = playerX + SQUARE_SIZE / 2 - fm.width(state.getOccupyingPlayer()->getName()) / 2;
-                QColor playerColor = playerColors[colorMap.value(state.getOccupyingPlayerId())][0];
 
                 painter->fillRect(playerX,
                                   playerY,
                                   SQUARE_SIZE,
                                   SQUARE_SIZE,
-                                  playerColor);
+                                  playerColors[colorMap.value(state.getOccupyingPlayerId())][0]);
 
-                painter->setPen(QPen(playerColor));
+                painter->setPen(QPen(playerColors[colorMap.value(state.getOccupyingPlayerId())][0]));
                 painter->drawText(textX, playerY - 10, state.getOccupyingPlayer()->getName());
             }
         }
+    }
+
+    const std::pair<plid_t, score_t> *leaderboard = cgs.getLeaderboard();
+    const int LEADERBOARD_HEIGHT = SQUARE_SIZE * 0.75;
+
+    font.setPixelSize(LEADERBOARD_HEIGHT * 0.70);
+    painter->setFont(font);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        const ClientPlayer *player = cgs.lookupPlayer(leaderboard[i].first);
+        if (!player)
+            continue;
+
+        double percent = leaderboard[i].second / static_cast<double>(cgs.getTotalSquares());
+        double width = 0.04165781884242057 + log(0.9591979438864181 + 214.9520165281591 * percent * percent);
+        width = SQUARE_SIZE * (2 + width);
+        int x = rect.x() + rect.width() - width;
+        int y = rect.y() + i * LEADERBOARD_HEIGHT;
+        painter->fillRect(x, y, width, LEADERBOARD_HEIGHT, playerColors[colorMap.value(leaderboard[i].first)][1]);
+
+        painter->setPen(QPen(playerColors[colorMap.value(leaderboard[i].first)][2]));
+        painter->drawText(x + 0.25 * LEADERBOARD_HEIGHT,
+                          y + 0.75 * LEADERBOARD_HEIGHT,
+                          player->getName());
+
     }
 }
 

@@ -90,6 +90,11 @@ quint16 ClientGameState::getTotalSquares() const
 	return totalSquares;
 }
 
+const std::pair<plid_t, score_t> *ClientGameState::getLeaderboard() const
+{
+    return leaderboard;
+}
+
 void ClientGameState::lockState()
 {
 	lock.lock();
