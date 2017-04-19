@@ -12,6 +12,7 @@ ClientGameState::ClientGameState()
 	, tickRate(0)
 	, lastTick()
 	, client(NULL_ID)
+	, kiosk(false)
 {
 	std::fill(leaderboard, leaderboard + 5, std::make_pair(NULL_ID, 0));
 	std::fill(board[0], board[0] + CLIENT_FRAME * CLIENT_FRAME, 0);
@@ -92,7 +93,12 @@ quint16 ClientGameState::getTotalSquares() const
 
 const std::pair<plid_t, score_t> *ClientGameState::getLeaderboard() const
 {
-    return leaderboard;
+	return leaderboard;
+}
+
+bool ClientGameState::isKiosk() const
+{
+	return kiosk;
 }
 
 void ClientGameState::lockState()

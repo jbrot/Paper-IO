@@ -111,7 +111,11 @@ Client::Client(QWidget *parent)
 
 	connect(rtimer, &QTimer::timeout, render, &GameWidget::animate);
 	connect(render, &GameWidget::changeDirection, ioh, &IOHandler::changeDirection);
-	connect(render, &GameWidget::changeKiosk, ioh, &IOHandler::changeKiosk);
+	connect(render, &GameWidget::changeKiosk, this, [this] (bool state) {
+		cgs.lockState();
+		cgs.kiosk = state;
+		cgs.unlock();
+	} );
 
 	connect(gameover, &GameOver::playAgain, ioh, &IOHandler::enterQueue);
 	connect(gameover, &GameOver::disconnect, this, [this] {

@@ -32,8 +32,6 @@ public slots:
 	void changeDirection(Direction dir);
 	void requestResend();
 
-	void changeKiosk(bool kiosk);
-
 signals:
 	void connected();
 	void disconnected();
@@ -59,7 +57,6 @@ private:
 	QString name;
 	ClientGameState &cgs;
 
-	bool kiosk;
 	KioskAI ka;
 
 	/*

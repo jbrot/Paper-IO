@@ -2,9 +2,12 @@
  * This file includes the actual rendering code.
  */
 
+#include <QStaticText>
 #include <QtCore>
 #include <QFont>
 
+#include "font.h"
+#include "launcher.h"
 #include "render.h"
 
 static int getXOff(Direction dir)
@@ -31,6 +34,43 @@ static int getYOff(Direction dir)
     default:
         return 0;
     }
+}
+
+static QStaticText &getTitleString()
+{
+	static QStaticText text;
+	static bool init = false;
+	if (init)
+		return text;
+
+	QStringList colors;
+	colors << "#F00" << "#0F0" << "#55D";
+	auto citer = colors.cbegin();
+
+	QString base = Launcher::tr("ARDUINO-IO"); 
+	QString res;
+	res.reserve(27 * base.size());
+	for (auto iter = base.cbegin(); iter < base.cend(); iter++, citer++) {
+		if (citer == colors.cend())
+			citer = colors.cbegin();
+		res += "<font color=\"" % *citer % "\">" % *iter % "</font>";
+	}
+
+	text.setText(res);
+	text.setTextFormat(Qt::RichText);
+	return text;
+}
+
+static QStaticText &getTitleShadow()
+{
+	static QStaticText text;
+	static bool init = false;
+	if (init)
+		return text;
+
+	text.setText(Launcher::tr("ARDUINO-IO"));
+	text.setTextFormat(Qt::PlainText);
+	return text;
 }
 
 // Background color
@@ -101,6 +141,7 @@ static void updateColorMap(QList<const ClientPlayer *> players)
 
 void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *event)
 {
+    painter->setTransform(QTransform());
 
     QRect rect = event->rect();
     const int CENTER_X = rect.x() + rect.width()/2;
@@ -281,7 +322,30 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
     painter->drawText(rect.x() + width - 0.25 * LEADERBOARD_HEIGHT - twidth,
                       rect.y() + 0.75 * LEADERBOARD_HEIGHT,
                       tscore);
+
+	// Kiosk mode watermark
+	if (!cgs.isKiosk())
+		return;
+
+	painter->fillRect(rect, QColor(0, 0, 0, 100));
                       
+	static int kfs = -1;
+	int nkfs = SQUARE_SIZE * 3;
+	font = getFreshmanFont();
+	font.setPixelSize(nkfs);
+	painter->setFont(font);
+	
+	QStaticText text = getTitleString();
+	QStaticText shadow = getTitleShadow();
+	if (nkfs != kfs)
+	{
+		text.prepare(painter->transform(), font);
+		shadow.prepare(painter->transform(), font);
+	}
+
+	painter->setPen(QColor(0, 0, 0, 85));
+	painter->drawStaticText(CENTER_X - text.size().width() / 2 + 2, CENTER_Y - rect.width() / 6 - text.size().height() / 2 + 2, shadow);
+	painter->drawStaticText(CENTER_X - text.size().width() / 2, CENTER_Y - rect.width() / 6 - text.size().height() / 2, text);
 }
 
 

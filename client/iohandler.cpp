@@ -16,7 +16,6 @@ IOHandler::IOHandler(ClientGameState &cg, QObject *parent)
 	, keepAlive(new QTimer(this))
 	, name(QLatin1String(""))
 	, cgs(cg)
-	, kiosk(false)
 	, ka()
 {
 	str.setDevice(socket);
@@ -76,11 +75,6 @@ void IOHandler::changeDirection(Direction dir)
 void IOHandler::requestResend()
 {
 	Packet::writePacket(str, PacketRequestResend());
-}
-
-void IOHandler::changeKiosk(bool k)
-{
-	kiosk = k;
 }
 
 void IOHandler::kaTimeout()
@@ -340,14 +334,15 @@ void IOHandler::processGameTick(const PacketGameTick &pgt)
 		updatePlayerPositions();
 	}
 
+	if (cgs.isKiosk())
+		QTimer::singleShot(10, this, [this] {
+			changeDirection(ka.tick(cgs));
+		} );
+
 	cgs.unlock();
 
 	emit gameTick();
 
-	if (kiosk)
-		QTimer::singleShot(10, this, [this] {
-			changeDirection(ka.tick(cgs));
-		} );
 }
 
 void IOHandler::newData()
@@ -393,6 +388,11 @@ void IOHandler::newData()
 			processGameTick(*static_cast<PacketGameTick *>(packet));
 			break;
 		case PACKET_GAME_END:
+		{
+			cgs.lockState();
+			bool kiosk = cgs.isKiosk();
+			cgs.unlock();
+
 			if (kiosk)
 				enterQueue();
 			else
@@ -402,6 +402,7 @@ void IOHandler::newData()
 				// call.
 				emit gameEnded(static_cast<PacketGameEnd *>(packet)->getScore(), cgs.getTotalSquares());
 			break;
+		}
 		default:
 			qDebug() << "Received unknown packet: " << packet;
 			break;

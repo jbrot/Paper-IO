@@ -156,7 +156,9 @@ public:
 
 	quint16 getTotalSquares() const;
 
-    const std::pair<plid_t, score_t> *getLeaderboard() const;
+	const std::pair<plid_t, score_t> *getLeaderboard() const;
+
+	bool isKiosk() const;
 
 private:
 	QMutex lock;
@@ -166,12 +168,13 @@ private:
 	quint16 tickRate;
 	QDateTime lastTick;
 
-    std::pair<plid_t, score_t> leaderboard[5];
+	std::pair<plid_t, score_t> leaderboard[5];
 
 	state_t board[CLIENT_FRAME][CLIENT_FRAME];
 	quint16 totalSquares;
 
 	plid_t client;
+	bool kiosk;
 
 	ClientPlayer *getClient();
 	ClientPlayer *lookupPlayer(plid_t id);
