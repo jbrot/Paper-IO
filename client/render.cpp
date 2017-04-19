@@ -240,10 +240,12 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
         }
     }
 
+    // Leaderboard
     const std::pair<plid_t, score_t> *leaderboard = cgs.getLeaderboard();
     const int LEADERBOARD_HEIGHT = SQUARE_SIZE * 0.75;
 
     font.setPixelSize(LEADERBOARD_HEIGHT * 0.70);
+    fm = QFontMetrics(font);
     painter->setFont(font);
 
     for (int i = 0; i < 5; ++i)
@@ -253,18 +255,33 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
             continue;
 
         double percent = leaderboard[i].second / static_cast<double>(cgs.getTotalSquares());
-        double width = 0.04165781884242057 + log(0.9591979438864181 + 214.9520165281591 * percent * percent);
-        width = SQUARE_SIZE * (2 + width);
+        double width = 2 * (log(20 * percent + 0.5) - log(0.5));
+        width = SQUARE_SIZE * (2.5 + width);
         int x = rect.x() + rect.width() - width;
         int y = rect.y() + i * LEADERBOARD_HEIGHT;
-        painter->fillRect(x, y, width, LEADERBOARD_HEIGHT, playerColors[colorMap.value(leaderboard[i].first)][1]);
+        painter->fillRect(x, y, width + 10, LEADERBOARD_HEIGHT, playerColors[colorMap.value(leaderboard[i].first)][1]);
 
         painter->setPen(QPen(playerColors[colorMap.value(leaderboard[i].first)][2]));
         painter->drawText(x + 0.25 * LEADERBOARD_HEIGHT,
                           y + 0.75 * LEADERBOARD_HEIGHT,
-                          player->getName());
+                          QString("%1 - %2% %3").arg(QString::number(i + 1), QString::number(100 * percent, 'f', (percent >= .1 ? 1 : 2)), player->getName()));
 
     }
+
+
+    // Player's score
+    double percent = cgs.getClient()->getScore() / static_cast<double>(cgs.getTotalSquares());
+    double width = 2 * (log(20 * percent + 0.5) - log(0.5));
+    QString tscore = QString("%1%").arg(QString::number(100 * percent, 'f', (percent >= .1 ? 1 : 2)));
+    double twidth = fm.width(tscore);
+    width = SQUARE_SIZE * (2.0 + width);
+    painter->fillRect(rect.x() - 10, rect.y(), width + 10, LEADERBOARD_HEIGHT, playerColors[colorMap.value(cgs.getClientId())][1]);
+
+    painter->setPen(QPen(playerColors[colorMap.value(cgs.getClientId())][2]));
+    painter->drawText(rect.x() + width - 0.25 * LEADERBOARD_HEIGHT - twidth,
+                      rect.y() + 0.75 * LEADERBOARD_HEIGHT,
+                      tscore);
+                      
 }
 
 
