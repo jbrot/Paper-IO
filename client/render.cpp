@@ -7,6 +7,7 @@
 #include <QFont>
 
 #include "font.h"
+#include "gameover.h"
 #include "launcher.h"
 #include "render.h"
 
@@ -318,10 +319,31 @@ void renderGame(const ClientGameState &cgs, QPainter *painter, QPaintEvent *even
     width = SQUARE_SIZE * (2.0 + width);
     painter->fillRect(rect.x() - 10, rect.y(), width + 10, LEADERBOARD_HEIGHT, playerColors[colorMap.value(cgs.getClientId())][1]);
 
+    // Player's best score
+    // N.B. This is probably better to do at GameOver, but is just so much simpler to do here.
+    QSettings settings;
+    double best_percent = settings.value("best_score", 0).toDouble();
+    if (best_percent > 1) best_percent = 1;
+    else if (best_percent < 0) best_percent = 0;
+    else if (best_percent < percent)
+    {
+        best_percent = percent;
+        settings.setValue("best_score", best_percent);
+    }
+    QString best_score = GameOver::tr("Best Score: %2%").arg(QString::number(100 * best_percent, 'f', (percent >= .1 ? 1 : 2)));
+
     painter->setPen(QPen(playerColors[colorMap.value(cgs.getClientId())][2]));
     painter->drawText(rect.x() + width - 0.25 * LEADERBOARD_HEIGHT - twidth,
                       rect.y() + 0.75 * LEADERBOARD_HEIGHT,
                       tscore);
+    painter->setPen(QColor(0,0,0,85));
+    painter->drawText(rect.x() + 0.25 * LEADERBOARD_HEIGHT + 1,
+                      rect.y() + 1.75 * LEADERBOARD_HEIGHT + 1,
+                      best_score);
+    painter->setPen(QColor(0xFFFFFF));
+    painter->drawText(rect.x() + 0.25 * LEADERBOARD_HEIGHT,
+                      rect.y() + 1.75 * LEADERBOARD_HEIGHT,
+                      best_score);
 
 	// Kiosk mode 2 watermark
 	if (cgs.kioskMode() != 2)

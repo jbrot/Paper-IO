@@ -43,7 +43,7 @@ GameOver::GameOver(QWidget *parent)
 
 	msg->setTextInteractionFlags(Qt::NoTextInteraction);
 	msg->setAlignment(Qt::AlignCenter);
-	msg->setStyleSheet("QLabel { font-size: 54px; font-weight: 600; font-variant: small-caps; }");
+    msg->setStyleSheet("QLabel { font-size: 54px; font-weight: 600; }");
 
 	QGridLayout *layout = new QGridLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -80,9 +80,21 @@ GameOver::GameOver(QWidget *parent)
 
 void GameOver::setScore(score_t score, quint16 total)
 {
-	double pct = score == total ? 100 : 100 * score / (double) total;
-	qDebug() << "Game Over! Score:" << score << "/" << total << ":" << pct << "%";
-	msg->setText(tr("Score: %1%").arg(QString::number(pct, 'f', (pct >= 10 ? 1 : 2)), 4));
+    double pct = score == total ? 100 : 100 * score / (double) total;
+
+    QSettings settings;
+    double best_percent = settings.value("best_score", 0).toDouble() * 100;
+    if (best_percent > 100) best_percent = 100;
+    else if (best_percent < 0) best_percent = 0;
+    else if (best_percent < pct)
+    {
+        best_percent = pct;
+        settings.setValue("best_score", best_percent / 100);
+    }
+
+    qDebug() << "Game Over! Score:" << score << "/" << total << ":" << pct << "% Best:" << best_percent << "%";
+    msg->setText(tr("Score: %1%\nBest Score: %2%").arg(QString::number(pct, 'f', (pct >= 10 ? 1 : 2)),
+                                                       QString::number(best_percent, 'f', (pct >= 10 ? 1 : 2))));
 	again->setEnabled(true);
 	quit->setEnabled(true);
 }
